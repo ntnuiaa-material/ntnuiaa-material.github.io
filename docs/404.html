@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Videresender – NTNUI Ålesund lager</title>
+  <script>
+    // GitHub Pages har ingen ruter, så /1002 havner her. Send videre til tingsiden.
+    const deler = location.pathname.split("/").filter(Boolean);
+    const id = deler.pop();
+    if (/^\d{4}$/.test(id || "")) {
+      const rot = "/" + deler.map((d) => d + "/").join("");
+      location.replace(`${rot}ting.html?id=${id}`);
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <main class="skjerm">
+    <p class="terminal">Feil 404</p>
+    <h2 class="hilsen">Fant ikke</h2>
+    <hr class="gul-strek">
+    <h1 class="tittel mellom">Ukjent side</h1>
+    <p><a class="knapp sekundaer" href="/" style="margin-top:22px">Til lageret</a></p>
+  </main>
+</body>
+</html>

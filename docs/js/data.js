@@ -1,6 +1,6 @@
 // Testdata til prototypen. Byttes ut med D1-databasen i sprint 1.
 
-const GRUNNADRESSE = "HTTPS://LAGER.PAGES.DEV/";
+const GRUNNADRESSE = "HTTPS://NTNUIAA-MATERIAL.GITHUB.IO/";
 
 const START_TING = [
   { id: 3001, type: "lokasjon", navn: "Boden, Campus", kategori: "Lokasjon", hjem_id: null },
