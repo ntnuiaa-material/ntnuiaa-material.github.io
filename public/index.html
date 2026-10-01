@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lager – NTNUI Ålesund</title>
+  <meta name="theme-color" content="#050a07">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&family=Sixtyfour:BLED,SCAN@0..100,-53..100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="skjerm">
+    <div id="topp"></div>
+
+    <section>
+      <p class="terminal">Velg ting: [søk], skann QR, lån<br>Låneperiode: 14 dager</p>
+      <h2 class="hilsen">Velkommen til</h2>
+      <hr class="gul-strek">
+      <h1 class="tittel">Material&shy;lageret</h1>
+    </section>
+
+    <div class="teller" id="teller"></div>
+
+    <label class="sok">
+      <span aria-hidden="true">&gt;</span>
+      <input id="sok" type="search" placeholder="Søk på ID eller navn, f.eks. 1002 eller telt" autocomplete="off" aria-label="Søk etter ting">
+    </label>
+    <div class="filtre" id="filtre"></div>
+
+    <p class="terminal dempet" id="treff" style="margin-top:22px"></p>
+    <ul class="liste" id="liste"></ul>
+
+    <div id="bunn"></div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script>
+    document.getElementById("topp").innerHTML = topplinje("Lager");
+    document.getElementById("bunn").innerHTML = bunnlinje();
+
+    const ting = TING.filter((t) => t.type !== "lokasjon");
+    const kategorier = ["Alle", ...new Set(ting.map((t) => t.kategori))];
+    let valgtKategori = "Alle";
+
+    const ute = utlaan.filter((u) => !u.levert);
+    const forsinket = ute.filter((u) => u.frist < idag());
+    document.getElementById("teller").innerHTML = `
+      <div><span class="etikett">Ting</span><data value="${ting.length}">${ting.length}</data></div>
+      <div><span class="etikett">Utlånt</span><data value="${ute.length}">${ute.length}</data></div>
+      <div class="${forsinket.length ? "varsel" : ""}"><span class="etikett">Forsinket</span><data value="${forsinket.length}">${forsinket.length}</data></div>`;
+
+    const filtre = document.getElementById("filtre");
+    filtre.innerHTML = kategorier
+      .map((k) => `<button type="button" aria-pressed="${k === valgtKategori}">${k}</button>`)
+      .join("");
+    filtre.addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      valgtKategori = e.target.textContent;
+      filtre.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b === e.target));
+      tegn();
+    });
+
+    const sok = document.getElementById("sok");
+    sok.addEventListener("input", tegn);
+    sok.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && finnTing(sok.value.trim())) location.href = `ting.html?id=${sok.value.trim()}`;
+    });
+
+    function tegn() {
+      const q = sok.value.trim().toLowerCase();
+      const treff = ting.filter((t) =>
+        (valgtKategori === "Alle" || t.kategori === valgtKategori) &&
+        (!q || String(t.id).includes(q) || t.navn.toLowerCase().includes(q))
+      );
+      document.getElementById("treff").textContent = `${treff.length} treff`;
+      document.getElementById("liste").innerHTML = treff.map((t) => {
+        const s = statusFor(t);
+        return `
+          <li><a href="ting.html?id=${t.id}">
+            <span class="id">${t.id}</span>
+            <span class="miniatyr">${t.bilde ? `<img src="${t.bilde}" alt="">` : ""}</span>
+            <span class="navn">${esc(t.navn)}<span class="sted">${esc(stiTil(t))}</span></span>
+            <span class="status ${s.kode}">${s.tekst}</span>
+          </a></li>`;
+      }).join("");
+    }
+
+    tegn();
+  </script>
+</body>
+</html>

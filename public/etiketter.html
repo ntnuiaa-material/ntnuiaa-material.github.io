@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Etiketter – NTNUI Ålesund lager</title>
+  <meta name="theme-color" content="#050a07">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&family=Sixtyfour:BLED,SCAN@0..100,-53..100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .oppsett { display: grid; gap: 22px; }
+    @media (min-width: 980px) { .oppsett { grid-template-columns: 340px 1fr; align-items: start; } }
+
+    .velg { max-height: 360px; overflow-y: auto; border-top: var(--ramme); }
+    .velg label {
+      display: grid; grid-template-columns: 22px 48px 1fr; gap: 10px; align-items: center;
+      padding: 7px 2px; border-bottom: 1px solid var(--svak); cursor: pointer; font-size: 15px;
+    }
+    .velg input { accent-color: var(--ntnui-gul); width: 18px; height: 18px; }
+    .velg .id { font-family: var(--f-terminal); font-size: 11px; color: var(--fosfor); }
+
+    .storrelser { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .storrelser label { position: relative; }
+    .storrelser input { position: absolute; opacity: 0; }
+    .storrelser span {
+      display: block; text-align: center; padding: 10px 4px; border: 1px solid var(--svak);
+      font: 700 13px var(--f-tekst); text-transform: uppercase; letter-spacing: 0.1em; color: var(--dempet); cursor: pointer;
+    }
+    .storrelser small { display: block; font-weight: 400; letter-spacing: 0; text-transform: none; margin-top: 2px; }
+    .storrelser input:checked + span { background: var(--fosfor); color: #000; border-color: var(--fosfor); }
+    .storrelser input:focus-visible + span { outline: 2px solid var(--ntnui-gul); outline-offset: 2px; }
+
+    /* A4-ark. Alle mål i millimeter så utskriften blir riktig. */
+    .ark-wrap { overflow-x: auto; padding-bottom: 8px; }
+    .ark {
+      width: 210mm; height: 297mm; background: #fff; color: #000;
+      display: grid; place-content: center; margin: 0 auto 24px;
+      box-shadow: 0 0 0 1px var(--ntnui-gronn), 8px 8px 0 rgba(0, 125, 50, 0.35);
+    }
+    .rutenett { display: grid; }
+    .rute {
+      display: grid; justify-items: center; align-content: center;
+      border: 0.2mm dashed #9a9a9a; margin: 0 -0.1mm -0.1mm 0;
+      font-family: "Schibsted Grotesk", Arial, sans-serif; text-align: center; overflow: hidden;
+    }
+    .rute.tom { border-color: #e4e4e4; }
+    .rute svg { display: block; }
+    .rute b { font-family: "Arial Black", Arial, sans-serif; line-height: 1; margin-top: 0.6mm; }
+    .rute small {
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      line-height: 1.1; padding: 0 1.2mm; margin-top: 0.4mm;
+    }
+
+    @media print {
+      @page { size: A4; margin: 0; }
+      html, body { background: #fff !important; }
+      body::after { display: none; }
+      .skjerm { padding: 0; max-width: none; }
+      .ikke-utskrift { display: none !important; }
+      .oppsett { display: block; margin: 0 !important; }
+      .ark-wrap { overflow: visible; padding: 0; }
+      .ark { margin: 0; box-shadow: none; break-after: page; zoom: 1 !important; height: 296mm; }
+      .ark:last-child { break-after: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="skjerm">
+    <div class="ikke-utskrift">
+      <div id="topp"></div>
+      <section>
+        <p class="terminal">Utskrift: A4, faktisk størrelse (100 %)<br>Klipp langs stiplet linje</p>
+        <h2 class="hilsen">Skriv ut</h2>
+        <hr class="gul-strek">
+        <h1 class="tittel mellom">Etiketter</h1>
+      </section>
+    </div>
+
+    <div class="oppsett" style="margin-top:22px">
+      <aside class="panel skjema ikke-utskrift">
+        <div class="panel-hode">
+          <span class="etikett">Velg ting</span>
+          <span class="terminal dempet" id="antall-valgt"></span>
+        </div>
+
+        <label class="felt"><span class="etikett">Intervall</span>
+          <input id="intervall" placeholder="F.eks. 1001-1022, 2001"></label>
+
+        <div class="velg" id="velg"></div>
+
+        <fieldset class="felt" style="border:0;padding:0;margin:0">
+          <legend class="etikett" style="margin-bottom:6px">Størrelse</legend>
+          <div class="storrelser" id="storrelser"></div>
+        </fieldset>
+
+        <div class="to-felt">
+          <label class="felt"><span class="etikett">Start på rute</span>
+            <input id="start" type="number" min="1" value="1" inputmode="numeric"></label>
+          <label class="felt"><span class="etikett">Navn under</span>
+            <select id="vis-navn"><option value="ja">Ja</option><option value="nei">Nei</option></select></label>
+        </div>
+        <p class="hjelp">"Start på rute" hopper over ruter som er brukt på et halvbrukt klistremerkeark.</p>
+
+        <button class="knapp" type="button" id="skriv-ut">Skriv ut</button>
+        <p class="hjelp">Velg "Faktisk størrelse" eller 100 % i utskriftsvinduet. Vil du skrive ut et annet sted, velg "Lagre som PDF".</p>
+      </aside>
+
+      <div class="ark-wrap" id="ark"></div>
+    </div>
+  </main>
+
+  <script src="js/vendor/qrcode.min.js"></script>
+  <script src="js/data.js"></script>
+  <script>
+    document.getElementById("topp").innerHTML = topplinje("Etiketter");
+
+    const STORRELSER = {
+      liten:  { navn: "Liten",  b: 25, h: 30, qr: 18, kol: 7, rad: 9, id: 3.2, tekst: 1.9 },
+      medium: { navn: "Medium", b: 35, h: 42, qr: 26, kol: 5, rad: 6, id: 4.2, tekst: 2.4 },
+      stor:   { navn: "Stor",   b: 50, h: 60, qr: 40, kol: 3, rad: 4, id: 6,   tekst: 3.2 },
+    };
+
+    // Sortert etter hjem, så etikettene til samme hylle havner ved siden av hverandre
+    const alle = [...TING].sort((a, b) => (a.hjem_id || 0) - (b.hjem_id || 0) || a.id - b.id);
+    const valgt = new Set();
+
+    const forhand = new URLSearchParams(location.search).get("ids");
+    if (forhand) forhand.split(",").forEach((id) => finnTing(id) && valgt.add(Number(id)));
+
+    document.getElementById("storrelser").innerHTML = Object.entries(STORRELSER).map(([k, s]) => `
+      <label><input type="radio" name="storrelse" value="${k}" ${k === "medium" ? "checked" : ""}>
+      <span>${s.navn}<small>${s.kol * s.rad} per ark</small></span></label>`).join("");
+
+    function tegnValg() {
+      document.getElementById("velg").innerHTML = alle.map((t) => `
+        <label><input type="checkbox" value="${t.id}" ${valgt.has(t.id) ? "checked" : ""}>
+        <span class="id">${t.id}</span><span>${esc(t.navn)}</span></label>`).join("");
+    }
+
+    document.getElementById("velg").addEventListener("change", (e) => {
+      const id = Number(e.target.value);
+      e.target.checked ? valgt.add(id) : valgt.delete(id);
+      tegnArk();
+    });
+
+    document.getElementById("intervall").addEventListener("input", (e) => {
+      valgt.clear();
+      e.target.value.split(",").forEach((del) => {
+        const [fra, til] = del.split("-").map((x) => Number(x.trim()));
+        if (!fra) return;
+        alle.forEach((t) => { if (t.id >= fra && t.id <= (til || fra)) valgt.add(t.id); });
+      });
+      tegnValg();
+      tegnArk();
+    });
+
+    ["storrelser", "start", "vis-navn"].forEach((id) =>
+      document.getElementById(id).addEventListener("change", tegnArk));
+    document.getElementById("start").addEventListener("input", tegnArk);
+    document.getElementById("skriv-ut").addEventListener("click", () => window.print());
+
+    function qrSvg(tekst, mm) {
+      const qr = qrcode(0, "M");
+      qr.addData(tekst, "Alphanumeric");
+      qr.make();
+      const n = qr.getModuleCount();
+      const kant = 2;
+      let sti = "";
+      for (let r = 0; r < n; r++)
+        for (let c = 0; c < n; c++)
+          if (qr.isDark(r, c)) sti += `M${c + kant} ${r + kant}h1v1h-1z`;
+      const total = n + kant * 2;
+      return `<svg width="${mm}mm" height="${mm}mm" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges">
+        <path d="${sti}" fill="#000"/></svg>`;
+    }
+
+    function tegnArk() {
+      const s = STORRELSER[document.querySelector("[name=storrelse]:checked").value];
+      const visNavn = document.getElementById("vis-navn").value === "ja";
+      const start = Math.max(1, Number(document.getElementById("start").value) || 1);
+      const ting = alle.filter((t) => valgt.has(t.id));
+      const perArk = s.kol * s.rad;
+
+      document.getElementById("antall-valgt").textContent = `${ting.length} valgt`;
+
+      const ruter = [...Array(start - 1).fill(null), ...ting];
+      const antallArk = Math.max(1, Math.ceil(ruter.length / perArk));
+      let html = "";
+
+      for (let a = 0; a < antallArk; a++) {
+        const side = ruter.slice(a * perArk, (a + 1) * perArk);
+        while (side.length < perArk) side.push(null);
+        html += `
+          <div class="ark"><div class="rutenett" style="grid-template-columns:repeat(${s.kol}, ${s.b}mm);grid-auto-rows:${s.h}mm">
+            ${side.map((t) => t ? `
+              <div class="rute">
+                ${qrSvg(GRUNNADRESSE + t.id, s.qr)}
+                <b style="font-size:${s.id}mm">${t.id}</b>
+                ${visNavn ? `<small style="font-size:${s.tekst}mm">${esc(t.navn)}</small>` : ""}
+              </div>` : `<div class="rute tom"></div>`).join("")}
+          </div></div>`;
+      }
+      document.getElementById("ark").innerHTML = html;
+      skalerForhandsvisning();
+    }
+
+    // Krymper arket på skjermen så det passer. Utskriften er alltid 100 %.
+    function skalerForhandsvisning() {
+      const wrap = document.getElementById("ark");
+      const mm = wrap.querySelector(".ark")?.offsetWidth || 794;
+      const zoom = Math.min(1, wrap.clientWidth / (mm + 12));
+      wrap.querySelectorAll(".ark").forEach((a) => (a.style.zoom = zoom));
+    }
+    addEventListener("resize", skalerForhandsvisning);
+
+    tegnValg();
+    tegnArk();
+  </script>
+</body>
+</html>

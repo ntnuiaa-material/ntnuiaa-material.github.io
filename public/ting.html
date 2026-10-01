@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ting – NTNUI Ålesund lager</title>
+  <meta name="theme-color" content="#050a07">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&family=Sixtyfour:BLED,SCAN@0..100,-53..100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="skjerm">
+    <div id="topp"></div>
+    <article class="ting" id="ting"></article>
+    <div id="bunn"></div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script>
+    document.getElementById("topp").innerHTML = topplinje("");
+    document.getElementById("bunn").innerHTML = bunnlinje();
+
+    const id = new URLSearchParams(location.search).get("id");
+    const t = finnTing(id);
+    const rot = document.getElementById("ting");
+
+    function standardFrist() {
+      const d = new Date();
+      d.setDate(d.getDate() + 14);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function tegn() {
+      if (!t) {
+        rot.innerHTML = `
+          <section class="ting-hode">
+            <p class="terminal">Feil 404 // ID ${esc(id || "mangler")}</p>
+            <h2 class="hilsen">Fant ikke</h2>
+            <hr class="gul-strek">
+            <h1 class="tittel mellom">Ukjent kode</h1>
+          </section>
+          <a class="knapp sekundaer" href="index.html">Tilbake til lageret</a>`;
+        return;
+      }
+
+      document.title = `${t.id} ${t.navn} – NTNUI Ålesund lager`;
+      const s = statusFor(t);
+      const ute = aapneUtlaan(t.id);
+      const hjem = hjemTil(t);
+      const innhold = TING.filter((x) => x.hjem_id === t.id);
+
+      const bilde = t.bilde
+        ? `<img src="${t.bilde}" alt="${esc(t.navn)}">`
+        : `<div class="bilde-mangler"><span class="terminal dempet">Bilde mangler<br>ID ${t.id}</span></div>`;
+
+      let handling = "";
+      if (t.type === "utstyr" && ute.length === 0) {
+        handling = laaneskjema();
+      } else if (t.type === "utstyr") {
+        const u = ute[0];
+        handling = `
+          <p class="etikett">Utlånt til</p>
+          <p style="font-size:22px;font-weight:800;margin:4px 0 2px">${esc(u.navn)}</p>
+          <p class="hjelp" style="margin-bottom:16px">Siden ${datoKort(u.utlaant)}, frist ${datoKort(u.frist)}${u.frist < idag() ? " – forsinket" : ""}</p>
+          <button class="knapp" type="button" data-lever="${u.id}">Lever tilbake</button>`;
+      } else if (t.type === "bulk") {
+        handling = laaneskjema(true) + (ute.length ? `
+          <p class="etikett" style="margin-top:22px">Ute nå</p>
+          <ul class="logg">${ute.map((u) => `
+            <li><time>${datoKort(u.frist)}</time>
+              <span>${u.antall} ${esc(u.variant)} – ${esc(u.navn)}
+              <button class="knapp sekundaer liten" type="button" data-lever="${u.id}" style="margin-left:8px">Lever</button></span></li>`).join("")}
+          </ul>` : "");
+      } else {
+        handling = `
+          <p class="etikett">Skal ligge her</p>
+          <ul class="liste">${innhold.map((x) => `
+            <li><a href="ting.html?id=${x.id}" style="grid-template-columns:56px 1fr auto">
+              <span class="id">${x.id}</span><span class="navn">${esc(x.navn)}</span>
+              <span class="status ${statusFor(x).kode}">${statusFor(x).tekst}</span></a></li>`).join("")}
+          </ul>`;
+      }
+
+      rot.innerHTML = `
+        <section class="ting-hode">
+          <p class="terminal">ID ${t.id} // ${esc(t.kategori)}<br>Type: [${t.type.toUpperCase()}]</p>
+          <h2 class="hilsen">Du har skannet</h2>
+          <hr class="gul-strek">
+          <h1 class="tittel mellom">${esc(t.navn)}</h1>
+        </section>
+
+        <div class="ting-grid">
+          <figure class="bilde" style="margin:0">
+            ${bilde}
+            <figcaption class="terminal">ID ${t.id}</figcaption>
+          </figure>
+
+          <section class="panel">
+            <div class="panel-hode">
+              <span class="etikett">Status</span>
+              <span class="status ${s.kode}">${s.tekst}</span>
+            </div>
+            <dl class="data">
+              ${hjem ? `<dt class="etikett">Hjem</dt><dd><a href="ting.html?id=${hjem.id}">${esc(stiTil(t))}</a></dd>` : ""}
+              <dt class="etikett">Kategori</dt><dd>${esc(t.kategori)}</dd>
+            </dl>
+            ${t.type === "bulk" ? `
+              <div class="varianter" style="margin-bottom:20px">
+                ${t.varianter.map((v) => `<div><b>${v.antall}</b><span class="etikett">${esc(v.navn)}</span></div>`).join("")}
+              </div>` : ""}
+            <div id="handling">${handling}</div>
+          </section>
+        </div>`;
+
+      kobleHandlinger();
+    }
+
+    function laaneskjema(bulk) {
+      const valg = bulk ? `
+        <div class="to-felt">
+          <label class="felt"><span class="etikett">Størrelse</span>
+            <select name="variant">${t.varianter.map((v) => `<option>${esc(v.navn)}</option>`).join("")}</select></label>
+          <label class="felt"><span class="etikett">Antall</span>
+            <input name="antall" type="number" min="1" value="1" inputmode="numeric" required></label>
+        </div>` : "";
+      return `
+        <form class="skjema" id="laan">
+          ${valg}
+          <label class="felt"><span class="etikett">Navn</span>
+            <input name="navn" autocomplete="name" required></label>
+          <div class="to-felt">
+            <label class="felt"><span class="etikett">Telefon</span>
+              <input name="telefon" type="tel" autocomplete="tel" inputmode="tel" required></label>
+            <label class="felt"><span class="etikett">Leveres innen</span>
+              <input name="frist" type="date" value="${standardFrist()}" required></label>
+          </div>
+          <button class="knapp" type="submit">Lån</button>
+          <p class="hjelp">Navn og telefon lagres så materialansvarlig kan få tak i deg. Slettes 12 måneder etter at tingen er levert.</p>
+        </form>`;
+    }
+
+    function kvitter(tittel, tekst) {
+      const h = document.getElementById("handling");
+      h.innerHTML = `
+        <div class="fremdrift"><span class="terminal">Registrerer...</span><div class="spor"><div class="fyll"></div></div></div>`;
+      setTimeout(() => {
+        h.innerHTML = `
+          <div class="kvittering">
+            <p class="terminal">Registrert</p>
+            <p class="tittel">${tittel}</p>
+            <p class="hjelp" style="margin:10px 0 16px">${tekst}</p>
+            <button class="knapp sekundaer" type="button" id="ok">OK</button>
+          </div>`;
+        document.getElementById("ok").addEventListener("click", tegn);
+      }, 1200);
+    }
+
+    function kobleHandlinger() {
+      const skjema = document.getElementById("laan");
+      if (skjema) {
+        skjema.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const f = new FormData(skjema);
+          laan(t.id, f.get("navn"), f.get("telefon"), f.get("frist"),
+            f.get("antall") ? Number(f.get("antall")) : undefined, f.get("variant") || undefined);
+          kvitter("Lånt!", `Lever innen ${datoKort(f.get("frist"))}. Skann koden igjen når du leverer.`);
+        });
+      }
+      document.querySelectorAll("[data-lever]").forEach((b) =>
+        b.addEventListener("click", () => {
+          lever(Number(b.dataset.lever));
+          kvitter("Levert!", `Legg den tilbake på ${esc(hjemTil(t)?.navn || "plassen sin")}.`);
+        })
+      );
+    }
+
+    tegn();
+  </script>
+</body>
+</html>
