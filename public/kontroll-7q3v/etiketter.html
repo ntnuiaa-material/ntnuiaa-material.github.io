@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
   <title>Etiketter – NTNUI Ålesund lager</title>
   <meta name="theme-color" content="#050a07">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&family=Sixtyfour:BLED,SCAN@0..100,-53..100&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
   <style>
     .oppsett { display: grid; gap: 22px; }
     @media (min-width: 980px) { .oppsett { grid-template-columns: 340px 1fr; align-items: start; } }
@@ -111,10 +112,10 @@
     </div>
   </main>
 
-  <script src="js/vendor/qrcode.min.js"></script>
-  <script src="js/data.js"></script>
+  <script src="../js/vendor/qrcode.min.js"></script>
+  <script src="../js/data.js"></script>
   <script>
-    document.getElementById("topp").innerHTML = topplinje("Etiketter");
+    document.getElementById("topp").innerHTML = topplinje("Etiketter", true);
 
     const STORRELSER = {
       liten:  { navn: "Liten",  b: 25, h: 30, qr: 18, kol: 7, rad: 9, id: 3.2, tekst: 1.9 },

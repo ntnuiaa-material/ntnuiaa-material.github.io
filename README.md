@@ -13,8 +13,9 @@ Prototype av brukergrensesnittet. Data ligger som testdata i `public/js/data.js`
 |---|---|
 | `public/index.html` | Søk og liste over alle ting |
 | `public/ting.html?id=1002` | Tingen: bilde, status, lån og lever |
-| `public/admin.html` | Utlånt nå, forsinket, hendelser, registrer ny ting med bilde |
-| `public/etiketter.html` | QR-etiketter på A4, tre størrelser, klar for utskrift |
+| `public/kontroll-*/` | Admin: oversikt, alle ting, registrer og endre ting med bilde, QR-etiketter på A4 |
+
+Admin-mappa har et navn ingen gjetter, og de offentlige sidene lenker aldri dit. Det er bare et gjemmested, ikke en lås. Låsen er Cloudflare Access. Mappa kan døpes om fritt, alle lenker inni den er relative.
 
 ## Kjøre lokalt
 

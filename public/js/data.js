@@ -2,7 +2,7 @@
 
 const GRUNNADRESSE = "HTTPS://LAGER.PAGES.DEV/";
 
-const TING = [
+const START_TING = [
   { id: 3001, type: "lokasjon", navn: "Boden, Campus", kategori: "Lokasjon", hjem_id: null },
   { id: 3002, type: "lokasjon", navn: "Hylle 1", kategori: "Lokasjon", hjem_id: 3001 },
   { id: 3003, type: "lokasjon", navn: "Hylle 2", kategori: "Lokasjon", hjem_id: 3001 },
@@ -57,11 +57,32 @@ function lagre(nokkel, verdi) {
   try { localStorage.setItem(nokkel, JSON.stringify(verdi)); } catch {}
 }
 
+let TING = hentLagret("lager.ting", START_TING);
 let utlaan = hentLagret("lager.utlaan", START_UTLAAN);
 let hendelser = hentLagret("lager.hendelser", START_HENDELSER);
 
 function finnTing(id) {
   return TING.find((t) => t.id === Number(id));
+}
+
+function lagreTing(ny) {
+  const i = TING.findIndex((t) => t.id === ny.id);
+  if (i === -1) {
+    TING.push(ny);
+    loggHendelse(ny.id, "Registrert");
+  } else {
+    TING[i] = ny;
+    loggHendelse(ny.id, "Endret");
+  }
+  lagre("lager.ting", TING);
+}
+
+function alleKategorier() {
+  return [...new Set(TING.filter((t) => t.type !== "lokasjon").map((t) => t.kategori).filter(Boolean))].sort();
+}
+
+function lokasjoner() {
+  return TING.filter((t) => t.type === "lokasjon");
 }
 
 function hjemTil(ting) {
@@ -128,18 +149,18 @@ function esc(tekst) {
   return String(tekst).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-function topplinje(aktiv) {
+// Offentlige sider lenker aldri til admin. Admin-sidene ligger i en mappe med hemmelig navn.
+function topplinje(aktiv, admin) {
   const lenke = (href, navn) =>
     `<a href="${href}"${aktiv === navn ? ' aria-current="page"' : ""}>${navn}</a>`;
+  const meny = admin
+    ? lenke("index.html", "Oversikt") + lenke("etiketter.html", "Etiketter") + lenke("../index.html", "Lager")
+    : lenke("index.html", "Lager");
   return `
     <header class="topplinje">
       <a class="merke" href="index.html">NTNUI<small>ÅLESUND</small></a>
-      <div class="terminal">Materiallager // Terminal 01</div>
-      <nav class="meny">
-        ${lenke("index.html", "Lager")}
-        ${lenke("admin.html", "Admin")}
-        ${lenke("etiketter.html", "Etiketter")}
-      </nav>
+      <div class="terminal">${admin ? "Kontrollpanel // Kun materialansvarlig" : "Materiallager // Terminal 01"}</div>
+      <nav class="meny">${meny}</nav>
     </header>`;
 }
 

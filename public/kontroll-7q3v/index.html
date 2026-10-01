@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin – NTNUI Ålesund lager</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>Kontrollpanel – NTNUI Ålesund lager</title>
   <meta name="theme-color" content="#050a07">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&family=Sixtyfour:BLED,SCAN@0..100,-53..100&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
   <main class="skjerm">
@@ -45,54 +46,32 @@
 
     <section class="panel" style="margin-top:22px">
       <div class="panel-hode">
-        <span class="etikett">Registrer ny ting</span>
-        <span class="terminal dempet" id="neste-id"></span>
+        <span class="etikett">Alle ting</span>
+        <a class="knapp liten" href="ting.html">+ Ny ting</a>
       </div>
-      <form class="ting-grid" id="ny">
-        <label class="kamera">
-          <input type="file" name="bilde" accept="image/*" capture="environment">
-          <span class="terminal">Ta bilde</span>
-          <span class="hjelp">Trykk for å åpne kameraet</span>
-          <img id="forhandsvisning" alt="" class="skjult">
-        </label>
-
-        <div class="skjema">
-          <div class="to-felt">
-            <label class="felt"><span class="etikett">Type</span>
-              <select name="type">
-                <option value="utstyr">Utstyr (1xxx)</option>
-                <option value="bulk">Bulk / klær (2xxx)</option>
-                <option value="lokasjon">Lokasjon (3xxx)</option>
-              </select></label>
-            <label class="felt"><span class="etikett">ID</span>
-              <input name="id" inputmode="numeric" required></label>
-          </div>
-          <label class="felt"><span class="etikett">Navn</span>
-            <input name="navn" placeholder="F.eks. Telt Nordisk Oppland 4" required></label>
-          <div class="to-felt">
-            <label class="felt"><span class="etikett">Kategori</span>
-              <input name="kategori" list="kategorier"></label>
-            <label class="felt"><span class="etikett">Hjem</span>
-              <select name="hjem" id="hjem"></select></label>
-          </div>
-          <button class="knapp" type="submit">Lagre og lag etikett</button>
-          <p class="hjelp">Prototype: ingenting lagres ennå. Bildet lastes opp til Cloudflare R2 når databasen er på plass.</p>
-        </div>
-        <datalist id="kategorier"></datalist>
-      </form>
+      <label class="sok" style="margin-bottom:14px">
+        <span aria-hidden="true">&gt;</span>
+        <input id="sok" type="search" placeholder="Søk på ID, navn, kategori eller sted" autocomplete="off" aria-label="Søk i alle ting">
+      </label>
+      <div class="tabell-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Navn</th><th>Kategori</th><th>Hjem</th><th></th></tr></thead>
+          <tbody id="alle"></tbody>
+        </table>
+      </div>
     </section>
 
     <div id="bunn"></div>
   </main>
 
-  <script src="js/data.js"></script>
+  <script src="../js/data.js"></script>
   <script>
-    document.getElementById("topp").innerHTML = topplinje("Admin");
+    document.getElementById("topp").innerHTML = topplinje("Oversikt", true);
     document.getElementById("bunn").innerHTML = bunnlinje();
 
     const ute = utlaan.filter((u) => !u.levert).sort((a, b) => a.frist.localeCompare(b.frist));
     const forsinket = ute.filter((u) => u.frist < idag());
-    const ting = TING.filter((t) => t.type !== "lokasjon");
+    const ting = TING.filter((t) => t.type !== "lokasjon" && t.status !== "kassert");
 
     document.getElementById("teller").innerHTML = `
       <div><span class="etikett">Ting</span><data value="${ting.length}">${ting.length}</data></div>
@@ -116,41 +95,23 @@
       <li><time>${datoKort(h.tid.slice(0, 10))} ${h.tid.slice(11)}</time>
       <span><a href="ting.html?id=${h.ting_id}" style="color:var(--fosfor)">${h.ting_id}</a> ${esc(h.tekst)}</span></li>`).join("");
 
-    // Nytt-ting-skjema
-    const skjema = document.getElementById("ny");
-    const serie = { utstyr: 1000, bulk: 2000, lokasjon: 3000 };
-
-    function nesteId(type) {
-      const brukt = TING.filter((t) => t.type === type).map((t) => t.id);
-      return Math.max(serie[type], ...brukt) + 1;
+    const sok = document.getElementById("sok");
+    function tegnAlle() {
+      const q = sok.value.trim().toLowerCase();
+      const rader = [...TING]
+        .sort((a, b) => a.id - b.id)
+        .filter((t) => !q || `${t.id} ${t.navn} ${t.kategori} ${stiTil(t)}`.toLowerCase().includes(q));
+      document.getElementById("alle").innerHTML = rader.map((t) => `
+        <tr${t.status === "kassert" ? ' style="opacity:.5"' : ""}>
+          <td class="id">${t.id}</td>
+          <td><a href="ting.html?id=${t.id}">${esc(t.navn)}</a>${t.status === "kassert" ? ' <span class="hjelp">(kassert)</span>' : ""}</td>
+          <td>${esc(t.kategori || "")}</td>
+          <td class="hjelp">${esc(stiTil(t))}</td>
+          <td><a class="etikett" href="ting.html?id=${t.id}" style="color:var(--ntnui-gul)">Endre</a></td>
+        </tr>`).join("");
     }
-
-    function oppdaterId() {
-      const id = nesteId(skjema.type.value);
-      skjema.id.value = id;
-      document.getElementById("neste-id").textContent = `Neste ledige: ${id}`;
-    }
-
-    skjema.type.addEventListener("change", oppdaterId);
-    oppdaterId();
-
-    document.getElementById("hjem").innerHTML = TING.filter((t) => t.type === "lokasjon")
-      .map((t) => `<option value="${t.id}">${t.id} ${esc(t.navn)}</option>`).join("");
-    document.getElementById("kategorier").innerHTML = [...new Set(ting.map((t) => t.kategori))]
-      .map((k) => `<option value="${esc(k)}">`).join("");
-
-    skjema.bilde.addEventListener("change", () => {
-      const fil = skjema.bilde.files[0];
-      const img = document.getElementById("forhandsvisning");
-      if (!fil) return;
-      img.src = URL.createObjectURL(fil);
-      img.classList.remove("skjult");
-    });
-
-    skjema.addEventListener("submit", (e) => {
-      e.preventDefault();
-      location.href = `etiketter.html?ids=${skjema.id.value}`;
-    });
+    sok.addEventListener("input", tegnAlle);
+    tegnAlle();
   </script>
 </body>
 </html>

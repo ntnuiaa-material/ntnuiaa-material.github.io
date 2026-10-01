@@ -707,3 +707,80 @@ tr.forsinket td.id { color: var(--ntnui-gul); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; transition: none !important; }
 }
+
+/* ---------- Velger (søk med forslag) ---------- */
+
+.velger { position: relative; }
+
+.velger-liste {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% - 1px);
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: #000;
+  border: 1px solid var(--ntnui-gul);
+  box-shadow: 6px 6px 0 rgba(0, 125, 50, 0.45);
+}
+
+.velger-liste li {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--svak);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.velger-liste li small {
+  display: block;
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--dempet);
+}
+
+.velger-liste li[aria-selected="true"],
+.velger-liste li:hover {
+  background: rgba(0, 125, 50, 0.35);
+}
+
+.velger-liste li.ny { color: var(--ntnui-gul); }
+.velger-liste li.ny .etikett { color: var(--ntnui-gul); }
+.velger-liste li.tom { color: var(--dempet); cursor: default; }
+
+.velger-liste mark {
+  background: none;
+  color: var(--ntnui-gul);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Variantrader (bulk) ---------- */
+
+.variantrad {
+  display: grid;
+  grid-template-columns: 1fr 100px 44px;
+  gap: 8px;
+}
+
+.variantrad button {
+  background: transparent;
+  border: 1px solid var(--svak);
+  color: var(--dempet);
+  font: 700 18px var(--f-tekst);
+  cursor: pointer;
+}
+
+.variantrad button:hover { color: var(--ntnui-gul); border-color: var(--ntnui-gul); }
+
+.knapperad { display: grid; gap: 10px; grid-template-columns: 1fr; }
+
+@media (min-width: 560px) {
+  .knapperad { grid-template-columns: 2fr 1fr 1fr; }
+}
+
+.knapp.fare { border-color: var(--feil); color: var(--feil); background: transparent; box-shadow: none; }
+.knapp.fare:hover { background: rgba(255, 90, 74, 0.1); }

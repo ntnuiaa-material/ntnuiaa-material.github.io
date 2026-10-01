@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Endre ting – NTNUI Ålesund lager</title>
+  <meta name="theme-color" content="#050a07">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&family=Sixtyfour:BLED,SCAN@0..100,-53..100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <main class="skjerm">
+    <div id="topp"></div>
+
+    <section>
+      <p class="terminal" id="hode-linje"></p>
+      <h2 class="hilsen" id="hilsen"></h2>
+      <hr class="gul-strek">
+      <h1 class="tittel mellom" id="tittel"></h1>
+    </section>
+
+    <form class="ting-grid" id="skjema" style="margin-top:22px" novalidate>
+      <div>
+        <label class="kamera">
+          <input type="file" name="bilde" accept="image/*" capture="environment">
+          <span class="terminal">Ta bilde</span>
+          <span class="hjelp">Trykk for å åpne kameraet</span>
+          <img id="forhandsvisning" alt="" class="skjult">
+        </label>
+        <p class="hjelp" style="margin-top:8px">Bildet krympes til 800 px før det lagres.</p>
+      </div>
+
+      <section class="panel skjema">
+        <div class="to-felt">
+          <label class="felt"><span class="etikett">Type</span>
+            <select name="type">
+              <option value="utstyr">Utstyr (1xxx)</option>
+              <option value="bulk">Bulk / klær (2xxx)</option>
+              <option value="lokasjon">Lokasjon (3xxx)</option>
+            </select></label>
+          <label class="felt"><span class="etikett">ID</span>
+            <input name="id" inputmode="numeric" required></label>
+        </div>
+
+        <label class="felt"><span class="etikett">Navn</span>
+          <input name="navn" placeholder="F.eks. Telt Nordisk Oppland 4" required></label>
+
+        <label class="felt" id="kategori-felt"><span class="etikett">Kategori</span>
+          <input name="kategori" placeholder="Skriv for å søke i kategoriene"></label>
+
+        <label class="felt"><span class="etikett">Hjem</span>
+          <input name="hjem" placeholder="Skriv hylle, bod eller ID"></label>
+
+        <fieldset class="felt skjult" id="varianter" style="border:0;padding:0;margin:0">
+          <legend class="etikett" style="margin-bottom:6px">Antall per størrelse</legend>
+          <div class="skjema" id="variantrader" style="gap:8px"></div>
+          <button class="knapp sekundaer liten" type="button" id="ny-variant" style="justify-self:start;margin-top:8px">+ Størrelse</button>
+        </fieldset>
+
+        <label class="felt"><span class="etikett">Beskrivelse</span>
+          <textarea name="beskrivelse" rows="2" placeholder="Valgfritt. F.eks. mangler én plugg"></textarea></label>
+
+        <p class="hjelp skjult" id="feil" style="color:var(--feil)"></p>
+
+        <div class="knapperad">
+          <button class="knapp" type="submit">Lagre</button>
+          <button class="knapp sekundaer" type="button" id="etikett">Etikett</button>
+          <button class="knapp fare" type="button" id="kasser">Kasser</button>
+        </div>
+      </section>
+    </form>
+
+    <div id="bunn"></div>
+  </main>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/velger.js"></script>
+  <script>
+    document.getElementById("topp").innerHTML = topplinje("", true);
+    document.getElementById("bunn").innerHTML = bunnlinje();
+
+    const skjema = document.getElementById("skjema");
+    const id = new URLSearchParams(location.search).get("id");
+    const eksisterende = id ? finnTing(id) : null;
+    const serie = { utstyr: 1000, bulk: 2000, lokasjon: 3000 };
+    let bilde = eksisterende?.bilde || null;
+
+    // Kategori: forslag fra alle kategorier som finnes, eller lag ny
+    lagVelger(skjema.kategori, {
+      valg: () => alleKategorier().map((k) => ({
+        verdi: k, tekst: k,
+        hint: `${TING.filter((t) => t.kategori === k).length} ting`,
+      })),
+      fri: true,
+      nyTekst: "Ny kategori",
+    });
+
+    // Hjem: må være en lokasjon som finnes
+    const hjemVelger = lagVelger(skjema.hjem, {
+      valg: () => lokasjoner()
+        .filter((l) => l.id !== eksisterende?.id)
+        .map((l) => ({ verdi: l.id, tekst: `${l.id} ${l.navn}`, hint: stiTil(l) || "Øverste nivå" })),
+    });
+
+    function nesteId(type) {
+      const brukt = TING.filter((t) => t.type === type).map((t) => t.id);
+      return Math.max(serie[type], ...brukt) + 1;
+    }
+
+    function variantrad(v = { navn: "", antall: 0 }) {
+      const rad = document.createElement("div");
+      rad.className = "variantrad felt";
+      rad.innerHTML = `
+        <input aria-label="Størrelse" placeholder="F.eks. M" value="${esc(v.navn)}">
+        <input aria-label="Antall" type="number" min="0" inputmode="numeric" value="${v.antall}">
+        <button type="button" aria-label="Fjern">×</button>`;
+      rad.querySelector("button").addEventListener("click", () => rad.remove());
+      document.getElementById("variantrader").appendChild(rad);
+    }
+
+    function visTypefelt() {
+      const type = skjema.type.value;
+      document.getElementById("varianter").classList.toggle("skjult", type !== "bulk");
+      document.getElementById("kategori-felt").classList.toggle("skjult", type === "lokasjon");
+      if (type === "bulk" && !document.querySelector(".variantrad")) variantrad({ navn: "Stk", antall: 0 });
+    }
+
+    document.getElementById("ny-variant").addEventListener("click", () => variantrad());
+    skjema.type.addEventListener("change", () => {
+      if (!eksisterende) skjema.id.value = nesteId(skjema.type.value);
+      visTypefelt();
+    });
+
+    // Fyll inn skjemaet
+    if (eksisterende) {
+      const t = eksisterende;
+      document.getElementById("hode-linje").innerHTML = `ID ${t.id} // ${esc(t.type)}<br>Status: [${(t.status || "aktiv").toUpperCase()}]`;
+      document.getElementById("hilsen").textContent = "Endre";
+      document.getElementById("tittel").textContent = t.navn;
+      skjema.type.value = t.type;
+      skjema.type.disabled = true;
+      skjema.id.value = t.id;
+      skjema.id.readOnly = true;
+      skjema.navn.value = t.navn;
+      skjema.kategori.value = t.kategori || "";
+      skjema.beskrivelse.value = t.beskrivelse || "";
+      const hjem = hjemTil(t);
+      if (hjem) hjemVelger.sett(hjem.id, `${hjem.id} ${hjem.navn}`);
+      (t.varianter || []).forEach(variantrad);
+      if (t.status === "kassert") document.getElementById("kasser").textContent = "Ta i bruk igjen";
+    } else {
+      document.getElementById("hode-linje").innerHTML = "Ny registrering<br>Ta bilde, fyll ut, lagre";
+      document.getElementById("hilsen").textContent = "Registrer";
+      document.getElementById("tittel").textContent = "Ny ting";
+      skjema.id.value = nesteId("utstyr");
+      document.getElementById("kasser").classList.add("skjult");
+    }
+    visTypefelt();
+    visBilde();
+
+    function visBilde() {
+      const img = document.getElementById("forhandsvisning");
+      if (!bilde) return;
+      img.src = bilde;
+      img.classList.remove("skjult");
+    }
+
+    // Krymper bildet i nettleseren så opplastingen blir liten
+    skjema.bilde.addEventListener("change", () => {
+      const fil = skjema.bilde.files[0];
+      if (!fil) return;
+      const img = new Image();
+      img.onload = () => {
+        const skala = Math.min(1, 800 / Math.max(img.width, img.height));
+        const lerret = document.createElement("canvas");
+        lerret.width = Math.round(img.width * skala);
+        lerret.height = Math.round(img.height * skala);
+        lerret.getContext("2d").drawImage(img, 0, 0, lerret.width, lerret.height);
+        bilde = lerret.toDataURL("image/jpeg", 0.75);
+        visBilde();
+        URL.revokeObjectURL(img.src);
+      };
+      img.src = URL.createObjectURL(fil);
+    });
+
+    function lesSkjema() {
+      const feil = [];
+      const nyId = Number(skjema.id.value);
+      const type = skjema.type.value;
+      if (!nyId) feil.push("ID må være et tall.");
+      if (!eksisterende && finnTing(nyId)) feil.push(`ID ${nyId} er allerede brukt.`);
+      if (!skjema.navn.value.trim()) feil.push("Navn mangler.");
+      const hjemId = skjema.hjem.dataset.verdi ? Number(skjema.hjem.dataset.verdi) : null;
+      if (skjema.hjem.value.trim() && !hjemId) feil.push("Velg hjem fra lista.");
+
+      const ting = {
+        ...(eksisterende || {}),
+        id: nyId,
+        type,
+        navn: skjema.navn.value.trim(),
+        kategori: type === "lokasjon" ? "Lokasjon" : skjema.kategori.value.trim(),
+        beskrivelse: skjema.beskrivelse.value.trim(),
+        hjem_id: hjemId,
+        bilde,
+        status: eksisterende?.status || "aktiv",
+      };
+      if (type === "bulk") {
+        ting.varianter = [...document.querySelectorAll(".variantrad")]
+          .map((r) => {
+            const [navn, antall] = r.querySelectorAll("input");
+            return { navn: navn.value.trim(), antall: Number(antall.value) || 0 };
+          })
+          .filter((v) => v.navn);
+        if (!ting.varianter.length) feil.push("Bulk trenger minst én størrelse.");
+      }
+      const boks = document.getElementById("feil");
+      boks.textContent = feil.join(" ");
+      boks.classList.toggle("skjult", !feil.length);
+      return feil.length ? null : ting;
+    }
+
+    skjema.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const ting = lesSkjema();
+      if (!ting) return;
+      lagreTing(ting);
+      location.href = `ting.html?id=${ting.id}&lagret=1`;
+    });
+
+    document.getElementById("etikett").addEventListener("click", () => {
+      const ting = lesSkjema();
+      if (!ting) return;
+      lagreTing(ting);
+      location.href = `etiketter.html?ids=${ting.id}`;
+    });
+
+    document.getElementById("kasser").addEventListener("click", () => {
+      const t = eksisterende;
+      const kassert = t.status === "kassert";
+      if (!kassert && !confirm(`Kassere ${t.id} ${t.navn}? ID-en gjenbrukes aldri, og historikken beholdes.`)) return;
+      lagreTing({ ...t, status: kassert ? "aktiv" : "kassert" });
+      location.reload();
+    });
+
+    if (new URLSearchParams(location.search).get("lagret")) {
+      document.getElementById("hode-linje").innerHTML += "<br>&gt; Lagret";
+    }
+  </script>
+</body>
+</html>
