@@ -180,15 +180,25 @@ function topplinje(aktiv, admin) {
   return `
     <header class="topplinje">
       <a class="merke" href="index.html">NTNUI<small>ÅLESUND</small></a>
-      <div class="terminal">${admin ? "Kontrollpanel // Kun materialansvarlig" : "Materiallager // Terminal 01"}</div>
+      <div class="terminal">${admin ? "Kontrollpanel.exe – Kun materialansvarlig" : "Lager.exe"}</div>
       <nav class="meny">${meny}</nav>
     </header>`;
 }
 
+function klokkeslett() {
+  return new Date().toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
+}
+
+// Klokka i oppgavelinja
+setInterval(() => {
+  const k = document.getElementById("klokke");
+  if (k) k.textContent = klokkeslett();
+}, 30000);
+
 function bunnlinje() {
   return `
     <footer class="bunn">
-      <span class="terminal dempet">Laget i Ålesund 2026</span>
-      <span class="terminal dempet">Materialansvarlig NTNUI Å</span>
+      <span class="terminal">Start</span>
+      <span class="terminal" id="klokke">${klokkeslett()}</span>
     </footer>`;
 }
