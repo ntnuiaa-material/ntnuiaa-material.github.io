@@ -18,12 +18,18 @@
   </main>
 
   <script src="js/data.js"></script>
-  <script>
+  <script type="module">
     document.getElementById("topp").innerHTML = topplinje("");
     document.getElementById("bunn").innerHTML = bunnlinje();
 
     const id = new URLSearchParams(location.search).get("id");
-    const t = finnTing(id);
+    try {
+      await lastData();
+    } catch (feil) {
+      visFeil(document.getElementById("ting"), feil);
+      throw feil;
+    }
+    let t = finnTing(id);
     const rot = document.getElementById("ting");
 
     function standardFrist() {
@@ -52,7 +58,7 @@
       const innhold = TING.filter((x) => x.hjem_id === t.id);
 
       const bilde = t.bilde
-        ? `<img src="${t.bilde}" alt="${esc(t.navn)}">`
+        ? `<img src="${bildeUrl(t)}" alt="${esc(t.navn)}">`
         : `<div class="bilde-mangler"><span class="terminal dempet">Bilde mangler<br>ID ${t.id}</span></div>`;
 
       let handling = "";
@@ -141,20 +147,36 @@
         </form>`;
     }
 
-    function kvitter(tittel, tekst) {
+    // Viser fremdriftslinja mens handlingen sendes, så kvittering eller feil
+    async function kvitter(handling, tittel, tekst) {
       const h = document.getElementById("handling");
       h.innerHTML = `
         <div class="fremdrift"><span class="terminal">Registrerer...</span><div class="spor"><div class="fyll"></div></div></div>`;
-      setTimeout(() => {
-        h.innerHTML = `
+      const pause = new Promise((r) => setTimeout(r, 1100));
+      let feil = null;
+      try {
+        await handling;
+      } catch (e) {
+        feil = e;
+      }
+      await pause;
+      h.innerHTML = feil ? `
+          <div class="kvittering" style="border-color:var(--feil)">
+            <p class="terminal" style="color:var(--feil)">Feil</p>
+            <p class="hjelp" style="margin:10px 0 16px;color:var(--tekst)">${esc(feil.message)}</p>
+            <button class="knapp sekundaer" type="button" id="ok">OK</button>
+          </div>` : `
           <div class="kvittering">
             <p class="terminal">Registrert</p>
             <p class="tittel">${tittel}</p>
             <p class="hjelp" style="margin:10px 0 16px">${tekst}</p>
             <button class="knapp sekundaer" type="button" id="ok">OK</button>
           </div>`;
-        document.getElementById("ok").addEventListener("click", tegn);
-      }, 1200);
+      document.getElementById("ok").addEventListener("click", async () => {
+        await lastData();
+        t = finnTing(id);
+        tegn();
+      });
     }
 
     function kobleHandlinger() {
@@ -163,15 +185,17 @@
         skjema.addEventListener("submit", (e) => {
           e.preventDefault();
           const f = new FormData(skjema);
-          laan(t.id, f.get("navn"), f.get("telefon"), f.get("frist"),
-            f.get("antall") ? Number(f.get("antall")) : undefined, f.get("variant") || undefined);
-          kvitter("Lånt!", `Lever innen ${datoKort(f.get("frist"))}. Skann koden igjen når du leverer.`);
+          kvitter(
+            laan(t.id, f.get("navn"), f.get("telefon"), f.get("frist"),
+              f.get("antall") ? Number(f.get("antall")) : undefined, f.get("variant") || undefined),
+            "Lånt!", `Lever innen ${datoKort(f.get("frist"))}. Skann koden igjen når du leverer.`
+          );
         });
       }
       document.querySelectorAll("[data-lever]").forEach((b) =>
         b.addEventListener("click", () => {
-          lever(Number(b.dataset.lever));
-          kvitter("Levert!", `Legg den tilbake på ${esc(hjemTil(t)?.navn || "plassen sin")}.`);
+          kvitter(lever(Number(b.dataset.lever)), "Levert!",
+            `Legg den tilbake på ${esc(hjemTil(t)?.navn || "plassen sin")}.`);
         })
       );
     }

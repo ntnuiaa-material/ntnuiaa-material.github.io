@@ -106,6 +106,8 @@ a { color: inherit; }
 
 .meny {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 4px;
   align-items: center;
 }
@@ -784,3 +786,19 @@ tr.forsinket td.id { color: var(--ntnui-gul); }
 
 .knapp.fare { border-color: var(--feil); color: var(--feil); background: transparent; box-shadow: none; }
 .knapp.fare:hover { background: rgba(255, 90, 74, 0.1); }
+
+/* ---------- Innlogging (admin) ---------- */
+
+.innlogging {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background: rgba(5, 10, 7, 0.92);
+}
+
+.innlogging form { width: min(380px, 100%); }
+
+.laster { padding: 40px 0; }

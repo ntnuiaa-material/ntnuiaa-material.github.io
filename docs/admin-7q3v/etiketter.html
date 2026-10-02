@@ -114,8 +114,9 @@
 
   <script src="../js/vendor/qrcode.min.js"></script>
   <script src="../js/data.js"></script>
-  <script>
+  <script type="module">
     document.getElementById("topp").innerHTML = topplinje("Etiketter", true);
+    await lastAdmin();
 
     const STORRELSER = {
       liten:  { navn: "Liten",  b: 25, h: 30, qr: 18, kol: 7, rad: 9, id: 3.2, tekst: 1.9 },

@@ -1,80 +1,113 @@
-// Testdata til prototypen. Byttes ut med D1-databasen i sprint 1.
+// Henter og lagrer data via API-et på Cloudflare (mappa api/ i repoet).
 
 const GRUNNADRESSE = "HTTPS://NTNUIAA-MATERIAL.GITHUB.IO/";
 
-const START_TING = [
-  { id: 3001, type: "lokasjon", navn: "Boden, Campus", kategori: "Lokasjon", hjem_id: null },
-  { id: 3002, type: "lokasjon", navn: "Hylle 1", kategori: "Lokasjon", hjem_id: 3001 },
-  { id: 3003, type: "lokasjon", navn: "Hylle 2", kategori: "Lokasjon", hjem_id: 3001 },
-  { id: 3004, type: "lokasjon", navn: "Skap, styrerommet", kategori: "Lokasjon", hjem_id: null },
+const API = ["localhost", "127.0.0.1"].includes(location.hostname)
+  ? "http://127.0.0.1:8788"
+  : "https://lager-api.SETTES_ETTER_DEPLOY.workers.dev";
 
-  { id: 1001, type: "utstyr", navn: "Telt Nordisk Oppland 4", kategori: "Tur", hjem_id: 3002 },
-  { id: 1002, type: "utstyr", navn: "Telt Nordisk Oppland 4", kategori: "Tur", hjem_id: 3002 },
-  { id: 1003, type: "utstyr", navn: "Primus Eta Lite", kategori: "Tur", hjem_id: 3002 },
-  { id: 1004, type: "utstyr", navn: "Sovepose Ajungilak -10", kategori: "Tur", hjem_id: 3002 },
-  { id: 1010, type: "utstyr", navn: "Klatretau Mammut 60 m", kategori: "Klatring", hjem_id: 3003 },
-  { id: 1011, type: "utstyr", navn: "Sikringsbrikke Grigri", kategori: "Klatring", hjem_id: 3003 },
-  { id: 1020, type: "utstyr", navn: "Høyttaler JBL PartyBox", kategori: "Arrangement", hjem_id: 3004 },
-  { id: 1021, type: "utstyr", navn: "Beachflagg NTNUI 3 m", kategori: "Arrangement", hjem_id: 3004 },
-  { id: 1022, type: "utstyr", navn: "Førstehjelpsskrin stort", kategori: "Arrangement", hjem_id: 3004 },
-  { id: 1030, type: "utstyr", navn: "Ballpumpe elektrisk", kategori: "Ball", hjem_id: 3003 },
+let TING = [];
+let utlaan = [];
+let hendelser = [];
 
-  { id: 2001, type: "bulk", navn: "Kasse T-skjorter 2026", kategori: "Klær", hjem_id: 3002,
-    varianter: [{ navn: "S", antall: 6 }, { navn: "M", antall: 14 }, { navn: "L", antall: 9 }, { navn: "XL", antall: 3 }] },
-  { id: 2002, type: "bulk", navn: "Kjegler, gule", kategori: "Ball", hjem_id: 3003,
-    varianter: [{ navn: "Stk", antall: 40 }] },
-  { id: 2003, type: "bulk", navn: "Volleyballer Mikasa", kategori: "Ball", hjem_id: 3003,
-    varianter: [{ navn: "Stk", antall: 8 }] },
-  { id: 2004, type: "bulk", navn: "Klatrehjelmer", kategori: "Klatring", hjem_id: 3003,
-    varianter: [{ navn: "S/M", antall: 5 }, { navn: "M/L", antall: 7 }] },
-];
+async function kall(sti, valg = {}) {
+  const svar = await fetch(API + sti, {
+    ...valg,
+    headers: { "Content-Type": "application/json", ...(valg.headers || {}) },
+  });
+  const data = await svar.json().catch(() => ({}));
+  if (!svar.ok) throw Object.assign(new Error(data.feil || "Fikk ikke kontakt med lageret."), { status: svar.status });
+  return data;
+}
 
-const START_UTLAAN = [
-  { id: 1, ting_id: 1002, navn: "Ola Nordmann", telefon: "912 34 567", utlaant: "2026-09-20", frist: "2026-10-04", levert: null },
-  { id: 2, ting_id: 1010, navn: "Kari Fjell", telefon: "478 11 222", utlaant: "2026-09-10", frist: "2026-09-24", levert: null },
-  { id: 3, ting_id: 1020, navn: "Futsal-styret", telefon: "400 00 000", utlaant: "2026-09-28", frist: "2026-10-08", levert: null },
-  { id: 4, ting_id: 2002, antall: 12, variant: "Stk", navn: "Per Ball", telefon: "955 55 555", utlaant: "2026-09-29", frist: "2026-10-13", levert: null },
-];
+function brukData(data) {
+  TING = data.ting;
+  utlaan = data.utlaan;
+  hendelser = data.hendelser;
+}
 
-const START_HENDELSER = [
-  { tid: "2026-09-29 18:02", ting_id: 2002, tekst: "12 stk utlånt til Per Ball" },
-  { tid: "2026-09-28 16:40", ting_id: 1020, tekst: "Utlånt til Futsal-styret" },
-  { tid: "2026-09-27 12:15", ting_id: 1004, tekst: "Levert av Jonas" },
-  { tid: "2026-09-20 09:31", ting_id: 1002, tekst: "Utlånt til Ola Nordmann" },
-];
+async function lastData() {
+  brukData(await kall("/api/ting"));
+}
 
-// Utlån lagres i nettleseren så prototypen føles levende. Ikke ekte lagring.
-function hentLagret(nokkel, standard) {
-  try {
-    const verdi = localStorage.getItem(nokkel);
-    return verdi ? JSON.parse(verdi) : structuredClone(standard);
-  } catch {
-    return structuredClone(standard);
+async function laan(id, navn, telefon, frist, antall, variant) {
+  await kall("/api/laan", { method: "POST", body: JSON.stringify({ ting_id: id, navn, telefon, frist, antall, variant }) });
+}
+
+async function lever(utlaanId) {
+  await kall("/api/lever", { method: "POST", body: JSON.stringify({ utlaan_id: utlaanId }) });
+}
+
+function bildeUrl(ting) {
+  return ting.bilde ? `${API}/api/bilde/${ting.id}?v=${ting.bilde}` : null;
+}
+
+// ---------- Admin ----------
+
+function hentPassord() {
+  try { return localStorage.getItem("lager.passord") || ""; } catch { return ""; }
+}
+
+function huskPassord(passord) {
+  try { passord ? localStorage.setItem("lager.passord", passord) : localStorage.removeItem("lager.passord"); } catch {}
+}
+
+function adminKall(sti, valg = {}) {
+  return kall(sti, { ...valg, headers: { Authorization: `Bearer ${hentPassord()}` } });
+}
+
+// Laster admin-data. Spør etter passord hvis det mangler eller er feil.
+async function lastAdmin() {
+  for (;;) {
+    try {
+      brukData(await adminKall("/api/admin"));
+      return;
+    } catch (feil) {
+      if (feil.status !== 401) throw feil;
+      huskPassord(await sporPassord(hentPassord() ? "Feil passord" : ""));
+    }
   }
 }
 
-function lagre(nokkel, verdi) {
-  try { localStorage.setItem(nokkel, JSON.stringify(verdi)); } catch {}
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("[data-logg-ut]")) return;
+  e.preventDefault();
+  huskPassord("");
+  location.reload();
+});
+
+function sporPassord(feilmelding) {
+  return new Promise((ferdig) => {
+    const boks = document.createElement("div");
+    boks.className = "innlogging";
+    boks.innerHTML = `
+      <form class="panel skjema">
+        <p class="terminal">Tilgang begrenset<br>Kun materialansvarlig</p>
+        <label class="felt"><span class="etikett">Passord</span>
+          <input type="password" autocomplete="current-password" required autofocus></label>
+        ${feilmelding ? `<p class="hjelp" style="color:var(--feil)">${feilmelding}</p>` : ""}
+        <button class="knapp" type="submit">Logg inn</button>
+      </form>`;
+    document.body.appendChild(boks);
+    boks.querySelector("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const verdi = boks.querySelector("input").value;
+      boks.remove();
+      ferdig(verdi);
+    });
+  });
 }
 
-let TING = hentLagret("lager.ting", START_TING);
-let utlaan = hentLagret("lager.utlaan", START_UTLAAN);
-let hendelser = hentLagret("lager.hendelser", START_HENDELSER);
+async function lagreTing(ting) {
+  return adminKall("/api/admin/ting", { method: "POST", body: JSON.stringify(ting) });
+}
+
+function visFeil(element, feil) {
+  element.innerHTML = `<div class="panel"><p class="terminal" style="color:var(--feil)">Feil</p><p>${esc(feil.message)}</p></div>`;
+}
 
 function finnTing(id) {
   return TING.find((t) => t.id === Number(id));
-}
-
-function lagreTing(ny) {
-  const i = TING.findIndex((t) => t.id === ny.id);
-  if (i === -1) {
-    TING.push(ny);
-    loggHendelse(ny.id, "Registrert");
-  } else {
-    TING[i] = ny;
-    loggHendelse(ny.id, "Endret");
-  }
-  lagre("lager.ting", TING);
 }
 
 function alleKategorier() {
@@ -120,26 +153,6 @@ function statusFor(ting) {
   return { kode: "ute", tekst: "Utlånt" };
 }
 
-function laan(id, navn, telefon, frist, antall, variant) {
-  utlaan.push({ id: Date.now(), ting_id: Number(id), navn, telefon, utlaant: idag(), frist, levert: null, antall, variant });
-  loggHendelse(id, antall ? `${antall} ${variant} utlånt til ${navn}` : `Utlånt til ${navn}`);
-  lagre("lager.utlaan", utlaan);
-}
-
-function lever(utlaanId) {
-  const u = utlaan.find((x) => x.id === utlaanId);
-  if (!u) return;
-  u.levert = idag();
-  loggHendelse(u.ting_id, `Levert av ${u.navn}`);
-  lagre("lager.utlaan", utlaan);
-}
-
-function loggHendelse(id, tekst) {
-  const tid = new Date().toISOString().slice(0, 16).replace("T", " ");
-  hendelser.unshift({ tid, ting_id: Number(id), tekst });
-  lagre("lager.hendelser", hendelser);
-}
-
 function datoKort(iso) {
   const [, m, d] = iso.split("-");
   return `${d}.${m}`;
@@ -154,7 +167,8 @@ function topplinje(aktiv, admin) {
   const lenke = (href, navn) =>
     `<a href="${href}"${aktiv === navn ? ' aria-current="page"' : ""}>${navn}</a>`;
   const meny = admin
-    ? lenke("index.html", "Oversikt") + lenke("etiketter.html", "Etiketter") + lenke("../index.html", "Lager")
+    ? lenke("index.html", "Oversikt") + lenke("etiketter.html", "Etiketter") + lenke("../index.html", "Lager") +
+      '<a href="#" data-logg-ut>Logg ut</a>'
     : lenke("index.html", "Lager");
   return `
     <header class="topplinje">

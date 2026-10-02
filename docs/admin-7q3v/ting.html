@@ -78,15 +78,21 @@
 
   <script src="../js/data.js"></script>
   <script src="../js/velger.js"></script>
-  <script>
+  <script type="module">
     document.getElementById("topp").innerHTML = topplinje("", true);
     document.getElementById("bunn").innerHTML = bunnlinje();
 
     const skjema = document.getElementById("skjema");
+    try {
+      await lastAdmin();
+    } catch (feil) {
+      visFeil(skjema, feil);
+      throw feil;
+    }
     const id = new URLSearchParams(location.search).get("id");
     const eksisterende = id ? finnTing(id) : null;
     const serie = { utstyr: 1000, bulk: 2000, lokasjon: 3000 };
-    let bilde = eksisterende?.bilde || null;
+    let nyttBilde = null;
 
     // Kategori: forslag fra alle kategorier som finnes, eller lag ny
     lagVelger(skjema.kategori, {
@@ -163,8 +169,9 @@
 
     function visBilde() {
       const img = document.getElementById("forhandsvisning");
-      if (!bilde) return;
-      img.src = bilde;
+      const kilde = nyttBilde || (eksisterende && bildeUrl(eksisterende));
+      if (!kilde) return;
+      img.src = kilde;
       img.classList.remove("skjult");
     }
 
@@ -179,7 +186,7 @@
         lerret.width = Math.round(img.width * skala);
         lerret.height = Math.round(img.height * skala);
         lerret.getContext("2d").drawImage(img, 0, 0, lerret.width, lerret.height);
-        bilde = lerret.toDataURL("image/jpeg", 0.75);
+        nyttBilde = lerret.toDataURL("image/jpeg", 0.75);
         visBilde();
         URL.revokeObjectURL(img.src);
       };
@@ -204,7 +211,8 @@
         kategori: type === "lokasjon" ? "Lokasjon" : skjema.kategori.value.trim(),
         beskrivelse: skjema.beskrivelse.value.trim(),
         hjem_id: hjemId,
-        bilde,
+        bilde: nyttBilde,
+        ny: !eksisterende,
         status: eksisterende?.status || "aktiv",
       };
       if (type === "bulk") {
@@ -222,27 +230,37 @@
       return feil.length ? null : ting;
     }
 
+    // Lagrer og går videre. Knappene er låst mens lagringen pågår.
+    async function lagreOgGaa(ting, neste) {
+      const knapper = skjema.querySelectorAll("button");
+      const boks = document.getElementById("feil");
+      knapper.forEach((k) => (k.disabled = true));
+      try {
+        await lagreTing(ting);
+        location.href = neste;
+      } catch (feil) {
+        boks.textContent = feil.message;
+        boks.classList.remove("skjult");
+        knapper.forEach((k) => (k.disabled = false));
+      }
+    }
+
     skjema.addEventListener("submit", (e) => {
       e.preventDefault();
       const ting = lesSkjema();
-      if (!ting) return;
-      lagreTing(ting);
-      location.href = `ting.html?id=${ting.id}&lagret=1`;
+      if (ting) lagreOgGaa(ting, `ting.html?id=${ting.id}&lagret=1`);
     });
 
     document.getElementById("etikett").addEventListener("click", () => {
       const ting = lesSkjema();
-      if (!ting) return;
-      lagreTing(ting);
-      location.href = `etiketter.html?ids=${ting.id}`;
+      if (ting) lagreOgGaa(ting, `etiketter.html?ids=${ting.id}`);
     });
 
     document.getElementById("kasser").addEventListener("click", () => {
       const t = eksisterende;
       const kassert = t.status === "kassert";
       if (!kassert && !confirm(`Kassere ${t.id} ${t.navn}? ID-en gjenbrukes aldri, og historikken beholdes.`)) return;
-      lagreTing({ ...t, status: kassert ? "aktiv" : "kassert" });
-      location.reload();
+      lagreOgGaa({ ...t, bilde: null, status: kassert ? "aktiv" : "kassert" }, `ting.html?id=${t.id}`);
     });
 
     if (new URLSearchParams(location.search).get("lagret")) {

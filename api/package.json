@@ -1,0 +1,16 @@
+{
+  "name": "lager-api",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:lokal": "wrangler d1 execute lager --local --file schema.sql",
+    "db:remote": "wrangler d1 execute lager --remote --file schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4.146.0"
+  },
+  "allowScripts": {
+    "workerd@1.20261001.1": true
+  }
+}
