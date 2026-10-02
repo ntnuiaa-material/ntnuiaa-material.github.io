@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Videresender – NTNUI Ålesund lager</title>
   <script>
+    // Gamle bokmerker til admin-7q3v sendes til /admin
+    if (location.pathname.startsWith("/admin-7q3v")) {
+      location.replace(location.pathname.replace("/admin-7q3v", "/admin") + location.search);
+    }
     // GitHub Pages har ingen ruter, så /1002 havner her. Send videre til tingsiden.
     const deler = location.pathname.split("/").filter(Boolean);
     const id = deler.pop();
@@ -13,7 +17,7 @@
       location.replace(`${rot}ting.html?id=${id}`);
     }
   </script>
-  <link rel="stylesheet" href="/css/style.css?v=202610021230">
+  <link rel="stylesheet" href="/css/style.css?v=202610021336">
 </head>
 <body>
   <main class="skjerm">
@@ -24,7 +28,7 @@
     <p><a class="knapp sekundaer" href="/" style="margin-top:22px">Til lageret</a></p>
     <div id="bunn"></div>
   </main>
-  <script src="/js/data.js?v=202610021230"></script>
+  <script src="/js/data.js?v=202610021336"></script>
   <script>document.getElementById("bunn").innerHTML = bunnlinje();</script>
 </body>
 </html>

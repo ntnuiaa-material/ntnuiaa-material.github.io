@@ -13,9 +13,9 @@ Prototype av brukergrensesnittet. Data ligger som testdata i `docs/js/data.js`, 
 |---|---|
 | `docs/index.html` | Søk og liste over alle ting |
 | `docs/ting.html?id=1002` | Tingen: bilde, status, lån og lever |
-| `docs/admin-*/` | Admin: oversikt, alle ting, registrer og endre ting med bilde, QR-etiketter på A4 |
+| `docs/admin/` | Admin: oversikt, alle gjenstander, registrer og endre med bilde, QR-etiketter på A4. Krever passord |
 
-Admin-mappa har et navn ingen gjetter, og de offentlige sidene lenker aldri dit. Det er bare et gjemmested, ikke en lås. En ekte lås kommer sammen med databasen. Mappa kan døpes om fritt, alle lenker inni den er relative.
+Admin er beskyttet av et passord som sjekkes i API-et (secret `ADMIN_PASSORD`).
 
 ## Publisering
 
@@ -42,5 +42,5 @@ npx serve docs
 Alle `js/` og `css/`-lenker har `?v=<tidsstempel>`, så nettleseren henter nye filer etter en endring. Oppdater tallet når du endrer en JS- eller CSS-fil:
 
 ```
-V=$(date +%Y%m%d%H%M); sed -i -E "s#\?v=[0-9]+#?v=$V#g" docs/*.html docs/admin-*/*.html
+V=$(date +%Y%m%d%H%M); sed -i -E "s#\?v=[0-9]+#?v=$V#g" docs/*.html docs/admin/*.html
 ```
