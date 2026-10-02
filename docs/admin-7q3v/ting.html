@@ -60,7 +60,7 @@
               <option value="salg">Salg (2xxx)</option>
               <option value="lokasjon">Lokasjon (3xxx)</option>
             </select></label>
-          <label class="felt"><span class="etikett">ID</span>
+          <label class="felt"><span class="etikett">ID (neste ledige)</span>
             <input name="id" inputmode="numeric" required></label>
         </div>
 
@@ -238,7 +238,6 @@
       skjema.style.gridTemplateColumns = "1fr";
       skjema.style.maxWidth = "560px";
       document.getElementById("kamera-del").classList.add("skjult");
-      document.getElementById("type-rad").classList.toggle("skjult", !eksisterende);
       document.getElementById("hjem-etikett").textContent = "Ligger i (valgfritt)";
       skjema.hjem.placeholder = "La stå tomt for et rom eller bygg";
       skjema.navn.placeholder = "F.eks. Gymsalen eller Hylle 2 på K-lageret";
@@ -345,7 +344,7 @@
     skjema.addEventListener("submit", (e) => {
       e.preventDefault();
       const ting = lesSkjema();
-      if (ting) lagreOgGaa(ting, `ting.html?id=${ting.id}&lagret=1`);
+      if (ting) lagreOgGaa(ting, `index.html?lagret=${ting.id}`);
     });
 
     document.getElementById("etikett").addEventListener("click", () => {
@@ -357,7 +356,7 @@
       const t = eksisterende;
       const kassert = t.status === "kassert";
       if (!kassert && !confirm(`Kassere ${t.id} ${t.navn}? ID-en gjenbrukes aldri, og historikken beholdes.`)) return;
-      lagreOgGaa({ ...t, bilde: null, status: kassert ? "aktiv" : "kassert" }, `ting.html?id=${t.id}`);
+      lagreOgGaa({ ...t, bilde: null, status: kassert ? "aktiv" : "kassert" }, `index.html?lagret=${t.id}`);
     });
 
     if (new URLSearchParams(location.search).get("lagret")) {

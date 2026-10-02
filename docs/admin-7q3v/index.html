@@ -22,6 +22,8 @@
       <h1 class="tittel mellom">Oversikt</h1>
     </section>
 
+    <p class="kvittering skjult" id="lagret" role="status" style="margin:22px 0 0;text-align:left"></p>
+
     <div class="teller" id="teller"></div>
 
     <div class="admin-grid">
@@ -82,6 +84,15 @@
     } catch (feil) {
       visFeil(document.getElementById("teller"), feil);
       throw feil;
+    }
+
+    // Bekreftelse etter lagring i skjemaet
+    const lagretId = new URLSearchParams(location.search).get("lagret");
+    if (lagretId && finnTing(lagretId)) {
+      const boks = document.getElementById("lagret");
+      boks.innerHTML = `<span class="terminal">&gt; Lagret</span> <a href="ting.html?id=${lagretId}" style="color:var(--ntnui-gul)">${lagretId} ${esc(finnTing(lagretId).navn)}</a>`;
+      boks.classList.remove("skjult");
+      history.replaceState(null, "", "index.html");
     }
 
     const ute = utlaan.filter((u) => !u.levert).sort((a, b) => a.frist.localeCompare(b.frist));
