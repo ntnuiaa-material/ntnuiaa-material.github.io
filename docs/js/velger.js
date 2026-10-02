@@ -37,7 +37,7 @@ function lagVelger(input, { valg, fri = false, nyTekst = "Ny", onVelg = () => {}
     liste.innerHTML = treff.length
       ? treff.map((v, i) => `
           <li role="option" id="${liste.id}-${i}" data-i="${i}" aria-selected="${i === aktiv}" class="${v.ny ? "ny" : ""}">
-            ${v.ny ? `<span class="etikett">+ ${nyTekst}</span> ${esc(v.tekst)}` : marker(v.tekst, q)}
+            ${v.ny ? `<span class="etikett">+ ${nyTekst}:</span> ${esc(v.tekst)}` : marker(v.tekst, q)}
             ${v.hint ? `<small>${marker(v.hint, q)}</small>` : ""}
           </li>`).join("")
       : `<li class="tom">Ingen treff</li>`;
