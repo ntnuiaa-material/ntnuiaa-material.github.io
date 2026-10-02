@@ -195,10 +195,57 @@ setInterval(() => {
   if (k) k.textContent = klokkeslett();
 }, 30000);
 
-function bunnlinje() {
+// Oppgavelinje med Start-meny. Start åpner menyen, øverste valg går hjem.
+function bunnlinje(admin) {
+  const valg = admin
+    ? [
+        ["pc", "Oversikt", "index.html"],
+        ["boks", "Ny gjenstand", "ting.html"],
+        ["mappe", "Ny lokasjon", "ting.html?type=lokasjon"],
+        ["dokument", "Skriv ut etiketter", "etiketter.html"],
+        null,
+        ["pc", "Til lageret", "../index.html"],
+        ["dokument", "Logg ut", "#", "data-logg-ut"],
+      ]
+    : [
+        ["pc", "Lageret", "/"],
+        ["dokument", "Søk etter gjenstand", "/?sok"],
+      ];
+  const punkter = valg.map((v) =>
+    v
+      ? `<li role="none"><a role="menuitem" class="ikon-${v[0]}" href="${v[2]}" ${v[3] || ""}>${v[1]}</a></li>`
+      : `<li role="separator" class="skille"></li>`
+  ).join("");
   return `
     <footer class="bunn">
-      <span class="terminal">Start</span>
+      <div class="startmeny skjult" id="startmeny">
+        <div class="startmeny-side" aria-hidden="true"><b>NTNUI</b> Ålesund</div>
+        <ul role="menu" aria-label="Start">${punkter}</ul>
+      </div>
+      <button class="start" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="startmeny">Start</button>
       <span class="terminal" id="klokke">${klokkeslett()}</span>
     </footer>`;
 }
+
+function visStartmeny(vis) {
+  const meny = document.getElementById("startmeny");
+  const knapp = document.querySelector(".bunn .start");
+  if (!meny || !knapp) return;
+  meny.classList.toggle("skjult", !vis);
+  knapp.setAttribute("aria-expanded", vis);
+  if (vis) meny.querySelector("a")?.focus();
+}
+
+document.addEventListener("click", (e) => {
+  if (e.target.closest(".bunn .start")) {
+    visStartmeny(document.getElementById("startmeny").classList.contains("skjult"));
+  } else if (!e.target.closest("#startmeny")) {
+    visStartmeny(false);
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || document.getElementById("startmeny")?.classList.contains("skjult")) return;
+  visStartmeny(false);
+  document.querySelector(".bunn .start")?.focus();
+});

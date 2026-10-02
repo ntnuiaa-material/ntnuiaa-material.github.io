@@ -57,7 +57,7 @@ html { background: var(--skrivebord); }
 body {
   margin: 0;
   min-height: 100vh;
-  padding: 18px 0 56px;
+  padding: 18px 0 64px;
   background: var(--skrivebord);
   color: var(--tekst);
   font-family: var(--f-tekst);
@@ -533,13 +533,27 @@ tr.forsinket td { color: var(--feil); }
   box-shadow: inset 0 1px var(--halvlys), inset 0 2px var(--lys);
 }
 
-.bunn .terminal:first-child {
-  padding: 3px 8px 3px 26px;
-  background: var(--ikon-flagg) 5px center / 16px no-repeat, var(--vindu);
+/* Start-knappen går til forsiden. Minst 44 px høy, så den er lett å treffe med tommelen */
+.bunn .start {
+  border: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 4px 16px 4px 10px;
+  background: var(--vindu);
   box-shadow: var(--opphoyd);
   color: #000;
-  font: 700 16px var(--f-tekst);
+  font: 700 18px var(--f-tekst);
+  text-decoration: none;
+  cursor: pointer;
 }
+
+.bunn .start::before { content: ""; width: 22px; height: 22px; background: var(--ikon-flagg) center / contain no-repeat; }
+.bunn .start:hover { background-color: var(--halvlys); }
+.bunn .start:active,
+.bunn .start[aria-expanded="true"] { box-shadow: var(--nedsenket); padding: 5px 15px 3px 11px; }
+.bunn .start:focus-visible { outline: 1px dotted #000; outline-offset: -5px; }
 
 .bunn .terminal:last-child {
   padding: 3px 10px;
@@ -547,6 +561,53 @@ tr.forsinket td { color: var(--feil); }
   font: 400 16px var(--f-tekst);
   box-shadow: var(--nedsenket);
 }
+
+/* Start-menyen, som i Windows 95 */
+.startmeny {
+  position: absolute;
+  left: 2px;
+  bottom: 100%;
+  z-index: 45;
+  display: flex;
+  min-width: 260px;
+  padding: 3px;
+  background: var(--vindu);
+  box-shadow: var(--opphoyd);
+}
+
+.startmeny.skjult { display: none; }
+
+.startmeny-side {
+  width: 32px;
+  padding: 8px 0;
+  background: linear-gradient(0deg, var(--tittel-fra), var(--tittel-til));
+  color: #c0c0c0;
+  font: 400 18px var(--f-tittel);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+
+.startmeny-side b { color: #fff; }
+
+.startmeny ul { flex: 1; margin: 0; padding: 0; list-style: none; }
+
+.startmeny a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 4px 18px 4px 10px;
+  color: #000;
+  text-decoration: none;
+}
+
+.startmeny a::before { content: ""; width: 28px; height: 28px; flex: none; background: var(--ikon-pc) center / contain no-repeat; }
+.startmeny a.ikon-boks::before { background-image: var(--ikon-boks); }
+.startmeny a.ikon-mappe::before { background-image: var(--ikon-mappe); }
+.startmeny a.ikon-dokument::before { background-image: var(--ikon-dokument); }
+.startmeny a:hover, .startmeny a:focus-visible { background: var(--marine); color: #fff; outline: none; }
+.startmeny .skille { height: 0; margin: 3px 2px; border-top: 1px solid var(--skygge); border-bottom: 1px solid var(--lys); }
 
 /* ---------- Velger (søk med forslag) ---------- */
 
@@ -597,6 +658,8 @@ tr.forsinket td { color: var(--feil); }
 .skjult { display: none !important; }
 
 @media (max-width: 560px) {
+  .bunn .start { min-height: 44px; padding-right: 22px; font-size: 22px; }
+  body { padding-bottom: 72px; }
   .liste a { grid-template-columns: 48px 1fr auto; }
   .liste .miniatyr { display: none; }
   .to-felt { grid-template-columns: 1fr; }
@@ -609,7 +672,7 @@ b, strong, dt,
 .panel-hode .etikett, .panel-hode .terminal,
 .filtre button[aria-pressed="true"], .teller data, .liste .navn,
 .status.lager, .status.ute, .status.forsinket, .varianter b,
-.knapp, .valg span, .bunn .terminal:first-child, .variantrad button,
+.knapp, .valg span, .bunn .start, .variantrad button,
 .velger-liste mark, .velger-liste li .etikett, .kvittering .terminal {
   text-shadow: 1px 0 0 currentColor;
   letter-spacing: 1px;
