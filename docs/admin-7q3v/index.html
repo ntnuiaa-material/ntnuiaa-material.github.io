@@ -46,11 +46,17 @@
 
     <section class="panel" style="margin-top:22px">
       <div class="panel-hode">
+        <span class="etikett">Lokasjoner</span>
+        <a class="knapp liten" href="ting.html?type=lokasjon">Ny lokasjon</a>
+      </div>
+      <ul class="liste" id="lokasjoner"></ul>
+      <p class="hjelp" style="margin-top:10px">Steder ting hører hjemme: rom, bod, skap eller hylle. En hylle kan ligge i et rom.</p>
+    </section>
+
+    <section class="panel" style="margin-top:22px">
+      <div class="panel-hode">
         <span class="etikett">Alle ting</span>
-        <span style="display:flex;gap:8px;flex-wrap:wrap">
-          <a class="knapp sekundaer liten" href="ting.html?type=lokasjon">Ny lokasjon</a>
-          <a class="knapp liten" href="ting.html">Ny ting</a>
-        </span>
+        <a class="knapp liten" href="ting.html">Ny ting</a>
       </div>
       <label class="sok" style="margin-bottom:14px">
         <span aria-hidden="true">&gt;</span>
@@ -104,10 +110,25 @@
       <li><time>${datoKort(h.tid.slice(0, 10))} ${h.tid.slice(11)}</time>
       <span><a href="ting.html?id=${h.ting_id}" style="color:var(--fosfor)">${h.ting_id}</a> ${esc(h.detaljer)}</span></li>`).join("");
 
+    // Lokasjoner med antall ting som hører hjemme der
+    const lok = TING.filter((t) => t.type === "lokasjon" && t.status !== "kassert");
+    document.getElementById("lokasjoner").innerHTML = lok.length
+      ? lok.map((l) => {
+          const antall = TING.filter((t) => t.hjem_id === l.id && t.type !== "lokasjon").length;
+          return `
+            <li><a href="ting.html?id=${l.id}" style="grid-template-columns:64px 1fr auto">
+              <span class="id">${l.id}</span>
+              <span class="navn">${esc(l.navn)}<span class="sted">${esc(stiTil(l) || "Øverste nivå")}</span></span>
+              <span class="status lager">${antall} ting</span>
+            </a></li>`;
+        }).join("")
+      : `<li class="hjelp" style="padding:12px 4px">Ingen lokasjoner ennå. Start med de store stedene, f.eks. Gymsalen og Kontoret.</li>`;
+
     const sok = document.getElementById("sok");
     function tegnAlle() {
       const q = sok.value.trim().toLowerCase();
       const rader = [...TING]
+        .filter((t) => t.type !== "lokasjon")
         .sort((a, b) => a.id - b.id)
         .filter((t) => !q || `${t.id} ${t.navn} ${t.kategori} ${stiTil(t)}`.toLowerCase().includes(q));
       document.getElementById("alle").innerHTML = rader.map((t) => `

@@ -23,7 +23,7 @@
     </section>
 
     <form class="ting-grid" id="skjema" style="margin-top:22px" novalidate autocomplete="off">
-      <div>
+      <div id="kamera-del">
         <label class="kamera">
           <input type="file" name="bilde" accept="image/*" capture="environment">
           <span class="terminal">Ta bilde</span>
@@ -34,7 +34,7 @@
       </div>
 
       <section class="panel skjema">
-        <div class="to-felt">
+        <div class="to-felt" id="type-rad">
           <label class="felt"><span class="etikett">Type</span>
             <select name="type">
               <option value="utstyr">Utstyr (1xxx)</option>
@@ -51,7 +51,7 @@
         <label class="felt" id="kategori-felt"><span class="etikett">Kategori</span>
           <input name="kategori" placeholder="Skriv for å søke i kategoriene"></label>
 
-        <label class="felt"><span class="etikett">Hjem</span>
+        <label class="felt"><span class="etikett" id="hjem-etikett">Hjem</span>
           <input name="hjem" placeholder="Skriv hylle, bod eller ID"></label>
 
         <fieldset class="felt skjult" id="varianter" style="border:0;padding:0;margin:0">
@@ -185,6 +185,24 @@
       if (skjema.type.value === "lokasjon") document.getElementById("tittel").textContent = "Ny lokasjon";
       skjema.id.value = nesteId(skjema.type.value);
       document.getElementById("kasser").classList.add("skjult");
+    }
+    // Lokasjoner får et enkelt skjema: bare navn og hvor den ligger
+    const lokasjonsmodus = parametre.get("type") === "lokasjon" || eksisterende?.type === "lokasjon";
+    if (lokasjonsmodus) {
+      skjema.type.value = "lokasjon";
+      skjema.style.gridTemplateColumns = "1fr";
+      skjema.style.maxWidth = "560px";
+      document.getElementById("kamera-del").classList.add("skjult");
+      document.getElementById("type-rad").classList.toggle("skjult", !eksisterende);
+      document.getElementById("hjem-etikett").textContent = "Ligger i (valgfritt)";
+      skjema.hjem.placeholder = "La stå tomt for et rom eller bygg";
+      skjema.navn.placeholder = "F.eks. Gymsalen eller Hylle 2 på K-lageret";
+      skjema.beskrivelse.placeholder = "Valgfritt. F.eks. nøkkel hos vaktmester";
+      if (!eksisterende) document.getElementById("hilsen").textContent = "Ny lokasjon";
+      document.getElementById("tittel").textContent = eksisterende ? eksisterende.navn : "Ny lokasjon";
+      document.getElementById("hode-linje").innerHTML = eksisterende
+        ? `ID ${eksisterende.id} // Lokasjon`
+        : "Et sted ting hører hjemme<br>Rom, bod, skap eller hylle";
     }
     visTypefelt();
     visBilde();
