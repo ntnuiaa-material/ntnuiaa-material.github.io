@@ -95,6 +95,14 @@
       history.replaceState(null, "", "index.html");
     }
 
+    const slettetId = new URLSearchParams(location.search).get("slettet");
+    if (slettetId) {
+      const boks = document.getElementById("lagret");
+      boks.innerHTML = `<span class="terminal">&gt; Slettet ${esc(slettetId)}. ID-en er ledig igjen</span>`;
+      boks.classList.remove("skjult");
+      history.replaceState(null, "", "index.html");
+    }
+
     const ute = utlaan.filter((u) => !u.levert).sort((a, b) => a.frist.localeCompare(b.frist));
     const forsinket = ute.filter((u) => u.frist < idag());
     const ting = TING.filter((t) => t.type !== "lokasjon" && t.status !== "kassert");

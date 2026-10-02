@@ -8,6 +8,7 @@
 // Admin (Authorization: Bearer <ADMIN_PASSORD>):
 //   GET  /api/admin        alt, med telefon og hendelser
 //   POST /api/admin/ting   lagre ny eller endret ting, med bilde
+//   POST /api/admin/slett  slett en ting for godt, så ID-en kan brukes igjen
 
 const MAKS_BILDE = 1_500_000;
 
@@ -56,6 +57,7 @@ async function ruter(request, env) {
     await sjekkAdmin(request, env);
     if (metode === "GET" && sti === "/api/admin") return json(await hentAlt(env, true));
     if (metode === "POST" && sti === "/api/admin/ting") return json(await lagreTing(env, await lesJson(request)));
+    if (metode === "POST" && sti === "/api/admin/slett") return json(await slettTing(env, await lesJson(request)));
   }
 
   return json({ feil: "Fant ikke" }, 404);
@@ -217,6 +219,29 @@ async function lagreTing(env, data) {
 
   await env.DB.batch(setninger);
   return { ok: true, id };
+}
+
+// Kun for nødstilfeller. Fjerner gjenstanden med all historikk og bilde
+async function slettTing(env, data) {
+  const id = heltall(data.id, "ID");
+  const ting = await env.DB.prepare("SELECT id FROM ting WHERE id = ?").bind(id).first();
+  if (!ting) throw new Brukerfeil("Gjenstanden finnes ikke.", 404);
+
+  const [ute, barn] = await env.DB.batch([
+    env.DB.prepare("SELECT COUNT(*) AS n FROM utlaan WHERE ting_id = ? AND levert IS NULL").bind(id),
+    env.DB.prepare("SELECT COUNT(*) AS n FROM ting WHERE hjem_id = ?").bind(id),
+  ]);
+  if (ute.results[0].n) throw new Brukerfeil("Gjenstanden er utlånt. Den må leveres før den kan slettes.", 409);
+  if (barn.results[0].n) throw new Brukerfeil(`${barn.results[0].n} gjenstander har denne som hjem. Flytt dem først.`, 409);
+
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM varianter WHERE ting_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM utlaan WHERE ting_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM hendelser WHERE ting_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM ting WHERE id = ?").bind(id),
+  ]);
+  await env.BILDER.delete(`bilde:${id}`);
+  return { ok: true };
 }
 
 // ---------- Hjelpere ----------

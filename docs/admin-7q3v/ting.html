@@ -95,6 +95,18 @@
       </section>
     </form>
 
+    <details class="panel skjult" id="faresone" style="margin-top:22px;max-width:560px;border-color:var(--feil)">
+      <summary class="etikett" style="cursor:pointer;color:var(--feil)">Slett for godt (nødstilfeller)</summary>
+      <div class="skjema" style="margin-top:14px">
+        <p class="hjelp" style="color:var(--tekst)">Sletter gjenstanden med all lånehistorikk og bilde. ID-en blir ledig og kan brukes på noe annet. Fjern den gamle QR-etiketten, ellers peker den til feil gjenstand.</p>
+        <p class="hjelp">Vanligvis holder det å kassere. Slett bare hvis noe er registrert feil.</p>
+        <label class="felt"><span class="etikett">Skriv ID-en for å bekrefte</span>
+          <input id="slett-bekreft" inputmode="numeric" autocomplete="off"></label>
+        <p class="hjelp skjult" id="slett-feil" style="color:var(--feil)"></p>
+        <button class="knapp fare" type="button" id="slett" disabled>Slett for godt</button>
+      </div>
+    </details>
+
     <div id="bunn"></div>
   </main>
 
@@ -158,8 +170,11 @@
 
     function nesteId(type) {
       type = ekteType(type);
-      const brukt = TING.filter((t) => t.type === type).map((t) => t.id);
-      return Math.max(serie[type], ...brukt) + 1;
+      // Laveste ledige nummer i serien, så slettede ID-er blir brukt igjen
+      const brukt = new Set(TING.map((t) => t.id));
+      let id = serie[type] + 1;
+      while (brukt.has(id)) id++;
+      return id;
     }
 
     function variantrad(v = { navn: "", antall: 0 }) {
@@ -358,6 +373,25 @@
       if (!kassert && !confirm(`Kassere ${t.id} ${t.navn}? ID-en gjenbrukes aldri, og historikken beholdes.`)) return;
       lagreOgGaa({ ...t, bilde: null, status: kassert ? "aktiv" : "kassert" }, `index.html?lagret=${t.id}`);
     });
+
+    // Sletting: knappen åpnes først når riktig ID er skrevet inn
+    if (eksisterende) {
+      const bekreft = document.getElementById("slett-bekreft");
+      const knapp = document.getElementById("slett");
+      document.getElementById("faresone").classList.remove("skjult");
+      bekreft.addEventListener("input", () => (knapp.disabled = bekreft.value.trim() !== String(eksisterende.id)));
+      knapp.addEventListener("click", async () => {
+        knapp.disabled = true;
+        try {
+          await slettTing(eksisterende.id);
+          location.href = `index.html?slettet=${eksisterende.id}`;
+        } catch (feil) {
+          const boks = document.getElementById("slett-feil");
+          boks.textContent = feil.message;
+          boks.classList.remove("skjult");
+        }
+      });
+    }
 
     if (new URLSearchParams(location.search).get("lagret")) {
       document.getElementById("hode-linje").innerHTML += "<br>&gt; Lagret";

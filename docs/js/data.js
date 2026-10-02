@@ -102,6 +102,10 @@ async function lagreTing(ting) {
   return adminKall("/api/admin/ting", { method: "POST", body: JSON.stringify(ting) });
 }
 
+async function slettTing(id) {
+  return adminKall("/api/admin/slett", { method: "POST", body: JSON.stringify({ id }) });
+}
+
 function visFeil(element, feil) {
   element.innerHTML = `<div class="panel"><p class="terminal" style="color:var(--feil)">Feil</p><p>${esc(feil.message)}</p></div>`;
 }
