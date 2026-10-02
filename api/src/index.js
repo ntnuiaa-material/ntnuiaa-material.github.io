@@ -11,6 +11,7 @@
 //   POST /api/admin/slett  slett en ting for godt, så ID-en kan brukes igjen
 
 const MAKS_BILDE = 1_500_000;
+const MAKS_DAGER = 14;
 
 export default {
   async fetch(request, env) {
@@ -106,6 +107,8 @@ async function laan(env, data) {
   const navn = tekst(data.navn, "Navn", 80);
   const telefon = tekst(data.telefon, "Telefon", 30);
   const frist = dato(data.frist);
+  if (frist < osloDato(0)) throw new Brukerfeil("Fristen kan ikke være tilbake i tid.");
+  if (frist > osloDato(MAKS_DAGER)) throw new Brukerfeil(`Lengste låneperiode er ${MAKS_DAGER} dager.`);
   const antall = data.antall ? heltall(data.antall, "Antall") : 1;
 
   const ting = await env.DB.prepare("SELECT * FROM ting WHERE id = ? AND status = 'aktiv'").bind(tingId).first();
@@ -268,6 +271,11 @@ function tekst(verdi, navn, maks) {
   const t = String(verdi ?? "").trim();
   if (!t) throw new Brukerfeil(`${navn} mangler.`);
   return t.slice(0, maks);
+}
+
+// Dagens dato i Norge pluss et antall dager, som YYYY-MM-DD
+function osloDato(dager) {
+  return new Date(Date.now() + dager * 86400000).toLocaleDateString("sv-SE", { timeZone: "Europe/Oslo" });
 }
 
 function dato(verdi) {
