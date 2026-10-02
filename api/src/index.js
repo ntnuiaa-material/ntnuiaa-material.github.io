@@ -107,12 +107,12 @@ async function laan(env, data) {
   const antall = data.antall ? heltall(data.antall, "Antall") : 1;
 
   const ting = await env.DB.prepare("SELECT * FROM ting WHERE id = ? AND status = 'aktiv'").bind(tingId).first();
-  if (!ting || ting.type === "lokasjon" || !ting.utlaanbar) throw new Brukerfeil("Denne tingen kan ikke lånes.");
+  if (!ting || ting.type === "lokasjon" || !ting.utlaanbar) throw new Brukerfeil("Denne gjenstanden kan ikke lånes.");
 
   let variant = null;
   if (ting.type === "utstyr") {
     const ute = await env.DB.prepare("SELECT 1 FROM utlaan WHERE ting_id = ? AND levert IS NULL").bind(tingId).first();
-    if (ute) throw new Brukerfeil("Tingen er allerede utlånt.", 409);
+    if (ute) throw new Brukerfeil("Gjenstanden er allerede utlånt.", 409);
   } else {
     variant = tekst(data.variant, "Størrelse", 20);
     const v = await env.DB.prepare("SELECT antall FROM varianter WHERE ting_id = ? AND navn = ?").bind(tingId, variant).first();
@@ -169,7 +169,7 @@ async function lagreTing(env, data) {
   const beskrivelse = (data.beskrivelse || "").trim().slice(0, 500);
   const hjemId = data.hjem_id ? heltall(data.hjem_id, "Hjem") : null;
   const status = data.status === "kassert" ? "kassert" : "aktiv";
-  if (hjemId === id) throw new Brukerfeil("En ting kan ikke ligge i seg selv.");
+  if (hjemId === id) throw new Brukerfeil("En gjenstand kan ikke ligge i seg selv.");
 
   const fra = await env.DB.prepare("SELECT * FROM ting WHERE id = ?").bind(id).first();
   if (fra && data.ny) throw new Brukerfeil(`ID ${id} er allerede brukt.`, 409);
@@ -196,7 +196,7 @@ async function lagreTing(env, data) {
 
   if (type === "bulk") {
     const varianter = (data.varianter || []).filter((v) => v.navn);
-    if (!varianter.length) throw new Brukerfeil("Bulk trenger minst én størrelse.");
+    if (!varianter.length) throw new Brukerfeil("Skriv inn minst én rad med antall.");
     setninger.push(env.DB.prepare("DELETE FROM varianter WHERE ting_id = ?").bind(id));
     for (const v of varianter) {
       setninger.push(env.DB.prepare("INSERT INTO varianter (ting_id, navn, antall) VALUES (?, ?, ?)")

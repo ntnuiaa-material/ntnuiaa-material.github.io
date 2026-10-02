@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Endre ting – NTNUI Ålesund lager</title>
+  <title>Endre gjenstand – NTNUI Ålesund lager</title>
   <meta name="theme-color" content="#050a07">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,8 +37,8 @@
         <div class="to-felt" id="type-rad">
           <label class="felt"><span class="etikett">Type</span>
             <select name="type">
-              <option value="utstyr">Utstyr (1xxx)</option>
-              <option value="bulk">Bulk / klær (2xxx)</option>
+              <option value="utstyr">Én gjenstand, f.eks. telt (1xxx)</option>
+              <option value="bulk">Flere like, med antall (2xxx)</option>
               <option value="lokasjon">Lokasjon (3xxx)</option>
             </select></label>
           <label class="felt"><span class="etikett">ID</span>
@@ -55,7 +55,7 @@
           <input name="hjem" placeholder="Skriv hylle, bod eller ID"></label>
 
         <fieldset class="felt skjult" id="varianter" style="border:0;padding:0;margin:0">
-          <legend class="etikett" style="margin-bottom:6px">Antall per størrelse</legend>
+          <legend class="etikett" style="margin-bottom:6px">Antall (én rad per størrelse, eller bare én rad)</legend>
           <div class="skjema" id="variantrader" style="gap:8px"></div>
           <button class="knapp sekundaer liten" type="button" id="ny-variant" style="justify-self:start;margin-top:8px">+ Størrelse</button>
         </fieldset>
@@ -99,7 +99,7 @@
     lagVelger(skjema.kategori, {
       valg: () => alleKategorier().map((k) => ({
         verdi: k, tekst: k,
-        hint: `${TING.filter((t) => t.kategori === k).length} ting`,
+        hint: `${TING.filter((t) => t.kategori === k).length} gjenstander`,
       })),
       fri: true,
       nyTekst: "Ny kategori",
@@ -180,7 +180,7 @@
     } else {
       document.getElementById("hode-linje").innerHTML = "Ny registrering<br>Ta bilde, fyll ut, lagre";
       document.getElementById("hilsen").textContent = "Registrer";
-      document.getElementById("tittel").textContent = "Ny ting";
+      document.getElementById("tittel").textContent = "Ny gjenstand";
       if (parametre.get("type")) skjema.type.value = parametre.get("type");
       if (skjema.type.value === "lokasjon") document.getElementById("tittel").textContent = "Ny lokasjon";
       skjema.id.value = nesteId(skjema.type.value);
@@ -202,7 +202,7 @@
       document.getElementById("tittel").textContent = eksisterende ? eksisterende.navn : "Ny lokasjon";
       document.getElementById("hode-linje").innerHTML = eksisterende
         ? `ID ${eksisterende.id} // Lokasjon`
-        : "Et sted ting hører hjemme<br>Rom, bod, skap eller hylle";
+        : "Et sted gjenstander hører hjemme<br>Rom, bod, skap eller hylle";
     }
     visTypefelt();
     visBilde();
@@ -262,7 +262,7 @@
             return { navn: navn.value.trim(), antall: Number(antall.value) || 0 };
           })
           .filter((v) => v.navn);
-        if (!ting.varianter.length) feil.push("Bulk trenger minst én størrelse.");
+        if (!ting.varianter.length) feil.push("Skriv inn minst én rad med antall.");
       }
       const boks = document.getElementById("feil");
       boks.textContent = feil.join(" ");

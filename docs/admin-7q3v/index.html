@@ -32,7 +32,7 @@
         </div>
         <div class="tabell-wrap">
           <table>
-            <thead><tr><th>ID</th><th>Ting</th><th>Låner</th><th>Frist</th></tr></thead>
+            <thead><tr><th>ID</th><th>Gjenstand</th><th>Låner</th><th>Frist</th></tr></thead>
             <tbody id="ute"></tbody>
           </table>
         </div>
@@ -50,17 +50,17 @@
         <a class="knapp liten" href="ting.html?type=lokasjon">Ny lokasjon</a>
       </div>
       <ul class="liste" id="lokasjoner"></ul>
-      <p class="hjelp" style="margin-top:10px">Steder ting hører hjemme: rom, bod, skap eller hylle. En hylle kan ligge i et rom.</p>
+      <p class="hjelp" style="margin-top:10px">Steder gjenstander hører hjemme: rom, bod, skap eller hylle. En hylle kan ligge i et rom.</p>
     </section>
 
     <section class="panel" style="margin-top:22px">
       <div class="panel-hode">
-        <span class="etikett">Alle ting</span>
-        <a class="knapp liten" href="ting.html">Ny ting</a>
+        <span class="etikett">Alle gjenstander</span>
+        <a class="knapp liten" href="ting.html">Ny gjenstand</a>
       </div>
       <label class="sok" style="margin-bottom:14px">
         <span aria-hidden="true">&gt;</span>
-        <input id="sok" type="search" placeholder="Søk på ID, navn, kategori eller sted" autocomplete="off" aria-label="Søk i alle ting">
+        <input id="sok" type="search" placeholder="Søk på ID, navn, kategori eller sted" autocomplete="off" aria-label="Søk i alle gjenstander">
       </label>
       <div class="tabell-wrap">
         <table>
@@ -89,7 +89,7 @@
     const ting = TING.filter((t) => t.type !== "lokasjon" && t.status !== "kassert");
 
     document.getElementById("teller").innerHTML = `
-      <div><span class="etikett">Ting</span><data value="${ting.length}">${ting.length}</data></div>
+      <div><span class="etikett">Gjenstander</span><data value="${ting.length}">${ting.length}</data></div>
       <div><span class="etikett">Utlånt</span><data value="${ute.length}">${ute.length}</data></div>
       <div class="${forsinket.length ? "varsel" : ""}"><span class="etikett">Forsinket</span><data value="${forsinket.length}">${forsinket.length}</data></div>`;
 
@@ -119,7 +119,7 @@
             <li><a href="ting.html?id=${l.id}" style="grid-template-columns:64px 1fr auto">
               <span class="id">${l.id}</span>
               <span class="navn">${esc(l.navn)}<span class="sted">${esc(stiTil(l) || "Øverste nivå")}</span></span>
-              <span class="status lager">${antall} ting</span>
+              <span class="status lager">${antall} stk</span>
             </a></li>`;
         }).join("")
       : `<li class="hjelp" style="padding:12px 4px">Ingen lokasjoner ennå. Start med de store stedene, f.eks. Gymsalen og Kontoret.</li>`;

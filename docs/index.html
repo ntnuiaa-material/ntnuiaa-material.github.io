@@ -15,7 +15,7 @@
     <div id="topp"></div>
 
     <section>
-      <p class="terminal">Velg ting: [søk], skann QR, lån<br>Låneperiode: 14 dager</p>
+      <p class="terminal">Velg gjenstand: [søk], skann QR, lån<br>Låneperiode: 14 dager</p>
       <h2 class="hilsen">Velkommen til</h2>
       <hr class="gul-strek">
       <h1 class="tittel">Material&shy;lageret</h1>
@@ -25,7 +25,7 @@
 
     <label class="sok">
       <span aria-hidden="true">&gt;</span>
-      <input id="sok" type="search" placeholder="Søk på ID eller navn, f.eks. 1002 eller telt" autocomplete="off" aria-label="Søk etter ting">
+      <input id="sok" type="search" placeholder="Søk på ID eller navn, f.eks. 1002 eller telt" autocomplete="off" aria-label="Søk etter gjenstander">
     </label>
     <div class="filtre" id="filtre"></div>
 
@@ -53,7 +53,7 @@
     const ute = utlaan.filter((u) => !u.levert);
     const forsinket = ute.filter((u) => u.frist < idag());
     document.getElementById("teller").innerHTML = `
-      <div><span class="etikett">Ting</span><data value="${ting.length}">${ting.length}</data></div>
+      <div><span class="etikett">Gjenstander</span><data value="${ting.length}">${ting.length}</data></div>
       <div><span class="etikett">Utlånt</span><data value="${ute.length}">${ute.length}</data></div>
       <div class="${forsinket.length ? "varsel" : ""}"><span class="etikett">Forsinket</span><data value="${forsinket.length}">${forsinket.length}</data></div>`;
 
