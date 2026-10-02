@@ -1,18 +1,10 @@
 /* NTNUI Ålesund lager. Y2K-skrivebord: grå vinduer, blå tittellinjer og pikselikoner. */
 
-/* Systemfonten fra Windows 95, gjenskapt av 98.css (MIT, Jordan Scales).
-   Skarpest i 11 og 22 px, tydelig pikselert i 16 px. */
+/* W95FA: systemfonten fra Windows 95 (MS Sans Serif) med norske bokstaver.
+   Laget av Alina Sava, SIL Open Font License (fonts/W95FA-OFL.txt). Fet skrift lages av nettleseren. */
 @font-face {
-  font-family: "Pixelated MS Sans Serif";
-  src: url("../fonts/ms_sans_serif.woff2") format("woff2");
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Pixelated MS Sans Serif";
-  src: url("../fonts/ms_sans_serif_bold.woff2") format("woff2");
-  font-weight: 700;
+  font-family: "W95FA";
+  src: url("../fonts/w95fa.woff2") format("woff2");
   font-display: swap;
 }
 
@@ -49,8 +41,8 @@
   --panel: var(--vindu);
 
   --f-tittel: "Arial Black", "Arial Bold", Arial, sans-serif;
-  --f-terminal: "Pixelated MS Sans Serif", Tahoma, sans-serif;
-  --f-tekst: "Pixelated MS Sans Serif", Tahoma, sans-serif;
+  --f-terminal: "W95FA", Tahoma, sans-serif;
+  --f-tekst: "W95FA", Tahoma, sans-serif;
 
   /* 3D-kanter som i Windows 95 */
   --opphoyd: inset -1px -1px var(--mork), inset 1px 1px var(--lys), inset -2px -2px var(--skygge), inset 2px 2px var(--halvlys);
@@ -71,6 +63,7 @@ body {
   font-family: var(--f-tekst);
   font-size: 16px;
   -webkit-font-smoothing: none;
+  font-synthesis: none;
   line-height: 1.4;
 }
 
@@ -608,6 +601,20 @@ tr.forsinket td { color: var(--feil); }
   .to-felt { grid-template-columns: 1fr; }
   .tittel { font-size: clamp(2rem, 11vw, 3rem); }
 }
+
+/* Fet skrift i pikselfonten: streken dobles én piksel til høyre, som i Windows 95 */
+b, strong, dt,
+.merke, .topplinje .terminal, .etikett, .hilsen,
+.panel-hode .etikett, .panel-hode .terminal,
+.filtre button[aria-pressed="true"], .teller data, .liste .navn,
+.status.lager, .status.ute, .status.forsinket, .varianter b,
+.knapp, .valg span, .bunn .terminal:first-child, .variantrad button,
+.velger-liste mark, .velger-liste li .etikett, .kvittering .terminal {
+  text-shadow: 1px 0 0 currentColor;
+}
+
+.teller .etikett, .valg small, .felt > .etikett { text-shadow: none; }
+.liste .sted { text-shadow: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; transition: none !important; }
