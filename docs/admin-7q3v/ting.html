@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&family=Sixtyfour:BLED,SCAN@0..100,-53..100&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=202610020948">
+  <link rel="stylesheet" href="../css/style.css?v=202610021007">
 </head>
 <body>
   <main class="skjerm">
@@ -72,8 +72,11 @@
         <label class="felt" id="kategori-felt"><span class="etikett">Kategori</span>
           <input name="kategori" placeholder="Skriv for å søke i kategoriene"></label>
 
-        <label class="felt"><span class="etikett" id="hjem-etikett">Hjem</span>
-          <input name="hjem" placeholder="Skriv hylle, bod eller ID"></label>
+        <label class="felt" id="rom-felt"><span class="etikett">Lokasjon</span>
+          <input name="rom" placeholder="F.eks. Gymsalen eller K-lageret"></label>
+
+        <label class="felt"><span class="etikett" id="hjem-etikett">Plass i lokasjonen (valgfritt)</span>
+          <input name="hjem" placeholder="F.eks. Hylle 2"></label>
 
         <fieldset class="felt skjult" id="varianter" style="border:0;padding:0;margin:0">
           <legend class="etikett" style="margin-bottom:6px">Antall (én rad per størrelse, eller bare én rad)</legend>
@@ -113,8 +116,8 @@
     <div id="bunn"></div>
   </main>
 
-  <script src="../js/data.js?v=202610020948"></script>
-  <script src="../js/velger.js?v=202610020948"></script>
+  <script src="../js/data.js?v=202610021007"></script>
+  <script src="../js/velger.js?v=202610021007"></script>
   <script type="module">
     document.getElementById("topp").innerHTML = topplinje("", true);
     document.getElementById("bunn").innerHTML = bunnlinje();
@@ -142,29 +145,62 @@
       nyTekst: "Ny kategori",
     });
 
-    // Hjem: en lokasjon som finnes, eller en ny som opprettes med en gang
-    const hjemVelger = lagVelger(skjema.hjem, {
-      valg: () => lokasjoner()
-        .filter((l) => l.id !== eksisterende?.id)
-        .map((l) => ({ verdi: l.id, tekst: `${l.id} ${l.navn}`, hint: stiTil(l) || "Øverste nivå" })),
+    // Lokasjoner får et enkelt skjema: bare navn og hvor den ligger
+    const lokasjonsmodus = parametre.get("type") === "lokasjon" || eksisterende?.type === "lokasjon";
+
+    // Gjenstander velger først lokasjon (rommet), så plass i rommet (hylla)
+    function toppAv(sted) {
+      while (sted?.hjem_id) sted = finnTing(sted.hjem_id);
+      return sted;
+    }
+    const valgtRom = () => (skjema.rom.dataset.verdi ? Number(skjema.rom.dataset.verdi) : null);
+    const somValg = (l) => ({ verdi: l.id, tekst: `${l.id} ${l.navn}`, hint: stiTil(l) || "Øverste nivå" });
+
+    function tomFelt(input) {
+      input.value = "";
+      delete input.dataset.verdi;
+    }
+
+    // Oppretter en ny lokasjon fra et søkefelt og velger den
+    async function opprettFra(input, velger, navn, hjemId) {
+      const ny = { ny: true, id: nesteId("lokasjon"), type: "lokasjon", navn, hjem_id: hjemId };
+      input.value = "Oppretter...";
+      try {
+        await lagreTing(ny);
+        TING.push({ ...ny, status: "aktiv" });
+        if (!eksisterende) skjema.id.value = nesteId(skjema.type.value);
+        velger.sett(ny.id, `${ny.id} ${ny.navn}`);
+      } catch (feil) {
+        tomFelt(input);
+        const boks = document.getElementById("feil");
+        boks.textContent = feil.message;
+        boks.classList.remove("skjult");
+      }
+    }
+
+    const romVelger = lagVelger(skjema.rom, {
+      valg: () => lokasjoner().filter((l) => !l.hjem_id).map(somValg),
       fri: true,
       nyTekst: "Ny lokasjon",
       onVelg: async (v) => {
+        tomFelt(skjema.hjem);
+        if (v.ny) await opprettFra(skjema.rom, romVelger, v.tekst, null);
+      },
+    });
+
+    const hjemVelger = lagVelger(skjema.hjem, {
+      valg: () => lokasjonsmodus
+        ? lokasjoner().filter((l) => l.id !== eksisterende?.id).map(somValg)
+        : lokasjoner().filter((l) => valgtRom() && l.id !== valgtRom() && toppAv(l)?.id === valgtRom()).map(somValg),
+      fri: true,
+      nyTekst: "Ny plass",
+      onVelg: async (v) => {
         if (!v.ny) return;
-        const ny = { ny: true, id: nesteId("lokasjon"), type: "lokasjon", navn: v.tekst, hjem_id: null };
-        skjema.hjem.value = "Oppretter...";
-        try {
-          await lagreTing(ny);
-          TING.push({ ...ny, status: "aktiv" });
-          if (!eksisterende) skjema.id.value = nesteId(skjema.type.value);
-          hjemVelger.sett(ny.id, `${ny.id} ${ny.navn}`);
-        } catch (feil) {
-          skjema.hjem.value = "";
-          delete skjema.hjem.dataset.verdi;
-          const boks = document.getElementById("feil");
-          boks.textContent = feil.message;
-          boks.classList.remove("skjult");
+        if (!lokasjonsmodus && !valgtRom()) {
+          tomFelt(skjema.hjem);
+          return;
         }
+        await opprettFra(skjema.hjem, hjemVelger, v.tekst, lokasjonsmodus ? null : valgtRom());
       },
     });
 
@@ -238,7 +274,13 @@
       skjema.kategori.value = t.kategori || "";
       skjema.beskrivelse.value = t.beskrivelse || "";
       const hjem = hjemTil(t);
-      if (hjem) hjemVelger.sett(hjem.id, `${hjem.id} ${hjem.navn}`);
+      const rom = toppAv(hjem);
+      if (lokasjonsmodus) {
+        if (hjem) hjemVelger.sett(hjem.id, `${hjem.id} ${hjem.navn}`);
+      } else if (rom) {
+        romVelger.sett(rom.id, `${rom.id} ${rom.navn}`);
+        if (hjem.id !== rom.id) hjemVelger.sett(hjem.id, `${hjem.id} ${hjem.navn}`);
+      }
       (t.varianter || []).forEach(variantrad);
       if (t.status === "kassert") document.getElementById("kasser").textContent = "Ta i bruk igjen";
     } else {
@@ -250,13 +292,12 @@
       skjema.id.value = nesteId(skjema.type.value);
       document.getElementById("kasser").classList.add("skjult");
     }
-    // Lokasjoner får et enkelt skjema: bare navn og hvor den ligger
-    const lokasjonsmodus = parametre.get("type") === "lokasjon" || eksisterende?.type === "lokasjon";
     if (lokasjonsmodus) {
       skjema.type.value = "lokasjon";
       skjema.style.gridTemplateColumns = "1fr";
       skjema.style.maxWidth = "560px";
       document.getElementById("kamera-del").classList.add("skjult");
+      document.getElementById("rom-felt").classList.add("skjult");
       document.getElementById("hjem-etikett").textContent = "Ligger i (valgfritt)";
       skjema.hjem.placeholder = "La stå tomt for et rom eller bygg";
       skjema.navn.placeholder = "F.eks. Gymsalen eller Hylle 2 på K-lageret";
@@ -313,8 +354,10 @@
       if (!nyId) feil.push("ID må være et tall.");
       if (!eksisterende && finnTing(nyId)) feil.push(`ID ${nyId} er allerede brukt.`);
       if (!skjema.navn.value.trim()) feil.push("Navn mangler.");
-      const hjemId = skjema.hjem.dataset.verdi ? Number(skjema.hjem.dataset.verdi) : null;
-      if (skjema.hjem.value.trim() && !hjemId) feil.push("Velg hjem fra lista.");
+      const plassId = skjema.hjem.dataset.verdi ? Number(skjema.hjem.dataset.verdi) : null;
+      const hjemId = plassId || (lokasjonsmodus ? null : valgtRom());
+      if (!lokasjonsmodus && skjema.rom.value.trim() && !valgtRom()) feil.push("Velg lokasjon fra lista.");
+      if (skjema.hjem.value.trim() && !plassId) feil.push(lokasjonsmodus ? "Velg fra lista." : "Velg plass fra lista.");
 
       const ting = {
         ...(eksisterende || {}),
