@@ -589,13 +589,14 @@ tr.forsinket td { color: var(--feil); }
   padding: 8px 0;
   background: linear-gradient(0deg, var(--tittel-fra), var(--tittel-til));
   color: #c0c0c0;
-  font: 400 18px var(--f-tittel);
+  font: 400 22px var(--f-tekst);
+  letter-spacing: 1px;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   white-space: nowrap;
 }
 
-.startmeny-side b { color: #fff; }
+.startmeny-side b { color: #fff; text-shadow: 1px 0 0 currentColor; }
 
 .startmeny ul { flex: 1; margin: 0; padding: 0; list-style: none; }
 

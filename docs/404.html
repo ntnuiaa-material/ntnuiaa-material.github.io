@@ -13,7 +13,7 @@
       location.replace(`${rot}ting.html?id=${id}`);
     }
   </script>
-  <link rel="stylesheet" href="/css/style.css?v=202610021222">
+  <link rel="stylesheet" href="/css/style.css?v=202610021229">
 </head>
 <body>
   <main class="skjerm">
@@ -22,6 +22,9 @@
     <hr class="gul-strek">
     <h1 class="tittel mellom">Ukjent side</h1>
     <p><a class="knapp sekundaer" href="/" style="margin-top:22px">Til lageret</a></p>
+    <div id="bunn"></div>
   </main>
+  <script src="/js/data.js?v=202610021229"></script>
+  <script>document.getElementById("bunn").innerHTML = bunnlinje();</script>
 </body>
 </html>
