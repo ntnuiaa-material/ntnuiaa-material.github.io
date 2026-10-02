@@ -781,8 +781,21 @@ tr.forsinket td.id { color: var(--ntnui-gul); }
 .knapperad { display: grid; gap: 10px; grid-template-columns: 1fr; }
 
 @media (min-width: 560px) {
-  .knapperad { grid-template-columns: 2fr 1fr 1fr; }
+  .knapperad { grid-template-columns: 2fr repeat(auto-fit, minmax(0, 1fr)); }
 }
+
+.tilbake {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 6px 0;
+  font: 700 13px var(--f-tekst);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dempet);
+  text-decoration: none;
+}
+
+.tilbake:hover { color: var(--ntnui-gul); }
 
 .knapp.fare { border-color: var(--feil); color: var(--feil); background: transparent; box-shadow: none; }
 .knapp.fare:hover { background: rgba(255, 90, 74, 0.1); }
