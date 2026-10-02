@@ -7,12 +7,12 @@
 
   // Database med ting, utlån og hendelser
   "d1_databases": [
-    { "binding": "DB", "database_name": "lager", "database_id": "SETTES_ETTER_D1_CREATE" }
+    { "binding": "DB", "database_name": "lager", "database_id": "9b3e8333-fb62-4e7d-9d0a-bd9345875dbf" }
   ],
 
   // Bilder av tingene, krympet til 800 px i nettleseren før opplasting
   "kv_namespaces": [
-    { "binding": "BILDER", "id": "SETTES_ETTER_KV_CREATE" }
+    { "binding": "BILDER", "id": "8c98ed2bdf2a4caca707abcbaabbd3ad" }
   ],
 
   // Anonymiserer navn og telefon på gamle utlån, kl. 03 den 1. hver måned
