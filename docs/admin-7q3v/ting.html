@@ -89,7 +89,8 @@
       visFeil(skjema, feil);
       throw feil;
     }
-    const id = new URLSearchParams(location.search).get("id");
+    const parametre = new URLSearchParams(location.search);
+    const id = parametre.get("id");
     const eksisterende = id ? finnTing(id) : null;
     const serie = { utstyr: 1000, bulk: 2000, lokasjon: 3000 };
     let nyttBilde = null;
@@ -104,11 +105,30 @@
       nyTekst: "Ny kategori",
     });
 
-    // Hjem: må være en lokasjon som finnes
+    // Hjem: en lokasjon som finnes, eller en ny som opprettes med en gang
     const hjemVelger = lagVelger(skjema.hjem, {
       valg: () => lokasjoner()
         .filter((l) => l.id !== eksisterende?.id)
         .map((l) => ({ verdi: l.id, tekst: `${l.id} ${l.navn}`, hint: stiTil(l) || "Øverste nivå" })),
+      fri: true,
+      nyTekst: "Ny lokasjon",
+      onVelg: async (v) => {
+        if (!v.ny) return;
+        const ny = { ny: true, id: nesteId("lokasjon"), type: "lokasjon", navn: v.tekst, hjem_id: null };
+        skjema.hjem.value = "Oppretter...";
+        try {
+          await lagreTing(ny);
+          TING.push({ ...ny, status: "aktiv" });
+          if (!eksisterende) skjema.id.value = nesteId(skjema.type.value);
+          hjemVelger.sett(ny.id, `${ny.id} ${ny.navn}`);
+        } catch (feil) {
+          skjema.hjem.value = "";
+          delete skjema.hjem.dataset.verdi;
+          const boks = document.getElementById("feil");
+          boks.textContent = feil.message;
+          boks.classList.remove("skjult");
+        }
+      },
     });
 
     function nesteId(type) {
@@ -161,6 +181,8 @@
       document.getElementById("hode-linje").innerHTML = "Ny registrering<br>Ta bilde, fyll ut, lagre";
       document.getElementById("hilsen").textContent = "Registrer";
       document.getElementById("tittel").textContent = "Ny ting";
+      if (parametre.get("type")) skjema.type.value = parametre.get("type");
+      if (skjema.type.value === "lokasjon") document.getElementById("tittel").textContent = "Ny lokasjon";
       skjema.id.value = nesteId(skjema.type.value);
       document.getElementById("kasser").classList.add("skjult");
     }
