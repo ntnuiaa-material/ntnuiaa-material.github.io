@@ -22,7 +22,7 @@
       <h1 class="tittel mellom" id="tittel"></h1>
     </section>
 
-    <form class="ting-grid" id="skjema" style="margin-top:22px" novalidate>
+    <form class="ting-grid" id="skjema" style="margin-top:22px" novalidate autocomplete="off">
       <div>
         <label class="kamera">
           <input type="file" name="bilde" accept="image/*" capture="environment">
@@ -161,7 +161,7 @@
       document.getElementById("hode-linje").innerHTML = "Ny registrering<br>Ta bilde, fyll ut, lagre";
       document.getElementById("hilsen").textContent = "Registrer";
       document.getElementById("tittel").textContent = "Ny ting";
-      skjema.id.value = nesteId("utstyr");
+      skjema.id.value = nesteId(skjema.type.value);
       document.getElementById("kasser").classList.add("skjult");
     }
     visTypefelt();
