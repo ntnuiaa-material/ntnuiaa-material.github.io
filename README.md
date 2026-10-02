@@ -36,3 +36,11 @@ npx serve docs
 | 1xxx | Enkeltutstyr |
 | 2xxx | Bulk og klær |
 | 3xxx | Lokasjoner (bod, hylle, skap) |
+
+## Cache
+
+Alle `js/` og `css/`-lenker har `?v=<tidsstempel>`, så nettleseren henter nye filer etter en endring. Oppdater tallet når du endrer en JS- eller CSS-fil:
+
+```
+V=$(date +%Y%m%d%H%M); sed -i -E "s#\?v=[0-9]+#?v=$V#g" docs/*.html docs/admin-*/*.html
+```
