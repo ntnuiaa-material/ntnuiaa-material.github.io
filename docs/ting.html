@@ -71,7 +71,11 @@
           <p style="font-size:22px;font-weight:800;margin:4px 0 2px">${esc(u.navn)}</p>
           <p class="hjelp" style="margin-bottom:16px">Siden ${datoKort(u.utlaant)}, frist ${datoKort(u.frist)}${u.frist < idag() ? " – forsinket" : ""}</p>
           <button class="knapp" type="button" data-lever="${u.id}">Lever tilbake</button>`;
-      } else if (t.type === "bulk" && !t.utlaanbar) {
+      } else if (t.bruk === "salg") {
+        handling = `
+          <p class="etikett">Til salgs${t.pris ? ` // ${t.pris} kr` : ""}</p>
+          <p style="margin:6px 0 0">Ta kontakt med materialansvarlig for å kjøpe.</p>`;
+      } else if (t.bruk === "forbruk") {
         handling = `
           <p class="etikett">Forbruksvare</p>
           <p style="margin:6px 0 0">Ta det du trenger. Materialansvarlig teller opp og oppdaterer antallet.</p>`;

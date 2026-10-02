@@ -34,12 +34,30 @@
       </div>
 
       <section class="panel skjema">
+        <fieldset class="felt" id="bruk-valg" style="border:0;padding:0;margin:0">
+          <legend class="etikett" style="margin-bottom:6px">Hva skal den brukes til?</legend>
+          <div class="valg">
+            <label><input type="radio" name="bruk" value="utlaan" checked><span>Utlån<small>Lånes og leveres tilbake</small></span></label>
+            <label><input type="radio" name="bruk" value="forbruk"><span>Forbruk<small>Brukes opp, f.eks. pappkopper</small></span></label>
+            <label><input type="radio" name="bruk" value="salg"><span>Salg<small>Selges, f.eks. klær</small></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="felt" id="antall-valg" style="border:0;padding:0;margin:0">
+          <legend class="etikett" style="margin-bottom:6px">Hvor mange?</legend>
+          <div class="valg">
+            <label><input type="radio" name="mengde" value="en" checked><span>Én<small>Egen QR-kode, f.eks. et telt</small></span></label>
+            <label><input type="radio" name="mengde" value="flere"><span>Flere like<small>Med antall, f.eks. kjegler</small></span></label>
+          </div>
+        </fieldset>
+
         <div class="to-felt" id="type-rad">
           <label class="felt"><span class="etikett">Type</span>
             <select name="type">
               <option value="utstyr">Én gjenstand, f.eks. telt (1xxx)</option>
               <option value="bulk">Flere like, lånes ut (2xxx)</option>
-              <option value="forbruk">Forbruk, f.eks. pappkopper (2xxx)</option>
+              <option value="forbruk">Forbruk (2xxx)</option>
+              <option value="salg">Salg (2xxx)</option>
               <option value="lokasjon">Lokasjon (3xxx)</option>
             </select></label>
           <label class="felt"><span class="etikett">ID</span>
@@ -60,6 +78,9 @@
           <div class="skjema" id="variantrader" style="gap:8px"></div>
           <button class="knapp sekundaer liten" type="button" id="ny-variant" style="justify-self:start;margin-top:8px">+ Størrelse</button>
         </fieldset>
+
+        <label class="felt skjult" id="pris-felt"><span class="etikett">Pris (kr)</span>
+          <input name="pris" type="number" min="0" inputmode="numeric" placeholder="F.eks. 250"></label>
 
         <label class="felt"><span class="etikett">Beskrivelse</span>
           <textarea name="beskrivelse" rows="2" placeholder="Valgfritt. F.eks. mangler én plugg"></textarea></label>
@@ -133,7 +154,7 @@
     });
 
     // «Forbruk» lagres som bulk som ikke kan lånes
-    const ekteType = (valgt) => (valgt === "forbruk" ? "bulk" : valgt);
+    const ekteType = (valgt) => (valgt === "forbruk" || valgt === "salg" ? "bulk" : valgt);
 
     function nesteId(type) {
       type = ekteType(type);
@@ -155,11 +176,29 @@
     function visTypefelt() {
       const type = skjema.type.value;
       document.getElementById("varianter").classList.toggle("skjult", ekteType(type) !== "bulk");
+      document.getElementById("pris-felt").classList.toggle("skjult", type !== "salg");
       document.getElementById("kategori-felt").classList.toggle("skjult", type === "lokasjon");
       if (ekteType(type) === "bulk" && !document.querySelector(".variantrad")) variantrad({ navn: "Stk", antall: 0 });
     }
 
     document.getElementById("ny-variant").addEventListener("click", () => variantrad());
+
+    // Valgknappene styrer den skjulte typen: utlån + én = utstyr, utlån + flere = bulk, forbruk = forbruk
+    function fraValg() {
+      const bruk = skjema.bruk.value;
+      document.getElementById("antall-valg").classList.toggle("skjult", bruk !== "utlaan");
+      skjema.type.value = bruk !== "utlaan" ? bruk : skjema.mengde.value === "flere" ? "bulk" : "utstyr";
+      skjema.type.dispatchEvent(new Event("change"));
+    }
+
+    function tilValg() {
+      const type = skjema.type.value;
+      skjema.bruk.value = type === "forbruk" || type === "salg" ? type : "utlaan";
+      skjema.mengde.value = type === "bulk" ? "flere" : "en";
+      document.getElementById("antall-valg").classList.toggle("skjult", skjema.bruk.value !== "utlaan");
+    }
+
+    skjema.querySelectorAll("[name=bruk], [name=mengde]").forEach((r) => r.addEventListener("change", fraValg));
     skjema.type.addEventListener("change", () => {
       if (!eksisterende) skjema.id.value = nesteId(skjema.type.value);
       visTypefelt();
@@ -171,7 +210,8 @@
       document.getElementById("hode-linje").innerHTML = `ID ${t.id} // ${esc(t.type)}<br>Status: [${(t.status || "aktiv").toUpperCase()}]`;
       document.getElementById("hilsen").textContent = "Endre";
       document.getElementById("tittel").textContent = t.navn;
-      skjema.type.value = t.type === "bulk" && !t.utlaanbar ? "forbruk" : t.type;
+      skjema.type.value = t.type === "bulk" && t.bruk !== "utlaan" ? t.bruk : t.type;
+      skjema.pris.value = t.pris ?? "";
       skjema.type.disabled = true;
       skjema.id.value = t.id;
       skjema.id.readOnly = true;
@@ -208,6 +248,15 @@
       document.getElementById("hode-linje").innerHTML = eksisterende
         ? `ID ${eksisterende.id} // Lokasjon`
         : "Et sted gjenstander hører hjemme<br>Rom, bod, skap eller hylle";
+    }
+    // Typevalget vises som knapper. Nedtrekkslista skjules, og type kan ikke endres etter registrering
+    tilValg();
+    skjema.type.closest("label").classList.add("skjult");
+    if (lokasjonsmodus) {
+      document.getElementById("bruk-valg").classList.add("skjult");
+      document.getElementById("antall-valg").classList.add("skjult");
+    } else if (eksisterende) {
+      skjema.querySelectorAll("[name=bruk], [name=mengde]").forEach((r) => (r.disabled = true));
     }
     visTypefelt();
     visBilde();
@@ -260,7 +309,8 @@
         bilde: nyttBilde,
         ny: !eksisterende,
         status: eksisterende?.status || "aktiv",
-        utlaanbar: valgtType === "forbruk" ? 0 : 1,
+        bruk: valgtType === "forbruk" || valgtType === "salg" ? valgtType : "utlaan",
+        pris: valgtType === "salg" && skjema.pris.value ? Number(skjema.pris.value) : null,
       };
       if (type === "bulk") {
         ting.varianter = [...document.querySelectorAll(".variantrad")]

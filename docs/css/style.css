@@ -802,3 +802,30 @@ tr.forsinket td.id { color: var(--ntnui-gul); }
 .innlogging form { width: min(380px, 100%); }
 
 .laster { padding: 40px 0; }
+
+/* ---------- Valgknapper (radio som ser ut som knapper) ---------- */
+
+.valg { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; }
+.valg label { position: relative; }
+.valg input { position: absolute; opacity: 0; }
+.valg span {
+  display: block;
+  height: 100%;
+  padding: 12px 10px;
+  border: 1px solid var(--svak);
+  font: 800 15px var(--f-tekst);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--dempet);
+  cursor: pointer;
+}
+.valg small {
+  display: block;
+  margin-top: 3px;
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.valg input:checked + span { background: var(--fosfor); color: #000; border-color: var(--fosfor); }
+.valg input:focus-visible + span { outline: 2px solid var(--ntnui-gul); outline-offset: 2px; }

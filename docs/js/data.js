@@ -143,7 +143,7 @@ function idag() {
 function statusFor(ting) {
   if (ting.type === "lokasjon") return { kode: "lager", tekst: "Lokasjon" };
   const ute = aapneUtlaan(ting.id);
-  if (ting.type === "bulk" && !ting.utlaanbar) {
+  if (ting.bruk === "forbruk" || ting.bruk === "salg") {
     return { kode: "lager", tekst: `${ting.varianter.reduce((s, v) => s + v.antall, 0)} stk` };
   }
   if (ting.type === "bulk") {

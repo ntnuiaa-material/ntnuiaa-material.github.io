@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS ting (
   hjem_id     INTEGER REFERENCES ting(id),
   bilde       TEXT,
   utlaanbar   INTEGER NOT NULL DEFAULT 1,
+  bruk        TEXT NOT NULL DEFAULT 'utlaan' CHECK (bruk IN ('utlaan', 'forbruk', 'salg')),
+  pris        INTEGER,
   status      TEXT NOT NULL DEFAULT 'aktiv' CHECK (status IN ('aktiv', 'kassert')),
   opprettet   TEXT NOT NULL DEFAULT (datetime('now'))
 );
