@@ -102,7 +102,7 @@
         hint: `${TING.filter((t) => t.kategori === k).length} ting`,
       })),
       fri: true,
-      nyTekst: "Opprett kategori",
+      nyTekst: "Ny kategori",
     });
 
     // Hjem: en lokasjon som finnes, eller en ny som opprettes med en gang
@@ -111,7 +111,7 @@
         .filter((l) => l.id !== eksisterende?.id)
         .map((l) => ({ verdi: l.id, tekst: `${l.id} ${l.navn}`, hint: stiTil(l) || "Øverste nivå" })),
       fri: true,
-      nyTekst: "Opprett lokasjon",
+      nyTekst: "Ny lokasjon",
       onVelg: async (v) => {
         if (!v.ny) return;
         const ny = { ny: true, id: nesteId("lokasjon"), type: "lokasjon", navn: v.tekst, hjem_id: null };
@@ -180,9 +180,9 @@
     } else {
       document.getElementById("hode-linje").innerHTML = "Ny registrering<br>Ta bilde, fyll ut, lagre";
       document.getElementById("hilsen").textContent = "Registrer";
-      document.getElementById("tittel").textContent = "Opprett ting";
+      document.getElementById("tittel").textContent = "Ny ting";
       if (parametre.get("type")) skjema.type.value = parametre.get("type");
-      if (skjema.type.value === "lokasjon") document.getElementById("tittel").textContent = "Opprett lokasjon";
+      if (skjema.type.value === "lokasjon") document.getElementById("tittel").textContent = "Ny lokasjon";
       skjema.id.value = nesteId(skjema.type.value);
       document.getElementById("kasser").classList.add("skjult");
     }
