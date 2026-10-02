@@ -64,6 +64,7 @@ body {
   font-size: 16px;
   -webkit-font-smoothing: none;
   font-synthesis: none;
+  letter-spacing: 0.5px;
   line-height: 1.4;
 }
 
@@ -611,10 +612,11 @@ b, strong, dt,
 .knapp, .valg span, .bunn .terminal:first-child, .variantrad button,
 .velger-liste mark, .velger-liste li .etikett, .kvittering .terminal {
   text-shadow: 1px 0 0 currentColor;
+  letter-spacing: 1px;
 }
 
-.teller .etikett, .valg small, .felt > .etikett { text-shadow: none; }
-.liste .sted { text-shadow: none; }
+.teller .etikett, .valg small, .felt > .etikett { text-shadow: none; letter-spacing: 0.5px; }
+.liste .sted { text-shadow: none; letter-spacing: 0.5px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; transition: none !important; }
