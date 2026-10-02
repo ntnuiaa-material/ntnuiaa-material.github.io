@@ -195,22 +195,25 @@ setInterval(() => {
   if (k) k.textContent = klokkeslett();
 }, 30000);
 
-// Oppgavelinje med Start-meny. Start åpner menyen, øverste valg går hjem.
+// Oppgavelinje. På offentlige sider går Start rett til forsiden, i admin åpner den en meny.
 function bunnlinje(admin) {
-  const valg = admin
-    ? [
-        ["pc", "Oversikt", "index.html"],
-        ["boks", "Ny gjenstand", "ting.html"],
-        ["mappe", "Ny lokasjon", "ting.html?type=lokasjon"],
-        ["dokument", "Skriv ut etiketter", "etiketter.html"],
-        null,
-        ["pc", "Til lageret", "../index.html"],
-        ["dokument", "Logg ut", "#", "data-logg-ut"],
-      ]
-    : [
-        ["pc", "Lageret", "/"],
-        ["dokument", "Søk etter gjenstand", "/?sok"],
-      ];
+  const klokke = `<span class="terminal" id="klokke">${klokkeslett()}</span>`;
+  if (!admin) {
+    return `
+    <footer class="bunn">
+      <a class="start" href="/" title="Til forsiden">Start</a>
+      ${klokke}
+    </footer>`;
+  }
+  const valg = [
+    ["pc", "Oversikt", "index.html"],
+    ["boks", "Ny gjenstand", "ting.html"],
+    ["mappe", "Ny lokasjon", "ting.html?type=lokasjon"],
+    ["dokument", "Skriv ut etiketter", "etiketter.html"],
+    null,
+    ["pc", "Til lageret", "../index.html"],
+    ["dokument", "Logg ut", "#", "data-logg-ut"],
+  ];
   const punkter = valg.map((v) =>
     v
       ? `<li role="none"><a role="menuitem" class="ikon-${v[0]}" href="${v[2]}" ${v[3] || ""}>${v[1]}</a></li>`
@@ -223,7 +226,7 @@ function bunnlinje(admin) {
         <ul role="menu" aria-label="Start">${punkter}</ul>
       </div>
       <button class="start" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="startmeny">Start</button>
-      <span class="terminal" id="klokke">${klokkeslett()}</span>
+      ${klokke}
     </footer>`;
 }
 
@@ -237,8 +240,10 @@ function visStartmeny(vis) {
 }
 
 document.addEventListener("click", (e) => {
+  const meny = document.getElementById("startmeny");
+  if (!meny) return;
   if (e.target.closest(".bunn .start")) {
-    visStartmeny(document.getElementById("startmeny").classList.contains("skjult"));
+    visStartmeny(meny.classList.contains("skjult"));
   } else if (!e.target.closest("#startmeny")) {
     visStartmeny(false);
   }
