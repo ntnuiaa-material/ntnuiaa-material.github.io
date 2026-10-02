@@ -143,6 +143,9 @@ function idag() {
 function statusFor(ting) {
   if (ting.type === "lokasjon") return { kode: "lager", tekst: "Lokasjon" };
   const ute = aapneUtlaan(ting.id);
+  if (ting.type === "bulk" && !ting.utlaanbar) {
+    return { kode: "lager", tekst: `${ting.varianter.reduce((s, v) => s + v.antall, 0)} stk` };
+  }
   if (ting.type === "bulk") {
     const totalt = ting.varianter.reduce((s, v) => s + v.antall, 0);
     const utlaant = ute.reduce((s, u) => s + (u.antall || 0), 0);

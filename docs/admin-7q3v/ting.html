@@ -38,7 +38,8 @@
           <label class="felt"><span class="etikett">Type</span>
             <select name="type">
               <option value="utstyr">Én gjenstand, f.eks. telt (1xxx)</option>
-              <option value="bulk">Flere like, med antall (2xxx)</option>
+              <option value="bulk">Flere like, lånes ut (2xxx)</option>
+              <option value="forbruk">Forbruk, f.eks. pappkopper (2xxx)</option>
               <option value="lokasjon">Lokasjon (3xxx)</option>
             </select></label>
           <label class="felt"><span class="etikett">ID</span>
@@ -131,7 +132,11 @@
       },
     });
 
+    // «Forbruk» lagres som bulk som ikke kan lånes
+    const ekteType = (valgt) => (valgt === "forbruk" ? "bulk" : valgt);
+
     function nesteId(type) {
+      type = ekteType(type);
       const brukt = TING.filter((t) => t.type === type).map((t) => t.id);
       return Math.max(serie[type], ...brukt) + 1;
     }
@@ -149,9 +154,9 @@
 
     function visTypefelt() {
       const type = skjema.type.value;
-      document.getElementById("varianter").classList.toggle("skjult", type !== "bulk");
+      document.getElementById("varianter").classList.toggle("skjult", ekteType(type) !== "bulk");
       document.getElementById("kategori-felt").classList.toggle("skjult", type === "lokasjon");
-      if (type === "bulk" && !document.querySelector(".variantrad")) variantrad({ navn: "Stk", antall: 0 });
+      if (ekteType(type) === "bulk" && !document.querySelector(".variantrad")) variantrad({ navn: "Stk", antall: 0 });
     }
 
     document.getElementById("ny-variant").addEventListener("click", () => variantrad());
@@ -166,7 +171,7 @@
       document.getElementById("hode-linje").innerHTML = `ID ${t.id} // ${esc(t.type)}<br>Status: [${(t.status || "aktiv").toUpperCase()}]`;
       document.getElementById("hilsen").textContent = "Endre";
       document.getElementById("tittel").textContent = t.navn;
-      skjema.type.value = t.type;
+      skjema.type.value = t.type === "bulk" && !t.utlaanbar ? "forbruk" : t.type;
       skjema.type.disabled = true;
       skjema.id.value = t.id;
       skjema.id.readOnly = true;
@@ -236,7 +241,8 @@
     function lesSkjema() {
       const feil = [];
       const nyId = Number(skjema.id.value);
-      const type = skjema.type.value;
+      const valgtType = skjema.type.value;
+      const type = ekteType(valgtType);
       if (!nyId) feil.push("ID må være et tall.");
       if (!eksisterende && finnTing(nyId)) feil.push(`ID ${nyId} er allerede brukt.`);
       if (!skjema.navn.value.trim()) feil.push("Navn mangler.");
@@ -254,6 +260,7 @@
         bilde: nyttBilde,
         ny: !eksisterende,
         status: eksisterende?.status || "aktiv",
+        utlaanbar: valgtType === "forbruk" ? 0 : 1,
       };
       if (type === "bulk") {
         ting.varianter = [...document.querySelectorAll(".variantrad")]

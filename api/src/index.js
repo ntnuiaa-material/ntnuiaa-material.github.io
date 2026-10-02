@@ -169,6 +169,8 @@ async function lagreTing(env, data) {
   const beskrivelse = (data.beskrivelse || "").trim().slice(0, 500);
   const hjemId = data.hjem_id ? heltall(data.hjem_id, "Hjem") : null;
   const status = data.status === "kassert" ? "kassert" : "aktiv";
+  // Forbruksvarer (f.eks. pappkopper) lånes ikke ut, folk tar det de trenger
+  const utlaanbar = data.utlaanbar === 0 || data.utlaanbar === false ? 0 : 1;
   if (hjemId === id) throw new Brukerfeil("En gjenstand kan ikke ligge i seg selv.");
 
   const fra = await env.DB.prepare("SELECT * FROM ting WHERE id = ?").bind(id).first();
@@ -186,12 +188,12 @@ async function lagreTing(env, data) {
 
   const setninger = [
     env.DB.prepare(
-      `INSERT INTO ting (id, type, navn, kategori, beskrivelse, hjem_id, bilde, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO ting (id, type, navn, kategori, beskrivelse, hjem_id, bilde, status, utlaanbar)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET navn = excluded.navn, kategori = excluded.kategori,
          beskrivelse = excluded.beskrivelse, hjem_id = excluded.hjem_id,
-         bilde = excluded.bilde, status = excluded.status`
-    ).bind(id, type, navn, kategori, beskrivelse, hjemId, bilde, status),
+         bilde = excluded.bilde, status = excluded.status, utlaanbar = excluded.utlaanbar`
+    ).bind(id, type, navn, kategori, beskrivelse, hjemId, bilde, status, utlaanbar),
   ];
 
   if (type === "bulk") {
