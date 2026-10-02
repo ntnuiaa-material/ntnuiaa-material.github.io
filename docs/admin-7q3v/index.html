@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#050a07">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="../css/style.css?v=202610021206">
+  <link rel="stylesheet" href="../css/style.css?v=202610021209">
 </head>
 <body>
   <main class="skjerm">
@@ -74,7 +74,7 @@
     <div id="bunn"></div>
   </main>
 
-  <script src="../js/data.js?v=202610021206"></script>
+  <script src="../js/data.js?v=202610021209"></script>
   <script type="module">
     document.getElementById("topp").innerHTML = topplinje("Oversikt", true);
     document.getElementById("bunn").innerHTML = bunnlinje();
@@ -89,7 +89,7 @@
     const lagretId = new URLSearchParams(location.search).get("lagret");
     if (lagretId && finnTing(lagretId)) {
       const boks = document.getElementById("lagret");
-      boks.innerHTML = `<span class="terminal">&gt; Lagret</span> <a href="ting.html?id=${lagretId}" style="color:var(--ntnui-gul)">${lagretId} ${esc(finnTing(lagretId).navn)}</a>`;
+      boks.innerHTML = `<span class="terminal">&gt; Lagret</span> <a href="ting.html?id=${lagretId}">${lagretId} ${esc(finnTing(lagretId).navn)}</a>`;
       boks.classList.remove("skjult");
       history.replaceState(null, "", "index.html");
     }
@@ -155,7 +155,7 @@
           <td><a href="ting.html?id=${t.id}">${esc(t.navn)}</a>${t.status === "kassert" ? ' <span class="hjelp">(kassert)</span>' : ""}</td>
           <td>${esc(t.kategori || "")}</td>
           <td class="hjelp">${esc(stiTil(t))}</td>
-          <td><a class="etikett" href="ting.html?id=${t.id}" style="color:var(--ntnui-gul)">Endre</a></td>
+          <td><a class="knapp sekundaer liten" href="ting.html?id=${t.id}">Endre…</a></td>
         </tr>`).join("");
     }
     sok.addEventListener("input", tegnAlle);

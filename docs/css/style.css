@@ -485,7 +485,7 @@ th {
   white-space: nowrap;
 }
 
-td { padding: 6px 8px; vertical-align: top; border-bottom: 1px dotted var(--halvlys); }
+td { padding: 6px 8px; vertical-align: middle; border-bottom: 1px dotted var(--halvlys); }
 td.id { font: 400 16px var(--f-terminal); color: var(--marine); white-space: nowrap; }
 tr.forsinket td { color: var(--feil); }
 
