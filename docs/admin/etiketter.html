@@ -15,10 +15,12 @@
 
     .velg { max-height: 360px; overflow-y: auto; border-top: var(--ramme); }
     .velg label {
-      display: grid; grid-template-columns: 22px 48px 1fr; gap: 10px; align-items: center;
+      display: grid; grid-template-columns: 22px 48px 1fr 52px; gap: 10px; align-items: center;
       padding: 7px 2px; border-bottom: 1px solid var(--svak); cursor: pointer; font-size: 15px;
     }
     .velg input { accent-color: var(--marine); width: 18px; height: 18px; }
+    .velg .antall { width: 52px; padding: 4px 6px; font-size: 15px; visibility: hidden; }
+    .velg input:checked ~ .antall { visibility: visible; }
     .velg .id { font-family: var(--f-terminal); font-size: 16px; color: var(--marine); }
 
     .storrelser { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -135,10 +137,10 @@
 
     // Sortert etter hjem, så etikettene til samme hylle havner ved siden av hverandre
     const alle = [...TING].sort((a, b) => (a.hjem_id || 0) - (b.hjem_id || 0) || a.id - b.id);
-    const valgt = new Set();
+    const valgt = new Map(); // gjenstand-ID -> antall etiketter
 
     const forhand = new URLSearchParams(location.search).get("ids");
-    if (forhand) forhand.split(",").forEach((id) => finnTing(id) && valgt.add(Number(id)));
+    if (forhand) forhand.split(",").forEach((id) => finnTing(id) && valgt.set(Number(id), 1));
 
     document.getElementById("storrelser").innerHTML = Object.entries(STORRELSER).map(([k, s]) => `
       <label><input type="radio" name="storrelse" value="${k}" ${k === "medium" ? "checked" : ""}>
@@ -147,12 +149,21 @@
     function tegnValg() {
       document.getElementById("velg").innerHTML = alle.map((t) => `
         <label><input type="checkbox" value="${t.id}" ${valgt.has(t.id) ? "checked" : ""}>
-        <span class="id">${t.id}</span><span>${esc(t.navn)}</span></label>`).join("");
+        <span class="id">${t.id}</span><span>${esc(t.navn)}</span>
+        <input type="number" class="antall" min="1" max="99" value="${valgt.get(t.id) || 1}" inputmode="numeric" aria-label="Antall etiketter for ${esc(t.navn)}"></label>`).join("");
     }
 
     document.getElementById("velg").addEventListener("change", (e) => {
+      if (e.target.type !== "checkbox") return;
       const id = Number(e.target.value);
-      e.target.checked ? valgt.add(id) : valgt.delete(id);
+      e.target.checked ? valgt.set(id, valgt.get(id) || 1) : valgt.delete(id);
+      tegnArk();
+    });
+
+    document.getElementById("velg").addEventListener("input", (e) => {
+      if (!e.target.classList.contains("antall")) return;
+      const id = Number(e.target.closest("label").querySelector("[type=checkbox]").value);
+      valgt.set(id, Math.min(99, Math.max(1, Math.floor(Number(e.target.value)) || 1)));
       tegnArk();
     });
 
@@ -161,7 +172,7 @@
       e.target.value.split(",").forEach((del) => {
         const [fra, til] = del.split("-").map((x) => Number(x.trim()));
         if (!fra) return;
-        alle.forEach((t) => { if (t.id >= fra && t.id <= (til || fra)) valgt.add(t.id); });
+        alle.forEach((t) => { if (t.id >= fra && t.id <= (til || fra)) valgt.set(t.id, 1); });
       });
       tegnValg();
       tegnArk();
@@ -192,10 +203,10 @@
       const visNavn = document.getElementById("vis-navn").value === "ja";
       const visLogo = document.getElementById("vis-logo").value === "ja";
       const start = Math.max(1, Number(document.getElementById("start").value) || 1);
-      const ting = alle.filter((t) => valgt.has(t.id));
+      const ting = alle.filter((t) => valgt.has(t.id)).flatMap((t) => Array(valgt.get(t.id)).fill(t));
       const perArk = s.kol * s.rad;
 
-      document.getElementById("antall-valgt").textContent = `${ting.length} valgt`;
+      document.getElementById("antall-valgt").textContent = `${valgt.size} valgt, ${ting.length} etiketter`;
 
       const ruter = [...Array(start - 1).fill(null), ...ting];
       const antallArk = Math.max(1, Math.ceil(ruter.length / perArk));
