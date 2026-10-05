@@ -47,7 +47,8 @@
       font-family: "Schibsted Grotesk", Arial, sans-serif; text-align: center; overflow: hidden;
     }
     .rute.tom { border-color: #e4e4e4; }
-    .rute svg { display: block; }
+    .rute svg, .rute .logo { display: block; }
+    .rute .logo { height: auto; margin-bottom: 0.5mm; }
     .rute b { font-family: "Arial Black", Arial, sans-serif; line-height: 1; margin-top: 0.6mm; }
     .rute small {
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -102,6 +103,10 @@
           <label class="felt"><span class="etikett">Navn under</span>
             <select id="vis-navn"><option value="ja">Ja</option><option value="nei">Nei</option></select></label>
         </div>
+        <div class="to-felt">
+          <label class="felt"><span class="etikett">Logo over QR</span>
+            <select id="vis-logo"><option value="ja">Ja</option><option value="nei">Nei</option></select></label>
+        </div>
         <p class="hjelp">"Start på rute" hopper over ruter som er brukt på et halvbrukt klistremerkeark.</p>
 
         <button class="knapp" type="button" id="skriv-ut">Skriv ut</button>
@@ -120,10 +125,12 @@
     document.getElementById("bunn").innerHTML = bunnlinje(true);
     await lastAdmin();
 
+    const LOGOBREDDE = 0.75; // logoens bredde som andel av QR-koden
+
     const STORRELSER = {
-      liten:  { navn: "Liten",  b: 25, h: 30, qr: 18, kol: 7, rad: 9, id: 3.2, tekst: 1.9 },
-      medium: { navn: "Medium", b: 35, h: 42, qr: 26, kol: 5, rad: 6, id: 4.2, tekst: 2.4 },
-      stor:   { navn: "Stor",   b: 50, h: 60, qr: 40, kol: 3, rad: 4, id: 6,   tekst: 3.2 },
+      liten:  { navn: "Liten",  b: 25, h: 34, qr: 18, kol: 7, rad: 8, id: 3.2, tekst: 1.9 },
+      medium: { navn: "Medium", b: 35, h: 48, qr: 26, kol: 5, rad: 6, id: 4.2, tekst: 2.4 },
+      stor:   { navn: "Stor",   b: 50, h: 68, qr: 40, kol: 3, rad: 4, id: 6,   tekst: 3.2 },
     };
 
     // Sortert etter hjem, så etikettene til samme hylle havner ved siden av hverandre
@@ -160,7 +167,7 @@
       tegnArk();
     });
 
-    ["storrelser", "start", "vis-navn"].forEach((id) =>
+    ["storrelser", "start", "vis-navn", "vis-logo"].forEach((id) =>
       document.getElementById(id).addEventListener("change", tegnArk));
     document.getElementById("start").addEventListener("input", tegnArk);
     document.getElementById("skriv-ut").addEventListener("click", () => window.print());
@@ -183,6 +190,7 @@
     function tegnArk() {
       const s = STORRELSER[document.querySelector("[name=storrelse]:checked").value];
       const visNavn = document.getElementById("vis-navn").value === "ja";
+      const visLogo = document.getElementById("vis-logo").value === "ja";
       const start = Math.max(1, Number(document.getElementById("start").value) || 1);
       const ting = alle.filter((t) => valgt.has(t.id));
       const perArk = s.kol * s.rad;
@@ -200,6 +208,7 @@
           <div class="ark"><div class="rutenett" style="grid-template-columns:repeat(${s.kol}, ${s.b}mm);grid-auto-rows:${s.h}mm">
             ${side.map((t) => t ? `
               <div class="rute">
+                ${visLogo ? `<img class="logo" src="../img/ntnui-logo.svg" alt="" style="width:${(s.qr * LOGOBREDDE).toFixed(1)}mm">` : ""}
                 ${qrSvg(GRUNNADRESSE + t.id, s.qr)}
                 <b style="font-size:${s.id}mm">${t.id}</b>
                 ${visNavn ? `<small style="font-size:${s.tekst}mm">${esc(t.navn)}</small>` : ""}
