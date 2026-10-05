@@ -31,6 +31,10 @@
           <span class="hjelp">Trykk for å åpne kameraet</span>
           <img id="forhandsvisning" alt="" class="skjult">
         </label>
+        <label class="knapp" style="display:block;text-align:center;margin-top:8px;cursor:pointer">
+          Velg fra kamerarull
+          <input type="file" name="bilde-rulle" accept="image/*" hidden>
+        </label>
         <p class="hjelp" style="margin-top:8px">Bildet krympes til 800 px før det lagres.</p>
       </div>
 
@@ -328,8 +332,9 @@
     }
 
     // Krymper bildet i nettleseren så opplastingen blir liten
-    skjema.bilde.addEventListener("change", () => {
-      const fil = skjema.bilde.files[0];
+    // Kamera og kamerarull er to egne felt: capture tvinger kameraet på iPhone, så rullen må ha sitt eget
+    [skjema.bilde, skjema["bilde-rulle"]].forEach((felt) => felt.addEventListener("change", () => {
+      const fil = felt.files[0];
       if (!fil) return;
       const img = new Image();
       img.onload = () => {
@@ -343,7 +348,7 @@
         URL.revokeObjectURL(img.src);
       };
       img.src = URL.createObjectURL(fil);
-    });
+    }));
 
     function lesSkjema() {
       const feil = [];
