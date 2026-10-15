@@ -176,7 +176,7 @@ function topplinje(aktiv, admin) {
   const meny = admin
     ? lenke("index.html", "Oversikt") + lenke("etiketter.html", "Etiketter") + lenke("../index.html", "Lager") +
       '<a href="#" data-logg-ut>Logg ut</a>'
-    : lenke("index.html", "Lager");
+    : lenke("index.html", "Lager") + lenke("utlaant.html", "Utlånt");
   return `
     <header class="topplinje">
       <a class="merke" href="index.html">NTNUI<small>ÅLESUND</small></a>

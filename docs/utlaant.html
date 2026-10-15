@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Utlånt – NTNUI Ålesund lager</title>
+  <meta name="description" content="Se hva som er utlånt fra lageret til NTNUI Ålesund, og når det skal leveres. Har du spørsmål om et utlån, kontakt materialansvarlig: material@ntnui-alesund.no">
+  <meta name="theme-color" content="#050a07">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css?v=202610021414">
+</head>
+<body>
+  <main class="skjerm">
+    <div id="topp"></div>
+
+    <section>
+      <p class="terminal">Oversikt over utlånt utstyr<br>Oppdateres når noe lånes eller leveres</p>
+      <h2 class="hilsen">Hva er ute nå</h2>
+      <hr class="gul-strek">
+      <h1 class="tittel mellom">Utlånt</h1>
+      <p style="margin:14px 0 0">Er det du trenger lånt ut, må du vente til det er levert. Har du spørsmål om et utlån, ta kontakt med materialansvarlig: <a href="mailto:material@ntnui-alesund.no">material@ntnui-alesund.no</a></p>
+    </section>
+
+    <div class="teller" id="teller" style="grid-template-columns:repeat(2, 1fr)"></div>
+
+    <section class="panel">
+      <div class="panel-hode">
+        <span class="etikett">Utlånt nå</span>
+        <span class="terminal dempet" id="antall-ute"></span>
+      </div>
+      <div class="tabell-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Gjenstand</th><th>Leveres innen</th></tr></thead>
+          <tbody id="ute"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div id="bunn"></div>
+  </main>
+
+  <script src="js/data.js?v=202610151300"></script>
+  <script type="module">
+    document.getElementById("topp").innerHTML = topplinje("Utlånt");
+    document.getElementById("bunn").innerHTML = bunnlinje();
+    try {
+      await lastData();
+    } catch (feil) {
+      visFeil(document.getElementById("ute"), feil);
+      throw feil;
+    }
+
+    // Låneren vises ikke her, bare hva som er ute og når det skal tilbake
+    const ute = utlaan.filter((u) => !u.levert && finnTing(u.ting_id))
+      .sort((a, b) => a.frist.localeCompare(b.frist));
+    const forsinket = ute.filter((u) => u.frist < idag());
+
+    document.getElementById("teller").innerHTML = `
+      <div><span class="etikett">Utlånt</span><data value="${ute.length}">${ute.length}</data></div>
+      <div class="${forsinket.length ? "varsel" : ""}"><span class="etikett">Forsinket</span><data value="${forsinket.length}">${forsinket.length}</data></div>`;
+
+    document.getElementById("antall-ute").textContent = `${ute.length} stk`;
+    document.getElementById("ute").innerHTML = ute.length
+      ? ute.map((u) => {
+          const t = finnTing(u.ting_id);
+          const sent = u.frist < idag();
+          return `
+            <tr class="${sent ? "forsinket" : ""}">
+              <td class="id">${t.id}</td>
+              <td><a href="ting.html?id=${t.id}">${esc(t.navn)}</a>${u.variant ? ` <span class="hjelp">(${u.antall} ${esc(u.variant)})</span>` : ""}</td>
+              <td>${datoKort(u.frist)}${sent ? "<br><span class='status forsinket'>Forsinket</span>" : ""}</td>
+            </tr>`;
+        }).join("")
+      : `<tr><td colspan="3" class="hjelp">Ingenting er utlånt. Alt er inne.</td></tr>`;
+  </script>
+</body>
+</html>
