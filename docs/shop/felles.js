@@ -1,8 +1,10 @@
 // Felles for forsiden og designeren: tekster, tema, språk, kurv, skjema og kvittering.
-// Krever katalog.js. «Send shop» skal til slutt poste til Workeren butikk-api.
-// Inntil den finnes, lages kvitteringen lokalt.
+// Krever katalog.js. Bestillingen sendes til lager-API-et (api/src/shop.js), som regner ut
+// prisen på nytt og lagrer den.
 
-const API = null; // f.eks. "https://butikk-api.ntnuiaa.workers.dev"
+const API = ["localhost", "127.0.0.1"].includes(location.hostname)
+  ? "http://127.0.0.1:8788"
+  : "https://lager-api.ntnuiaa.workers.dev";
 const EPOST_MONSTER = /^[^\s@]+@stud\.ntnu\.no$/i;
 
 // Landkoder for telefon: [ISO-kode, norsk navn, engelsk navn, retningsnummer]
@@ -46,7 +48,7 @@ const TEKST = {
     "slik.1t": "Design plagget",
     "slik.1": "Velg plagg, gruppe, hva som skal stå foran og bak, og størrelse.",
     "slik.2t": "Send bestillingen",
-    "slik.2": "Navn, telefon og stud-e-post. Du får kvittering på mail.",
+    "slik.2": "Navn, telefon og stud-e-post. Du får ordrenummer med en gang.",
     "slik.3t": "Hent og betal",
     "slik.3": "Vi samler bestillingene og sender dem til Intersport Rongve. Du betaler i butikken.",
     "kol.tittel": "Kolleksjonen",
@@ -90,7 +92,7 @@ const TEKST = {
     "kurv.tom": "Kurven er tom. Lag noe i designeren.",
     "kurv.total": "Totalt",
     "kurv.merknad": "Betales ved henting hos Intersport Rongve. Ingen betaling her.",
-    "kurv.videre": "Videre til shop",
+    "kurv.videre": "Videre til bestilling",
     "kurv.tilbake": "← Tilbake til kurven",
     "skjema.navn": "Navn",
     "skjema.telefon": "Telefon",
@@ -100,7 +102,7 @@ const TEKST = {
     "skjema.epost": "Stud-e-post",
     "skjema.kommentar": "Kommentar (valgfritt)",
     "skjema.samtykke": "Jeg forstår at bestillingen er bindende, og at jeg betaler når jeg henter.",
-    "skjema.send": "Send shop",
+    "skjema.send": "Send bestilling",
     "sendt.tittel": "Bestillingen er sendt",
     "sendt.ferdig": "Tilbake til butikken",
     // Brukes fra skriptene
@@ -128,7 +130,7 @@ const TEKST = {
     feilSamtykke: "Kryss av for å gå videre.",
     feilSend: "Noe gikk galt. Prøv igjen, eller send en mail til material@ntnui-alesund.no.",
     sender: "Sender …",
-    sendtTekst: (epost) => `Kvitteringen er sendt til ${epost}. Vi sier fra når plaggene er klare til henting.`,
+    sendtTekst: (epost) => `Ta vare på ordrenummeret. Vi sier fra på ${epost} når plaggene er klare til henting.`,
   },
   en: {
     "nav.tittel": "Order",
@@ -147,7 +149,7 @@ const TEKST = {
     "slik.1t": "Design it",
     "slik.1": "Pick the item, group, what goes on the front and back, and size.",
     "slik.2t": "Send the order",
-    "slik.2": "Name, phone and student email. You get a receipt by email.",
+    "slik.2": "Name, phone and student email. You get an order number right away.",
     "slik.3t": "Pick up and pay",
     "slik.3": "We collect the orders and send them to Intersport Rongve. You pay in the store.",
     "kol.tittel": "The collection",
@@ -228,7 +230,7 @@ const TEKST = {
     feilSamtykke: "Tick the box to continue.",
     feilSend: "Something went wrong. Try again, or email material@ntnui-alesund.no.",
     sender: "Sending …",
-    sendtTekst: (epost) => `The receipt has been sent to ${epost}. We will let you know when your items are ready for pickup.`,
+    sendtTekst: (epost) => `Keep the order number. We will let you know at ${epost} when your items are ready for pickup.`,
   },
 };
 
@@ -364,7 +366,7 @@ $("#kurv-liste").addEventListener("click", (e) => {
   const fjern = e.target.closest("[data-fjern]");
   if (endre) {
     const linje = kurv[+endre.dataset.endre];
-    linje.antall += +endre.dataset.steg;
+    linje.antall = Math.min(10, linje.antall + +endre.dataset.steg);
     if (linje.antall < 1) kurv.splice(+endre.dataset.endre, 1);
   } else if (fjern) {
     kurv.splice(+fjern.dataset.fjern, 1);
@@ -516,7 +518,6 @@ function sjekkSkjema() {
 
 $("#skjema").addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (e.target.nettside.value) return; // honeypot fylt ut: stille avvisning
   const kunde = sjekkSkjema();
   if (!kunde) return;
 
@@ -528,24 +529,19 @@ $("#skjema").addEventListener("submit", async (e) => {
   const bestilling = {
     ...kunde,
     sprak,
+    nettside: e.target.nettside.value,
     linjer: kurv.map((l) => ({ ...l.k, antall: l.antall })),
   };
 
   try {
-    let ordrenr;
-    if (API) {
-      const svar = await fetch(`${API}/api/bestilling`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bestilling),
-      });
-      if (!svar.ok) throw new Error(await svar.text());
-      ordrenr = (await svar.json()).ordrenr;
-    } else {
-      // Ingen backend ennå: lag et ordrenummer lokalt så flyten kan testes
-      await new Promise((r) => setTimeout(r, 700));
-      ordrenr = `NTNUI-${String(Math.floor(Math.random() * 9000) + 1000)}`;
-    }
+    const svar = await fetch(`${API}/api/shop/bestilling`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bestilling),
+    });
+    const data = await svar.json().catch(() => ({}));
+    if (!svar.ok) throw new Error(data.feil || t("feilSend"));
+    const ordrenr = data.ordrenr;
     $("#ordrenr").textContent = `#${ordrenr}`;
     $("#sendt-tekst").textContent = t("sendtTekst")(kunde.epost);
     kurv = [];
@@ -554,7 +550,7 @@ $("#skjema").addEventListener("submit", async (e) => {
     e.target.reset();
     visSteg("sendt");
   } catch (feil) {
-    visToast(t("feilSend"));
+    visToast(feil instanceof TypeError ? t("feilSend") : feil.message);
   } finally {
     send.disabled = false;
     sendTekst.textContent = t("skjema.send");

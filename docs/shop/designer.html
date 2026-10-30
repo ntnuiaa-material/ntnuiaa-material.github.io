@@ -7,14 +7,14 @@
   <meta name="description" content="Sett sammen plagget ditt: gruppe, logo foran, motiv bak og navn på ryggen. Du ser resultatet med en gang.">
   <script>
     try {
-      const tema = localStorage.getItem("bestilling-tema");
+      const tema = localStorage.getItem("shop-tema");
       if (tema === "light" || tema === "dark") document.documentElement.dataset.theme = tema;
-      if (localStorage.getItem("bestilling-sprak") === "en") document.documentElement.lang = "en";
+      if (localStorage.getItem("shop-sprak") === "en") document.documentElement.lang = "en";
     } catch (e) {}
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap">
   <link rel="stylesheet" href="bestilling.css?v=202610301600">
 </head>
 <body class="side-designer">

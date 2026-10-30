@@ -1,6 +1,6 @@
 # Verktøy for bestillingssiden
 
-Skriptene lager bildene i `../docs/shop`. De ligger utenfor `docs/`, så GitHub Pages publiserer dem ikke.
+Skriptene lager bildene i `docs/shop/img/`. De ligger utenfor `docs/`, så GitHub Pages publiserer dem ikke.
 
 | Skript | Lager | Kjøres slik |
 |---|---|---|

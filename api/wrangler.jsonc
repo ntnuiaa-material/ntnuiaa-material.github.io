@@ -15,7 +15,7 @@
     { "binding": "BILDER", "id": "8c98ed2bdf2a4caca707abcbaabbd3ad" }
   ],
 
-  // Anonymiserer navn og telefon på gamle utlån, kl. 03 den 1. hver måned
+  // Anonymiserer gamle utlån (12 mnd) og shop-bestillinger (6 mnd), kl. 03 den 1. hver måned
   "triggers": { "crons": ["0 3 1 * *"] },
 
   "vars": {

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="nb" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Shop-admin – NTNUI Ålesund</title>
+  <script>
+    try {
+      const tema = localStorage.getItem("shop-tema");
+      if (tema === "light" || tema === "dark") document.documentElement.dataset.theme = tema;
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&display=swap">
+  <link rel="stylesheet" href="../bestilling.css?v=202610311200">
+  <link rel="stylesheet" href="admin.css?v=202610311200">
+</head>
+<body>
+  <div class="bakgrunn" aria-hidden="true">
+    <span class="klatt klatt-1"></span>
+    <span class="klatt klatt-2"></span>
+  </div>
+
+  <header class="nav">
+    <a class="nav-logo" href="../" aria-label="Til shopen">
+      <img src="../../img/ntnui-logo.svg" alt="" width="70" height="28">
+    </a>
+    <nav class="nav-lenker">
+      <a href="./" aria-current="page">Shop-admin</a>
+      <a href="../../admin/">Lager-admin</a>
+    </nav>
+    <div class="nav-valg">
+      <button type="button" class="ikon-knapp" id="tema-knapp" aria-label="Bytt mellom mørkt og lyst">
+        <svg class="ikon-sol" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        <svg class="ikon-mane" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6Z"/></svg>
+      </button>
+      <button type="button" class="knapp knapp-sekundaer liten" id="logg-ut">Logg ut</button>
+    </div>
+  </header>
+
+  <main class="admin">
+    <h1 class="admin-tittel">Bestillinger</h1>
+    <p class="admin-ingress">Samle nye bestillinger i en pulje, last ned arket til Erik og merk pulja som sendt og levert.
+      Navn, telefon og e-post slettes automatisk 6 måneder etter at pulja er levert.</p>
+
+    <section class="tall" id="tall" aria-label="Oversikt"></section>
+
+    <div class="faner" role="tablist">
+      <button type="button" role="tab" data-fane="nye" aria-selected="true">Nye</button>
+      <button type="button" role="tab" data-fane="puljer" aria-selected="false">Puljer</button>
+      <button type="button" role="tab" data-fane="avbestilte" aria-selected="false">Avbestilte</button>
+    </div>
+
+    <section class="fane" data-fane="nye">
+      <div class="verktoy">
+        <label class="avkryss"><input type="checkbox" id="velg-alle"> <span>Velg alle</span></label>
+        <input class="tekstfelt-admin" id="pulje-navn" aria-label="Navn på pulja">
+        <button type="button" class="knapp knapp-gul liten" id="lag-pulje" disabled>Lag pulje av valgte</button>
+      </div>
+      <div class="liste" id="nye"></div>
+    </section>
+
+    <section class="fane" data-fane="puljer" hidden>
+      <div class="liste" id="puljer"></div>
+    </section>
+
+    <section class="fane" data-fane="avbestilte" hidden>
+      <div class="liste" id="avbestilte"></div>
+    </section>
+  </main>
+
+  <dialog class="passord" id="passord">
+    <form method="dialog" id="passord-skjema">
+      <h2>Shop-admin</h2>
+      <p>Samme passord som lager-admin.</p>
+      <p class="feil" id="passord-feil"></p>
+      <input type="password" id="passord-felt" autocomplete="current-password" aria-label="Passord" required>
+      <button type="submit" class="knapp knapp-gul knapp-full">Logg inn</button>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../katalog.js?v=202610311200"></script>
+  <script src="admin.js?v=202610311200"></script>
+</body>
+</html>

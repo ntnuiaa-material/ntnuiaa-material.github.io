@@ -9,6 +9,9 @@
 //   GET  /api/admin        alt, med telefon og hendelser
 //   POST /api/admin/ting   lagre ny eller endret ting, med bilde
 //   POST /api/admin/slett  slett en ting for godt, så ID-en kan brukes igjen
+// Shopen har egne ruter under /api/shop og /api/admin/shop, se src/shop.js.
+
+import { shopRuter, anonymiserShop } from "./shop.js";
 
 const MAKS_BILDE = 1_500_000;
 const MAKS_DAGER = 14;
@@ -34,6 +37,7 @@ export default {
       `UPDATE utlaan SET navn = 'slettet', telefon = ''
        WHERE levert IS NOT NULL AND levert < date('now', '-12 months') AND navn != 'slettet'`
     ).run();
+    await anonymiserShop(env);
   },
 };
 
@@ -53,6 +57,9 @@ async function ruter(request, env) {
   if (metode === "GET" && sti.startsWith("/api/bilde/")) return hentBilde(env, sti.split("/").pop());
   if (metode === "POST" && sti === "/api/laan") return json(await laan(env, await lesJson(request)));
   if (metode === "POST" && sti === "/api/lever") return json(await lever(env, await lesJson(request)));
+
+  const shop = await shopRuter(request, env, sti, metode, { Brukerfeil, lesJson, json, sjekkAdmin });
+  if (shop) return shop;
 
   if (sti.startsWith("/api/admin")) {
     await sjekkAdmin(request, env);
