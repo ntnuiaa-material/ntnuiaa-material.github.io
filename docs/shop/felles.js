@@ -130,6 +130,7 @@ const TEKST = {
     feilSamtykke: "Kryss av for å gå videre.",
     feilSend: "Noe gikk galt. Prøv igjen, eller send en mail til material@ntnui-alesund.no.",
     sender: "Sender …",
+    sendtEpost: (epost) => `Kvitteringen er sendt til ${epost}. Vi sier fra når plaggene er klare til henting.`,
     sendtTekst: (epost) => `Ta vare på ordrenummeret. Vi sier fra på ${epost} når plaggene er klare til henting.`,
   },
   en: {
@@ -230,6 +231,7 @@ const TEKST = {
     feilSamtykke: "Tick the box to continue.",
     feilSend: "Something went wrong. Try again, or email material@ntnui-alesund.no.",
     sender: "Sending …",
+    sendtEpost: (epost) => `The receipt has been sent to ${epost}. We will let you know when your items are ready for pickup.`,
     sendtTekst: (epost) => `Keep the order number. We will let you know at ${epost} when your items are ready for pickup.`,
   },
 };
@@ -543,7 +545,7 @@ $("#skjema").addEventListener("submit", async (e) => {
     if (!svar.ok) throw new Error(data.feil || t("feilSend"));
     const ordrenr = data.ordrenr;
     $("#ordrenr").textContent = `#${ordrenr}`;
-    $("#sendt-tekst").textContent = t("sendtTekst")(kunde.epost);
+    $("#sendt-tekst").textContent = t(data.epost ? "sendtEpost" : "sendtTekst")(kunde.epost);
     kurv = [];
     lagre("shop-kurv-v2", kurv);
     tegnKurv();

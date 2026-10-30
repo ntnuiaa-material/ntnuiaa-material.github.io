@@ -10,6 +10,7 @@
 //   POST /api/admin/shop/avbestill     avbestill en bestilling som ikke er sendt
 
 import { PLAGG, GRUPPER, GENERISK, prisFor, finnPlagg, fargerFor } from "./katalog.js";
+import { sendEposter } from "./epost.js";
 
 const MAKS_LINJER = 20;
 const MAKS_ANTALL = 10;
@@ -50,8 +51,8 @@ async function nyBestilling(env, data, Brukerfeil) {
   if (navn.split(/\s+/).length < 2) throw new Brukerfeil("Skriv fullt navn.");
   const telefon = tekst(data.telefon, "Telefon", 30, Brukerfeil);
   if (!/^\+\d{1,4} \d{5,14}$/.test(telefon)) throw new Brukerfeil("Ugyldig telefonnummer.");
-  const epost = tekst(data.epost, "E-post", 120, Brukerfeil).toLowerCase();
-  if (!EPOST.test(epost)) throw new Brukerfeil("Bruk e-posten din som slutter på @stud.ntnu.no.");
+  const epostAdr = tekst(data.epost, "E-post", 120, Brukerfeil).toLowerCase();
+  if (!EPOST.test(epostAdr)) throw new Brukerfeil("Bruk e-posten din som slutter på @stud.ntnu.no.");
   const kommentar = String(data.kommentar || "").trim().slice(0, 500) || null;
   const sprak = data.sprak === "en" ? "en" : "nb";
 
@@ -65,14 +66,16 @@ async function nyBestilling(env, data, Brukerfeil) {
   const ny = await env.DB.prepare(
     `INSERT INTO shop_bestillinger (ordrenr, navn, telefon, epost, kommentar, sprak, sum)
      VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`
-  ).bind(ordrenr, navn, telefon, epost, kommentar, sprak, sum).first();
+  ).bind(ordrenr, navn, telefon, epostAdr, kommentar, sprak, sum).first();
 
   await env.DB.batch(linjer.map((l) => env.DB.prepare(
     `INSERT INTO shop_linjer (bestilling_id, plagg, artikkel, farge, kjonn, storrelse, gruppe, front, bak, navn, antall, stykkpris)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(ny.id, l.plagg, l.artikkel, l.farge, l.kjonn, l.storrelse, l.gruppe, l.front, l.bak, l.navn, l.antall, l.stykkpris)));
 
-  return { ok: true, ordrenr, sum };
+  // Kvittering på språket kunden valgte, og varsel til materialansvarlig
+  const epost = await sendEposter(env, { ordrenr, navn, telefon, epost: epostAdr, kommentar, sprak, sum }, linjer);
+  return { ok: true, ordrenr, sum, epost };
 }
 
 // Godtar bare kombinasjoner som finnes i katalogen. Alt annet avvises, ikke rettes.

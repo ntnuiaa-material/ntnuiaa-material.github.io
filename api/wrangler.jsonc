@@ -18,7 +18,11 @@
   // Anonymiserer gamle utlån (12 mnd) og shop-bestillinger (6 mnd), kl. 03 den 1. hver måned
   "triggers": { "crons": ["0 3 1 * *"] },
 
+  // E-post fra shopen via Resend. API-nøkkelen er secret: wrangler secret put RESEND_API_KEY
   "vars": {
-    "TILLATTE_ADRESSER": "https://ntnuiaa-material.github.io,http://localhost:8787"
+    "TILLATTE_ADRESSER": "https://ntnuiaa-material.github.io,http://localhost:8787",
+    "EPOST_FRA": "NTNUI Ålesund <shop@ntnui-alesund.no>",
+    "VARSEL_TIL": "material@ntnui-alesund.no",
+    "SHOP_ADMIN_URL": "https://ntnuiaa-material.github.io/shop/admin/"
   }
 }
