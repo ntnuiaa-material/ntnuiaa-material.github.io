@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="nb" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Designeren – NTNUI Ålesund</title>
+  <meta name="description" content="Sett sammen plagget ditt: gruppe, logo foran, motiv bak og navn på ryggen. Du ser resultatet med en gang.">
+  <script>
+    try {
+      const tema = localStorage.getItem("bestilling-tema");
+      if (tema === "light" || tema === "dark") document.documentElement.dataset.theme = tema;
+      if (localStorage.getItem("bestilling-sprak") === "en") document.documentElement.lang = "en";
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+  <link rel="stylesheet" href="bestilling.css?v=202610301600">
+</head>
+<body class="side-designer">
+  <div class="bakgrunn" aria-hidden="true">
+    <span class="klatt klatt-1"></span>
+    <span class="klatt klatt-2"></span>
+    <span class="klatt klatt-3"></span>
+  </div>
+  <div class="korn" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a class="nav-logo" href="./" aria-label="NTNUI Ålesund">
+      <img src="../img/ntnui-logo.svg" alt="" width="70" height="28">
+    </a>
+    <nav class="nav-lenker">
+      <a href="./" data-i18n="nav.hjem">Kolleksjonen</a>
+      <a href="designer.html" aria-current="page" data-i18n="nav.designer">Designeren</a>
+    </nav>
+    <div class="nav-valg">
+      <div class="sprak" role="group" aria-label="Språk / Language">
+        <button type="button" data-sprak="nb" aria-pressed="true">NO</button>
+        <button type="button" data-sprak="en" aria-pressed="false">EN</button>
+      </div>
+      <button type="button" class="ikon-knapp" id="tema-knapp" data-i18n-aria="nav.tema" aria-label="Bytt mellom mørkt og lyst">
+        <svg class="ikon-sol" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        <svg class="ikon-mane" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6Z"/></svg>
+      </button>
+      <button type="button" class="kurv-knapp" id="kurv-knapp" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 7Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+        <span data-i18n="nav.kurv">Kurv</span>
+        <span class="kurv-antall" id="kurv-antall" aria-live="polite">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="designer">
+    <section class="scene" aria-label="Forhåndsvisning">
+      <div class="scene-topp">
+        <div>
+          <h1 class="scene-tittel" id="scene-tittel">Tiro26 League jersey</h1>
+          <p class="scene-stoff" id="scene-stoff"></p>
+        </div>
+        <div class="visning" role="tablist" aria-label="Visning">
+          <button type="button" role="tab" data-vis="front" aria-selected="true" data-i18n="des.front">Front</button>
+          <button type="button" role="tab" data-vis="bak" aria-selected="false" data-i18n="des.bak">Rygg</button>
+        </div>
+      </div>
+      <div class="figurer" id="figurer" data-vis="front">
+        <figure class="figur" data-side="front">
+          <div class="figur-lerret" id="lerret-front"></div>
+          <figcaption class="mono" data-i18n="des.front">Front</figcaption>
+        </figure>
+        <figure class="figur" data-side="bak">
+          <div class="figur-lerret" id="lerret-bak"></div>
+          <figcaption class="mono" data-i18n="des.bak">Rygg</figcaption>
+        </figure>
+      </div>
+      <div class="gulv" aria-hidden="true"></div>
+    </section>
+
+    <aside class="panel" aria-labelledby="panel-tittel">
+      <h2 class="panel-tittel" id="panel-tittel" data-i18n="des.tittel">Designeren</h2>
+
+      <fieldset class="gruppe-valg">
+        <legend class="mono" data-i18n="des.plagg">Plagg</legend>
+        <div class="plagg-valg" id="valg-plagg"></div>
+      </fieldset>
+
+      <fieldset class="gruppe-valg" id="farge-felt">
+        <legend class="mono" data-i18n="des.farge">Farge</legend>
+        <div class="farger" id="valg-farge"></div>
+      </fieldset>
+
+      <div class="gruppe-valg" id="gruppe-felt">
+        <label class="mono" for="valg-gruppe" data-i18n="des.gruppe">Gruppe</label>
+        <div class="velger">
+          <select id="valg-gruppe"></select>
+        </div>
+      </div>
+
+      <fieldset class="gruppe-valg">
+        <legend class="mono" data-i18n="des.frontvalg">Foran</legend>
+        <div class="chips" id="valg-front"></div>
+      </fieldset>
+
+      <fieldset class="gruppe-valg" id="bak-felt">
+        <legend class="mono" data-i18n="des.bakvalg">Bak</legend>
+        <div class="chips" id="valg-bak"></div>
+      </fieldset>
+
+      <div class="gruppe-valg" id="navn-felt">
+        <label class="mono" for="valg-navn" data-i18n="des.navn">Navn på ryggen</label>
+        <input class="tekstfelt" id="valg-navn" maxlength="12" autocomplete="off" spellcheck="false" placeholder="DITT NAVN">
+        <p class="hjelp" data-i18n="des.navnhjelp">Maks 12 tegn.</p>
+      </div>
+
+      <div class="to-kol">
+        <fieldset class="gruppe-valg">
+          <legend class="mono" data-i18n="des.kjonn">Snitt</legend>
+          <div class="chips" id="valg-kjonn"></div>
+        </fieldset>
+        <div class="gruppe-valg">
+          <label class="mono" for="valg-storrelse" data-i18n="des.storrelse">Størrelse</label>
+          <div class="velger">
+            <select id="valg-storrelse"></select>
+          </div>
+        </div>
+      </div>
+
+      <details class="info">
+        <summary class="mono" data-i18n="des.info">Om plagget</summary>
+        <dl class="info-liste" id="info-liste"></dl>
+      </details>
+
+      <div class="prisboks">
+        <dl class="prislinjer" id="prislinjer"></dl>
+        <div class="sum-linje">
+          <span data-i18n="kurv.total">Totalt</span>
+          <strong class="sum-tall" id="des-sum">0,-</strong>
+        </div>
+        <button type="button" class="knapp knapp-gul knapp-full" id="legg-til">
+          <span data-i18n="des.leggtil">Legg i kurven</span>
+          <span class="knapp-ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+        </button>
+      </div>
+    </aside>
+  </main>
+
+  <div class="slor" id="slor" hidden></div>
+  <aside class="kurv" id="kurv" role="dialog" aria-modal="true" aria-labelledby="kurv-tittel" hidden>
+    <div class="kurv-topp">
+      <h2 id="kurv-tittel" data-i18n="kurv.tittel">Kurven</h2>
+      <button type="button" class="ikon-knapp" id="kurv-lukk" data-i18n-aria="kurv.lukk" aria-label="Lukk">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <!-- Steg 1: innholdet i kurven -->
+    <div class="kurv-steg" data-steg="kurv">
+      <ul class="kurv-liste" id="kurv-liste"></ul>
+      <p class="kurv-tom" id="kurv-tom" data-i18n="kurv.tom">Kurven er tom. Lag noe i designeren.</p>
+      <div class="kurv-sum" id="kurv-sum">
+        <div class="sum-linje">
+          <span data-i18n="kurv.total">Totalt</span>
+          <strong class="sum-tall" id="sum-tall">0,-</strong>
+        </div>
+        <p class="sum-merknad" data-i18n="kurv.merknad">Betales ved henting hos Intersport Rongve. Ingen betaling her.</p>
+        <button type="button" class="knapp knapp-hoved knapp-full" id="til-detaljer">
+          <span data-i18n="kurv.videre">Videre til bestilling</span>
+          <span class="knapp-ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Steg 2: kontaktinfo -->
+    <form class="kurv-steg" data-steg="detaljer" id="skjema" novalidate hidden>
+      <button type="button" class="tilbake" id="tilbake" data-i18n="kurv.tilbake">← Tilbake til kurven</button>
+      <div class="felt">
+        <label for="navn" data-i18n="skjema.navn">Navn</label>
+        <input id="navn" name="navn" autocomplete="name" required>
+        <span class="feil" data-feil="navn"></span>
+      </div>
+      <div class="felt">
+        <label for="telefon" data-i18n="skjema.telefon">Telefon</label>
+        <div class="telefon-rad">
+          <div class="land">
+            <button type="button" class="land-knapp" id="land-knapp" aria-haspopup="listbox" aria-expanded="false" aria-controls="land-liste" data-i18n-aria="skjema.land" aria-label="Landkode">
+              <img class="flagg" id="land-flagg" src="https://flagcdn.com/w40/no.png" alt="" width="22" height="16">
+              <span id="land-kode">+47</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+            </button>
+            <div class="land-meny" id="land-meny" hidden>
+              <input type="search" class="land-sok" id="land-sok" autocomplete="off" data-i18n-ph="skjema.landsok" placeholder="Søk etter land">
+              <ul class="land-liste" id="land-liste" role="listbox" tabindex="-1" data-i18n-aria="skjema.land" aria-label="Landkode"></ul>
+            </div>
+          </div>
+          <input id="telefon" name="telefon" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="123 45 678" required>
+        </div>
+        <span class="feil" data-feil="telefon"></span>
+      </div>
+      <div class="felt">
+        <label for="epost" data-i18n="skjema.epost">Stud-e-post</label>
+        <input id="epost" name="epost" type="email" autocomplete="email" placeholder="brukernavn@stud.ntnu.no" required>
+        <span class="feil" data-feil="epost"></span>
+      </div>
+      <div class="felt">
+        <label for="kommentar" data-i18n="skjema.kommentar">Kommentar (valgfritt)</label>
+        <textarea id="kommentar" name="kommentar" rows="2"></textarea>
+      </div>
+      <!-- Honeypot: skjult for mennesker, fylles av roboter -->
+      <input class="honning" name="nettside" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <label class="avkryss">
+        <input type="checkbox" id="samtykke" required>
+        <span data-i18n="skjema.samtykke">Jeg forstår at bestillingen er bindende, og at jeg betaler når jeg henter.</span>
+      </label>
+      <span class="feil" data-feil="samtykke"></span>
+      <div class="sum-linje">
+        <span data-i18n="kurv.total">Totalt</span>
+        <strong class="sum-tall" id="sum-tall-2">0,-</strong>
+      </div>
+      <button type="submit" class="knapp knapp-gul knapp-full" id="send">
+        <span data-i18n="skjema.send">Send bestilling</span>
+        <span class="knapp-ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </button>
+    </form>
+
+    <!-- Steg 3: kvittering -->
+    <div class="kurv-steg kvittering" data-steg="sendt" hidden>
+      <div class="kvittering-merke" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7.5"/></svg>
+      </div>
+      <h3 data-i18n="sendt.tittel">Bestillingen er sendt</h3>
+      <p class="mono" id="ordrenr">#NTNUI-0000</p>
+      <p id="sendt-tekst"></p>
+      <button type="button" class="knapp knapp-sekundaer knapp-full" id="ferdig" data-i18n="sendt.ferdig">Tilbake til butikken</button>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="katalog.js?v=202610301600"></script>
+  <script src="felles.js?v=202610301600"></script>
+  <script src="designer.js?v=202610301600"></script>
+</body>
+</html>
