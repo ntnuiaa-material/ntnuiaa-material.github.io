@@ -103,7 +103,7 @@ function varsel(b, linjer, env) {
     `${b.telefon} · ${b.epost}`, "",
     ...linjer.map((l) => { const r = beskriv(l, t, "nb"); return `${r.tittel}: ${r.detaljer} – ${kroner(l.stykkpris * l.antall, "nb")}`; }),
     "", `Totalt: ${kroner(b.sum, "nb")}`,
-    b.kommentar ? `\nKommentar: ${b.kommentar}` : "",
+    ...(b.kommentar ? ["", `Kommentar: ${b.kommentar}`] : []),
     "", `Se alle bestillinger: ${env.SHOP_ADMIN_URL}`,
   ].join("\n");
   return { to: env.VARSEL_TIL, subject: `Ny bestilling ${b.ordrenr} – ${b.navn}`, text: tekst };
