@@ -1,5 +1,5 @@
 // Felles for forsiden og designeren: tekster, tema, språk, kurv, skjema og kvittering.
-// Krever katalog.js. «Send bestilling» skal til slutt poste til Workeren butikk-api.
+// Krever katalog.js. «Send shop» skal til slutt poste til Workeren butikk-api.
 // Inntil den finnes, lages kvitteringen lokalt.
 
 const API = null; // f.eks. "https://butikk-api.ntnuiaa.workers.dev"
@@ -90,7 +90,7 @@ const TEKST = {
     "kurv.tom": "Kurven er tom. Lag noe i designeren.",
     "kurv.total": "Totalt",
     "kurv.merknad": "Betales ved henting hos Intersport Rongve. Ingen betaling her.",
-    "kurv.videre": "Videre til bestilling",
+    "kurv.videre": "Videre til shop",
     "kurv.tilbake": "← Tilbake til kurven",
     "skjema.navn": "Navn",
     "skjema.telefon": "Telefon",
@@ -100,7 +100,7 @@ const TEKST = {
     "skjema.epost": "Stud-e-post",
     "skjema.kommentar": "Kommentar (valgfritt)",
     "skjema.samtykke": "Jeg forstår at bestillingen er bindende, og at jeg betaler når jeg henter.",
-    "skjema.send": "Send bestilling",
+    "skjema.send": "Send shop",
     "sendt.tittel": "Bestillingen er sendt",
     "sendt.ferdig": "Tilbake til butikken",
     // Brukes fra skriptene
@@ -260,7 +260,7 @@ function escape(s) {
 
 function settTema(tema) {
   document.documentElement.dataset.theme = tema;
-  try { localStorage.setItem("bestilling-tema", tema); } catch (e) {}
+  try { localStorage.setItem("shop-tema", tema); } catch (e) {}
 }
 $("#tema-knapp").addEventListener("click", () => {
   settTema(document.documentElement.dataset.theme === "light" ? "dark" : "light");
@@ -272,7 +272,7 @@ const vedSprak = [];
 function settSprak(nytt) {
   sprak = nytt;
   document.documentElement.lang = nytt;
-  try { localStorage.setItem("bestilling-sprak", nytt); } catch (e) {}
+  try { localStorage.setItem("shop-sprak", nytt); } catch (e) {}
   $$("[data-sprak]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sprak === nytt)));
   $$("[data-i18n]").forEach((el) => {
     el.textContent = t(el.dataset.i18n);
@@ -287,7 +287,7 @@ $$("[data-sprak]").forEach((b) => b.addEventListener("click", () => settSprak(b.
 
 // ---------- Kurven ----------
 
-let kurv = hent("bestilling-kurv-v2", []);
+let kurv = hent("shop-kurv-v2", []);
 
 function nokkelFor(k) {
   return [k.plagg, k.farge, k.gruppe, k.front, k.bak, k.navn || "", k.kjonn, k.storrelse].join("|");
@@ -298,7 +298,7 @@ function leggTil(k) {
   const finnes = kurv.find((l) => l.nokkel === nokkel);
   if (finnes) finnes.antall += 1;
   else kurv.push({ nokkel, k: { ...k }, antall: 1 });
-  lagre("bestilling-kurv-v2", kurv);
+  lagre("shop-kurv-v2", kurv);
   tegnKurv();
   const teller = $("#kurv-antall");
   teller.classList.remove("dunk");
@@ -369,7 +369,7 @@ $("#kurv-liste").addEventListener("click", (e) => {
   } else if (fjern) {
     kurv.splice(+fjern.dataset.fjern, 1);
   } else return;
-  lagre("bestilling-kurv-v2", kurv);
+  lagre("shop-kurv-v2", kurv);
   tegnKurv();
 });
 
@@ -549,7 +549,7 @@ $("#skjema").addEventListener("submit", async (e) => {
     $("#ordrenr").textContent = `#${ordrenr}`;
     $("#sendt-tekst").textContent = t("sendtTekst")(kunde.epost);
     kurv = [];
-    lagre("bestilling-kurv-v2", kurv);
+    lagre("shop-kurv-v2", kurv);
     tegnKurv();
     e.target.reset();
     visSteg("sendt");
