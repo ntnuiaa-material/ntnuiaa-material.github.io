@@ -21,7 +21,11 @@
   // E-post fra shopen via Resend. API-nøkkelen er secret: wrangler secret put RESEND_API_KEY
   "vars": {
     "TILLATTE_ADRESSER": "https://ntnuiaa-material.github.io,http://localhost:8787",
-    "EPOST_FRA": "NTNUI Ålesund <shop@ntnui-alesund.no>",
+    // Midlertidig: Resend sin testadresse, til DNS for ntnui-alesund.no er lagt inn hos Domeneshop.
+    // Testadressen kan bare sende til e-posten Resend-kontoen er registrert med (material@), så
+    // kvitteringen til kunden er slått av. Bytt til shop@ntnui-alesund.no og "pa" når domenet er verifisert.
+    "EPOST_FRA": "NTNUI Ålesund <onboarding@resend.dev>",
+    "KVITTERING": "av",
     "VARSEL_TIL": "material@ntnui-alesund.no",
     "SHOP_ADMIN_URL": "https://ntnuiaa-material.github.io/shop/admin/"
   }

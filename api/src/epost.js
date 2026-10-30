@@ -122,10 +122,11 @@ async function send(env, melding) {
 export async function sendEposter(env, bestilling, linjer) {
   if (!env.RESEND_API_KEY) return false;
   const [kunde, admin] = await Promise.allSettled([
-    send(env, kvittering(bestilling, linjer)),
+    env.KVITTERING === "av" ? Promise.reject(new Error("Kvittering er slått av")) : send(env, kvittering(bestilling, linjer)),
     env.VARSEL_TIL ? send(env, varsel(bestilling, linjer, env)) : Promise.resolve(),
   ]);
-  for (const r of [kunde, admin]) if (r.status === "rejected") console.error(r.reason);
+  if (admin.status === "rejected") console.error(admin.reason);
+  if (kunde.status === "rejected" && env.KVITTERING !== "av") console.error(kunde.reason);
   return kunde.status === "fulfilled";
 }
 
