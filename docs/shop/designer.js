@@ -1,5 +1,5 @@
 // Designeren: plagget tegnes som lag over et frilagt bilde av front og rygg.
-// Plasseringene ligger i katalog.js (soner, i prosent av lerretet).
+// Plasseringene ligger i katalog.js (soner, regnet ut fra cm), og lagene bygges i tegning.js.
 
 const params = new URLSearchParams(location.search);
 const startPlagg = finnPlagg(params.get("plagg")) || PLAGG[0];
@@ -59,51 +59,16 @@ function plassering(sone, boks = false) {
   return `left:${sone.x}%;top:${sone.y}%;width:${sone.b}%${boks && sone.h ? `;height:${sone.h}%` : ""}`;
 }
 
-function logoKilde() {
-  const g = finnGruppe(valg.gruppe);
-  return g ? `img/logo/${g.slug}.webp` : "../img/ntnui-logo.svg";
-}
-
-// Hvitt trykk på mørke plagg, sort på lyse
-function trykkfarge() {
-  return plagg().farger[valg.farge].lys ? "sort" : "hvit";
+// Lagene kommer fra tegning.js, som admin bruker til forhåndsvisningene. Her gjøres de om til HTML.
+function lagHtml(l) {
+  if (l.type === "base") return `<img class="lag lag-base" src="${l.src}" alt="">`;
+  if (l.type === "bilde") return `<img class="lag lag-trykk" style="${plassering(l.sone)}" src="${l.src}" alt="">`;
+  if (l.type === "boks") return `<div class="lag lag-trykk lag-boks" style="${plassering(l.sone, true)}"><img src="${l.src}" alt=""></div>`;
+  return `<div class="lag lag-trykk lag-navn lag-${l.farge}" style="${plassering(l.sone)};font-size:${navnStorrelse(l.sone).toFixed(2)}cqw">${escape(l.tekst)}</div>`;
 }
 
 function lagFor(side) {
-  const p = plagg();
-  const s = p.soner;
-  const bilde = p.farger[valg.farge][side];
-  if (!p.sider.includes(side) || !bilde) return [];
-  const g = finnGruppe(valg.gruppe);
-  const f = trykkfarge();
-  const lag = [{ nokkel: `base:${bilde}`, html: `<img class="lag lag-base" src="${bilde}" alt="">` }];
-
-  if (side === "front") {
-    if (valg.front === "ntnui") {
-      lag.push({ nokkel: "front:ntnui", html: `<img class="lag lag-trykk" style="${plassering(s.bryst)}" src="../img/ntnui-logo.svg" alt="">` });
-    } else if (valg.front === "tekst" && g) {
-      lag.push({ nokkel: `front:tekst:${g.slug}:${f}`, html: `<img class="lag lag-trykk" style="${plassering(s.tekst)}" src="img/tekst/${g.slug}-front-${f}.svg" alt="">` });
-    }
-  } else {
-    if (valg.bak === "logo") {
-      lag.push({ nokkel: `bak:logo:${valg.gruppe}`, html: `<img class="lag lag-trykk" style="${plassering(s.logo)}" src="${logoKilde()}" alt="">` });
-    } else if (valg.bak === "motiv" && g) {
-      lag.push(
-        { nokkel: `bak:baktekst:${f}`, html: `<img class="lag lag-trykk" style="${plassering(s.baktekst)}" src="img/tekst/${g.slug}-bak-${f}.svg" alt="">` },
-        { nokkel: `bak:motiv:${g.slug}:${f}`, html: `<div class="lag lag-trykk lag-boks" style="${plassering(s.motiv, true)}"><img src="img/motiv/${g.slug}-${f}.svg" alt=""></div>` },
-        { nokkel: `bak:estd:${g.slug}:${f}`, html: `<img class="lag lag-trykk" style="${plassering(s.estd)}" src="img/tekst/${g.slug}-estd-${f}.svg" alt="">` },
-      );
-    }
-    if (valg.navn) {
-      // Navnet står i Arial Black, som i PSD-en. Høyden er versalhøyden i prosent av lerretet.
-      const storrelse = (s.navn.h * 10 / 9) / 0.716;
-      lag.push({
-        nokkel: `bak:navn:${valg.navn}:${f}`,
-        html: `<div class="lag lag-trykk lag-navn lag-${f}" style="${plassering(s.navn)};font-size:${storrelse.toFixed(2)}cqw">${escape(valg.navn)}</div>`,
-      });
-    }
-  }
-  return lag;
+  return trykkLag(valg, side).map((l) => ({ nokkel: l.nokkel, html: lagHtml(l) }));
 }
 
 // Bytter bare lagene som er endret, så de nye kan tones inn. De gamle står til de nye

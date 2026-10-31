@@ -150,6 +150,7 @@ function puljeKort(p) {
     : p.sendt ? `<span class="merke gul">Sendt ${dato(p.sendt)}</span>` : `<span class="merke">Ikke sendt</span>`;
   const knapper = [
     `<button type="button" class="knapp knapp-hoved liten" data-csv="${p.id}">Last ned ark til Erik</button>`,
+    `<button type="button" class="knapp knapp-hoved liten" data-zip="${p.id}">Last ned ZIP</button>`,
     !p.sendt ? `<button type="button" class="knapp knapp-gul liten" data-status="sendt" data-pulje="${p.id}">Merk som sendt</button>`
       : !p.levert ? `<button type="button" class="knapp knapp-gul liten" data-status="levert" data-pulje="${p.id}">Merk som levert</button>` : "",
     !p.sendt ? `<button type="button" class="knapp fare liten" data-los-opp="${p.id}">Løs opp pulje</button>` : "",
@@ -201,26 +202,195 @@ function sammendrag(linjer) {
 
 // Én rad per plagg, samme kolonner som arket fra Nettskjema-tiden. Semikolon og BOM, så
 // norsk Excel åpner fila riktig med dobbeltklikk.
-function lastNedCsv(puljeId) {
-  const p = data.puljer.find((x) => x.id === puljeId);
-  const kol = ["Nr", "Navn", "Telefon", "E-post", "Plagg", "Modell", "Artikkel", "Farge", "Snitt", "Størrelse", "Trykk", "Trykkfarge", "Egennavn"];
+const CSV_KOLONNER = ["Nr", "Navn", "Telefon", "E-post", "Plagg", "Modell", "Artikkel", "Farge", "Snitt", "Størrelse", "Trykk", "Trykkfarge", "Egennavn"];
+// ZIP-en har i tillegg mappa til bestillingen og bredden på hvert trykk i cm (ca., fra størrelse L herre)
+const MAAL_KOLONNER = [
+  ["bryst", "Bredde NTNUI-logo foran (cm)"], ["tekst", "Bredde tekst foran (cm)"], ["logo", "Bredde logo bak (cm)"],
+  ["baktekst", "Bredde tekst bak (cm)"], ["motiv", "Bredde motiv bak (cm)"], ["estd", "Bredde ESTD bak (cm)"], ["navn", "Høyde navn bak (cm)"],
+];
+
+function valgFor(l) {
+  return { plagg: l.plagg, farge: l.farge, gruppe: l.gruppe, front: l.front, bak: l.bak, navn: l.navn || "" };
+}
+
+// Trykk på en linje, i samme rekkefølge som i designeren: posisjon, fil og mål i cm
+function trykkFor(l) {
+  const v = valgFor(l);
+  const p = finnPlagg(l.plagg);
+  return ["front", "bak"].flatMap((side) => trykkLag(v, side).filter((x) => x.posisjon).map((x) => {
+    const m = soneMaal(p, x.posisjon);
+    return { ...x, side, cm: x.posisjon === "navn" ? m.h : m.b };
+  }));
+}
+
+function byggCsv(puljeId, utvidet) {
+  const kol = utvidet ? [...CSV_KOLONNER, "Mappe", ...MAAL_KOLONNER.map(([, t]) => t)] : CSV_KOLONNER;
   const rader = [kol];
   for (const b of data.bestillinger.filter((x) => x.pulje_id === puljeId)) {
     for (const l of b.linjer) {
       const pl = finnPlagg(l.plagg);
+      const trykk = trykkFor(l);
       for (let i = 0; i < l.antall; i++) {
-        rader.push([b.ordrenr, b.navn, b.telefon, b.epost, plaggNavn(l.plagg), pl ? pl.kategori : "", l.artikkel || "",
-          NAVN[l.farge] || l.farge, NAVN[l.kjonn], l.storrelse, trykkTekst(l), trykkfarge(l), l.navn || ""]);
+        const rad = [b.ordrenr, b.navn, b.telefon, b.epost, plaggNavn(l.plagg), pl ? pl.kategori : "", l.artikkel || "",
+          NAVN[l.farge] || l.farge, NAVN[l.kjonn], l.storrelse, trykkTekst(l), trykkfarge(l), l.navn || ""];
+        if (utvidet) {
+          rad.push(b.ordrenr);
+          for (const [pos] of MAAL_KOLONNER) {
+            const t = trykk.find((x) => x.posisjon === pos);
+            rad.push(t ? String(t.cm).replace(".", ",") : "");
+          }
+        }
+        rader.push(rad);
       }
     }
   }
   const celle = (v) => /[";\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v);
-  const csv = "﻿" + rader.map((r) => r.map(celle).join(";")).join("\r\n");
+  return "\ufeff" + rader.map((r) => r.map(celle).join(";")).join("\r\n");
+}
+
+function filnavn(tekst) {
+  return tekst.replace(/[^\wæøåÆØÅ.-]+/g, "_");
+}
+
+function lastNedFil(blob, navn) {
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-  a.download = `${p.navn.replace(/[^\wæøåÆØÅ.-]+/g, "_")}_NTNUI.csv`;
+  a.href = URL.createObjectURL(blob);
+  a.download = navn;
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+function lastNedCsv(puljeId) {
+  const p = data.puljer.find((x) => x.id === puljeId);
+  lastNedFil(new Blob([byggCsv(puljeId, false)], { type: "text/csv;charset=utf-8" }), `${filnavn(p.navn)}_NTNUI.csv`);
+}
+
+// ---------- ZIP med forhåndsvisninger og trykkfiler ----------
+
+const SIDE_NAVN = { front: "Front", bak: "Rygg" };
+const POSISJON_TEKST = {
+  bryst: "Foran: NTNUI-logo", tekst: "Foran: tekst", logo: "Bak: logo", baktekst: "Bak: tekst øverst",
+  motiv: "Bak: motiv", estd: "Bak: ESTD", navn: "Bak: navn",
+};
+
+// PNG-er uten oppløsning i fila åpnes som 72 dpi. Legger inn pHYs rett etter IHDR.
+function settDpi(png, dpi) {
+  const ppm = Math.round(dpi / 0.0254);
+  const chunk = new Uint8Array(21);
+  const v = new DataView(chunk.buffer);
+  v.setUint32(0, 9);
+  chunk.set([0x70, 0x48, 0x59, 0x73], 4); // "pHYs"
+  v.setUint32(8, ppm);
+  v.setUint32(12, ppm);
+  chunk[16] = 1; // meter
+  v.setUint32(17, crc32(chunk.subarray(4, 17)));
+  const ut = new Uint8Array(png.length + chunk.length);
+  ut.set(png.subarray(0, 33), 0); // signatur (8) + IHDR (25)
+  ut.set(chunk, 33);
+  ut.set(png.subarray(33), 33 + chunk.length);
+  return ut;
+}
+
+const tilBytes = async (blob) => new Uint8Array(await blob.arrayBuffer());
+const canvasPng = (c) => new Promise((ok) => c.toBlob(ok, "image/png"));
+
+// Front og rygg ved siden av hverandre, tegnet av samme kode som designeren, og kortet under som tekst
+async function forhandsvisning(b, l, nr, antallLinjer) {
+  const p = finnPlagg(l.plagg);
+  const v = valgFor(l);
+  const trykk = trykkFor(l);
+  const sider = p.sider;
+  const M = 40, B = 900, H = 1000;
+  const bredde = M + sider.length * (B + M);
+
+  const rader = [
+    [`${b.ordrenr}${antallLinjer > 1 ? ` · linje ${nr} av ${antallLinjer}` : ""}`, "tittel"],
+    [`${plaggNavn(l.plagg)}${l.artikkel ? ` (${l.artikkel})` : ""}`, "fet"],
+    [`Farge: ${NAVN[l.farge] || l.farge}   ·   Snitt: ${NAVN[l.kjonn]}   ·   Størrelse: ${l.storrelse}   ·   Antall: ${l.antall}`, ""],
+    [`Gruppe: ${gruppeTekst(l)}`, ""],
+    ...trykk.map((t) => {
+      const mal = t.posisjon === "navn" ? `«${t.tekst}», versalhøyde ${t.cm} cm` : `${t.cm} cm bredt`;
+      return [`${POSISJON_TEKST[t.posisjon]}: ${mal}   (${t.fil}.${t.type === "navn" ? "png" : t.src.split(".").pop()})`, ""];
+    }),
+  ];
+  if (!trykk.length) rader.push(["Ingen trykk", ""]);
+  rader.push(["Forhåndsvisning fra shopen. Mål i cm er ca. og regnet fra størrelse L herre.", "liten"]);
+
+  const linjeH = 46;
+  const tekstH = 20 + rader.reduce((s, [, t]) => s + (t === "tittel" ? 80 : linjeH), 0) + 20;
+  const c = document.createElement("canvas");
+  c.width = bredde;
+  c.height = M + H + 60 + tekstH + M;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#f2f2ee";
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  for (const [i, side] of sider.entries()) {
+    const x = M + i * (B + M);
+    ctx.fillStyle = "#c9c9c4"; // lysere enn plaggene, så sort og hvitt synes
+    ctx.fillRect(x, M, B, H);
+    await tegnSide(ctx, v, side, { x, y: M, bredde: B, rot: "../" });
+    ctx.fillStyle = "#555";
+    ctx.font = "30px system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(SIDE_NAVN[side], x + B / 2, M + H + 40);
+  }
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  let y = M + H + 60 + 20;
+  for (const [t, stil] of rader) {
+    if (stil === "tittel") { ctx.font = "bold 56px system-ui, sans-serif"; ctx.fillStyle = "#111"; y += 64; }
+    else if (stil === "fet") { ctx.font = "bold 34px system-ui, sans-serif"; ctx.fillStyle = "#111"; y += linjeH; }
+    else if (stil === "liten") { ctx.font = "26px system-ui, sans-serif"; ctx.fillStyle = "#777"; y += linjeH; }
+    else { ctx.font = "32px system-ui, sans-serif"; ctx.fillStyle = "#222"; y += linjeH; }
+    ctx.fillText(t, M, y);
+    if (stil === "tittel") y += 16;
+  }
+  return tilBytes(await canvasPng(c));
+}
+
+// Selve trykkfila: originalen fra siden (SVG, eller WebP for gruppelogoene), og navnet som PNG i 300 dpi
+async function trykkfil(l, t) {
+  if (t.type === "navn") {
+    const png = await tilBytes(await canvasPng(await navnCanvas(t.tekst, t.farge, t.cm, 300)));
+    return { navn: `${t.fil}.png`, data: settDpi(png, 300) };
+  }
+  const svar = await fetch(`../${t.src}`);
+  if (!svar.ok) throw new Error(`Fikk ikke hentet ${t.src}`);
+  return { navn: `${t.fil}.${t.src.split(".").pop()}`, data: new Uint8Array(await svar.arrayBuffer()) };
+}
+
+async function lastNedZip(puljeId, knapp) {
+  const p = data.puljer.find((x) => x.id === puljeId);
+  const best = data.bestillinger.filter((x) => x.pulje_id === puljeId);
+  const tekst = knapp.textContent;
+  knapp.disabled = true;
+  try {
+    const filer = [{ navn: "bestillingsark.csv", data: byggCsv(puljeId, true) }];
+    let i = 0;
+    for (const b of best) {
+      for (const [n, l] of b.linjer.entries()) {
+        i++;
+        knapp.textContent = `Lager ${i}…`;
+        const flere = b.linjer.length > 1;
+        const mappe = `${b.ordrenr}/`;
+        const prefiks = flere ? `linje${n + 1}-` : "";
+        filer.push({ navn: `${mappe}forhandsvisning${flere ? `-${n + 1}` : ""}.png`, data: await forhandsvisning(b, l, n + 1, b.linjer.length) });
+        for (const t of trykkFor(l)) {
+          const f = await trykkfil(l, t);
+          filer.push({ navn: `${mappe}${prefiks}${f.navn}`, data: f.data });
+        }
+      }
+    }
+    lastNedFil(lagZip(filer), `${filnavn(p.navn)}.zip`);
+    visToast("ZIP-en er laget.");
+  } catch (feil) {
+    visToast(`Fikk ikke laget ZIP-en: ${feil.message}`);
+  } finally {
+    knapp.disabled = false;
+    knapp.textContent = tekst;
+  }
 }
 
 // ---------- Hendelser ----------
@@ -290,6 +460,8 @@ document.addEventListener("click", (e) => {
   }
   const csv = e.target.closest("[data-csv]");
   if (csv) lastNedCsv(Number(csv.dataset.csv));
+  const zip = e.target.closest("[data-zip]");
+  if (zip) lastNedZip(Number(zip.dataset.zip), zip);
 });
 
 $("#tema-knapp").addEventListener("click", () => {
