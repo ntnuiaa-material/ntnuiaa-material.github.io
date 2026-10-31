@@ -1526,3 +1526,147 @@ form.kurv-steg .knapp { margin-top: 12px; }
   .scene { padding: 16px; }
   .gulv { margin: 0 -16px -16px; }
 }
+
+/* =====================================================================
+   Mørkere og stilrenere, mørkt tema (31.10.2026)
+   Inspirert av «distinto»: nesten svart flate, én myk spektralgradient
+   som kommer inn fra høyre (blå → turkis → krem → gul → oransje), og
+   tydelig finkorn over alt. Lyst tema er uendret.
+   ===================================================================== */
+:root,
+:root[data-theme="dark"] {
+  --bg: #0d1311;
+  --kjerne: #131b18;
+  --klatt-1: #1d4fd8;
+  --klatt-2: #19b85a;
+  --klatt-3: #2563eb;
+  --klatt-styrke: 0.85;
+  --korn: 0.11;
+  --halvtone: rgba(236, 248, 239, 0.32);
+}
+:root:not([data-theme="light"]) .klatt { filter: blur(120px); }
+:root:not([data-theme="light"]) .klatt-1 {
+  width: 54vw; height: 70vw; left: auto; right: -14vw; top: 4vh;
+  background: radial-gradient(closest-side, #2fbf8f 0%, #127a5a 45%, #1d4fd8 80%, transparent 100%);
+}
+:root:not([data-theme="light"]) .klatt-2 {
+  width: 40vw; height: 46vw; right: -6vw; top: -10vh;
+  background: radial-gradient(closest-side, #8ff0b0 0%, #19b85a 55%, transparent 100%);
+}
+:root:not([data-theme="light"]) .klatt-3 {
+  width: 26vw; height: 30vw; right: -10vw; top: 6vh;
+  opacity: calc(var(--klatt-styrke) * 0.8);
+}
+
+/* ---------- Ren forside: sentrert merke som «distinto» ---------- */
+.helt.helt-ren {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  min-height: 100svh;
+  max-width: none;
+  padding: 120px var(--side) 96px;
+  text-align: center;
+}
+.helt-merke {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.2vw, 28px);
+}
+.merke-ord {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.18em;
+  font-family: var(--font-tittel);
+  font-weight: 400;
+  font-size: clamp(30px, 4vw, 54px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.merke-shop { font-family: var(--font-tekst); font-weight: 500; letter-spacing: -0.04em; }
+.merke-skille { width: 1px; height: clamp(34px, 4.4vw, 58px); background: var(--tekst); opacity: 0.7; }
+.merke-slagord {
+  margin: 0;
+  font-family: var(--font-tekst);
+  font-weight: 500;
+  font-size: clamp(20px, 2.4vw, 32px);
+  letter-spacing: -0.02em;
+}
+.helt-lenke {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--dempet);
+  text-decoration: none;
+  border-bottom: 1px solid var(--strek-sterk);
+  padding-bottom: 3px;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.helt-lenke:hover { color: var(--tekst); border-color: var(--tekst); }
+.helt-rull {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--dempet);
+  text-decoration: none;
+  font-size: 18px;
+}
+.helt-rull:hover { color: var(--tekst); }
+
+/* Slik funker det: åpen rad med tre steg, uten boks */
+.slik {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(80px, 10vw, 140px) var(--side) 0;
+}
+.slik-topp {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+.slik-topp h2 {
+  margin: 0;
+  font-family: var(--font-tittel);
+  font-weight: 400;
+  font-size: clamp(32px, 4.4vw, 60px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.slik-topp p { max-width: 44ch; margin: 0; }
+.slik .steg {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 56px);
+  border-top: 1px solid var(--strek);
+}
+.slik .steg li { grid-template-columns: 1fr; border-bottom: 0; padding: 28px 0 0; gap: 14px; }
+@media (max-width: 760px) {
+  .helt-merke { flex-direction: column; gap: 14px; }
+  .merke-skille { width: 40px; height: 1px; }
+  .slik-topp { flex-direction: column; align-items: flex-start; }
+  .slik .steg { grid-template-columns: 1fr; }
+}
+.merke-ord { align-items: center; gap: 0.3em; }
+.merke-logo { height: clamp(58px, 7.4vw, 100px); width: auto; }
+
+/* «Lag ditt eget plagg»-båndet i samme mørke spektralstil som forsiden (mørkt tema) */
+:root:not([data-theme="light"]) .band-indre {
+  background:
+    radial-gradient(60% 120% at 100% 0%, rgba(47, 191, 143, 0.55), transparent 60%),
+    radial-gradient(50% 110% at 105% 100%, rgba(29, 79, 216, 0.55), transparent 60%),
+    radial-gradient(40% 80% at 75% 50%, rgba(25, 184, 90, 0.28), transparent 70%),
+    #121a17;
+  border: 1px solid var(--strek);
+  color: var(--tekst);
+}
+:root:not([data-theme="light"]) .band-indre::before { opacity: 0.25; }
+
+/* Bunnmerket får plass i hele bredden uten å kuttes */
+.bunn { container-type: inline-size; }
+.bunn-merke { font-size: min(10.4cqi, 210px); overflow: visible; text-align: center; }

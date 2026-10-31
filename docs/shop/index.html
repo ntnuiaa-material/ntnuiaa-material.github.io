@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap">
-  <link rel="stylesheet" href="bestilling.css?v=202610302135">
+  <link rel="stylesheet" href="bestilling.css?v=202610312040">
 </head>
 <body>
   <div class="bakgrunn" aria-hidden="true">
@@ -52,31 +52,22 @@
   </header>
 
   <main>
-    <section class="helt">
-      <div class="helt-tekst reveal">
-        <h1 class="helt-tittel">
-          <span class="linje" data-i18n="helt.tittel1">Klær for</span>
-          <span class="linje gul" data-text="hele NTNUI" data-i18n="helt.tittel2">hele NTNUI</span>
-        </h1>
-        <p class="helt-serif" data-i18n="helt.serif">fra gymsalen til fjelltoppen.</p>
-        <p class="helt-ingress" data-i18n="helt.ingress">Sett sammen plagget ditt i designeren, legg det i kurven og send bestillingen. Du betaler først når du henter hos Intersport Rongve.</p>
-        <div class="helt-knapper">
-          <a class="knapp knapp-gul" href="designer.html">
-            <span data-i18n="helt.cta">Ta meg til designeren</span>
-            <span class="knapp-ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-          </a>
-          <a class="knapp knapp-sekundaer" href="#kolleksjon" data-i18n="helt.cta2">Se kolleksjonen</a>
-        </div>
+    <section class="helt helt-ren">
+      <div class="helt-merke reveal">
+        <h1 class="merke-ord"><img class="merke-logo" src="../img/ntnui-logo.svg" alt="NTNUI Ålesund" width="139" height="55"><span class="merke-shop">shop</span></h1>
+        <span class="merke-skille" aria-hidden="true"></span>
+        <p class="merke-slagord" data-i18n="helt.slagord">klær for hele NTNUI Ålesund.</p>
       </div>
+      <a class="helt-lenke reveal" href="designer.html"><span data-i18n="helt.cta">Ta meg til designeren</span> <span aria-hidden="true">→</span></a>
+      <a class="helt-rull" href="#slik" aria-label="Til innholdet"><span aria-hidden="true">↓</span></a>
+    </section>
 
-      <aside class="ramme reveal" aria-labelledby="slik-tittel">
-        <span class="hjorne hjorne-1"></span><span class="hjorne hjorne-2"></span>
-        <span class="hjorne hjorne-3"></span><span class="hjorne hjorne-4"></span>
-        <div class="ramme-topp">
-          <span class="mono" id="slik-tittel" data-i18n="slik.tittel">Slik funker det</span>
-          <span class="mono dempet" data-i18n="slik.antall">03 steg</span>
-        </div>
-        <ol class="steg">
+    <section class="slik reveal" id="slik" aria-labelledby="slik-tittel">
+      <div class="slik-topp">
+        <h2 id="slik-tittel" data-i18n="slik.tittel">Slik funker det</h2>
+        <p class="dempet" data-i18n="helt.ingress">Sett sammen plagget ditt i designeren, legg det i kurven og send bestillingen. Du betaler først når du henter hos Intersport Rongve.</p>
+      </div>
+      <ol class="steg">
           <li>
             <span class="steg-nr">01</span>
             <div>
@@ -99,15 +90,7 @@
             </div>
           </li>
         </ol>
-        <div class="sikte" aria-hidden="true"></div>
-      </aside>
-
-      <div class="halvtone" aria-hidden="true"></div>
     </section>
-
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker-spor" id="ticker"></div>
-    </div>
 
     <section class="kolleksjon" id="kolleksjon" aria-labelledby="kol-tittel">
       <div class="seksjon-topp reveal">
@@ -242,11 +225,8 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="katalog.js?v=202610311800"></script>
-  <script src="felles.js?v=202610302135"></script>
+  <script src="felles.js?v=202610312010"></script>
   <script>
-    // Ticker med gruppene: to like runder gir sømløs løkke
-    const runde = GRUPPER.map((g) => `<span>${escape(g.navn)}</span>`).join("");
-    $("#ticker").innerHTML = runde + runde;
 
     function tegnKolleksjon() {
       $("#skinne").innerHTML = KOLLEKSJON.map((k, i) => `
