@@ -67,9 +67,27 @@ test("trykksoner: samme fysiske bredde på alle plagg, med mindre plagget avvike
   }
 });
 
-test("trykksoner: Tiro jersey og Entrada TEE får samme plassering", () => {
+test("trykksoner: Tiro jersey og Entrada TEE får samme plassering bak (foran følger adidas-logoen)", () => {
   const f = (id) => PLAGG.find((p) => p.id === id).soner;
-  for (const sone of ["bryst", "tekst", "logo", "navn"]) assert.deepEqual(f("tiro-drakt")[sone], f("entrada-tee")[sone]);
+  for (const sone of ["logo", "navn"]) assert.deepEqual(f("tiro-drakt")[sone], f("entrada-tee")[sone]);
+});
+
+test("trykksoner: NTNUI-logoen foran står på høyde med adidas-logoen og speilvendt om midtlinja", () => {
+  const medAdidas = PLAGG.filter((p) => p.mal.front && p.mal.front.adidas);
+  assert.ok(medAdidas.length >= 12, "alle overdeler og lange bukser har adidas-logo i malen");
+  for (const p of medAdidas) {
+    const { hals, adidas } = p.mal.front;
+    const mal = p.mal.front, cmPerProsent = mal.cm / mal.bredde;
+    for (const sone of ["bryst", "tekst"]) {
+      const s = p.soner[sone];
+      if (!s) continue;
+      const nudge = ((p.sonerCm && p.sonerCm[sone] && p.sonerCm[sone].speilDx) || 0) / cmPerProsent;
+      assert.ok(Math.abs(s.y - adidas.y) <= 0.06, `${p.id}.${sone}: y ${s.y}, adidas ${adidas.y}`);
+      assert.ok(Math.abs(s.x - (2 * hals.x - adidas.x + nudge)) <= 0.06, `${p.id}.${sone}: x ${s.x}, speilet ${2 * hals.x - adidas.x}`);
+    }
+  }
+  // shortsene har ingen adidas-logo i malen og beholder håndplasseringen
+  for (const id of ["tiro-shorts", "entrada-short"]) assert.equal(PLAGG.find((p) => p.id === id).mal.front.adidas, undefined);
 });
 
 test("trykksoner: rotasjonen fra sonerCm følger med til sona", () => {

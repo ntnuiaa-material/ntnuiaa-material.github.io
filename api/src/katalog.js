@@ -74,9 +74,11 @@ const PLAGG = [
     bak: ["logo", "ingen"],
     navnFelt: true,
     mal: {
-      front: { hals: { x: 50.8, y: 0.3 }, bredde: 58.1, cm: 54 },
+      front: { hals: { x: 50.8, y: 0.3 }, bredde: 58.1, cm: 54, adidas: { x: 34.4, y: 26.7 } },
       bak: { hals: { x: 49.7, y: 0.3 }, bredde: 55.2, cm: 54 },
     },
+    // Teksten er bredere enn logoen og tok i det hvite skulderfeltet når den ble speilet, så den er flyttet 2 cm mot midten
+    sonerCm: { tekst: { speilDx: -2 } },
   },
   {
     id: "entrada-tee",
@@ -101,7 +103,7 @@ const PLAGG = [
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
-      front: { hals: { x: 50.8, y: 0.3 }, bredde: 58.1, cm: 54 },
+      front: { hals: { x: 50.8, y: 0.3 }, bredde: 58.1, cm: 54, adidas: { x: 33.9, y: 25.4 } },
       bak: { hals: { x: 49.7, y: 0.3 }, bredde: 55.2, cm: 54 },
     },
   },
@@ -130,7 +132,7 @@ const PLAGG = [
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
-      front: { hals: { x: 50.8, y: 0.3 }, bredde: 58.1, cm: 54 },
+      front: { hals: { x: 50.8, y: 0.3 }, bredde: 58.1, cm: 54, adidas: { x: 33.9, y: 25.4 } },
       bak: { hals: { x: 49.7, y: 0.3 }, bredde: 55.2, cm: 54 },
     },
   },
@@ -190,7 +192,7 @@ const PLAGG = [
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
-      front: { hals: { x: 50.2, y: 28.3 }, bredde: 40.6, cm: 60 },
+      front: { hals: { x: 50.2, y: 28.3 }, bredde: 40.6, cm: 60, adidas: { x: 38.3, y: 42.1 } },
       bak: { hals: { x: 50.0, y: 27.5 }, bredde: 44.4, cm: 60 },
     },
     sonerCm: { navn: { dy: 82.0 } }, // samme høyde som før cm-målene (nær nedre kant)
@@ -217,7 +219,7 @@ const PLAGG = [
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
-      front: { hals: { x: 49.9, y: 2.2 }, bredde: 54.1, cm: 60 },
+      front: { hals: { x: 49.9, y: 2.2 }, bredde: 54.1, cm: 60, adidas: { x: 34.4, y: 22.9 } },
       bak: { hals: { x: 49.8, y: 0.8 }, bredde: 54.4, cm: 60 },
     },
     sonerCm: { navn: { dy: 97.0 } }, // samme høyde som før cm-målene (nær nedre kant)
@@ -244,7 +246,7 @@ const PLAGG = [
     bak: ["logo", "ingen"],
     navnFelt: true,
     mal: {
-      front: { hals: { x: 50.0, y: 2.5 }, bredde: 53.8, cm: 60 },
+      front: { hals: { x: 50.0, y: 2.5 }, bredde: 53.8, cm: 60, adidas: { x: 34.8, y: 23.4 } },
       bak: { hals: { x: 50.0, y: 1.0 }, bredde: 55.1, cm: 60 },
     },
     sonerCm: { navn: { dy: 95.5 } }, // samme høyde som før cm-målene (nær nedre kant)
@@ -271,7 +273,7 @@ const PLAGG = [
     bak: ["logo", "ingen"],
     navnFelt: true,
     mal: {
-      front: { hals: { x: 50.4, y: 28.3 }, bredde: 43.6, cm: 60 },
+      front: { hals: { x: 50.4, y: 28.3 }, bredde: 43.6, cm: 60, adidas: { x: 38.8, y: 42.9 } },
       bak: { hals: { x: 49.7, y: 28.8 }, bredde: 44.8, cm: 60 },
     },
     sonerCm: { navn: { dy: 79.0 } }, // samme høyde som før cm-målene (nær nedre kant)
@@ -299,7 +301,7 @@ const PLAGG = [
     bak: ["logo", "ingen"],
     navnFelt: true,
     mal: {
-      front: { hals: { x: 50.0, y: 9.0 }, bredde: 50.7, cm: 56 },
+      front: { hals: { x: 50.0, y: 9.0 }, bredde: 50.7, cm: 56, adidas: { x: 36.3, y: 25.9 } },
       bak: { hals: { x: 50.0, y: 6.2 }, bredde: 50.7, cm: 56 },
     },
     sonerCm: { navn: { dy: 90.5 } }, // samme høyde som før cm-målene (nær nedre kant)
@@ -327,7 +329,7 @@ const PLAGG = [
     bak: ["logo", "ingen"],
     navnFelt: true,
     mal: {
-      front: { hals: { x: 50.1, y: 14.8 }, bredde: 47.6, cm: 60 },
+      front: { hals: { x: 50.1, y: 14.8 }, bredde: 47.6, cm: 60, adidas: { x: 37.4, y: 32.5 } },
       bak: { hals: { x: 50.0, y: 25.5 }, bredde: 48.9, cm: 60 },
     },
     sonerCm: { navn: { dy: 74.5 } }, // samme høyde som før cm-målene (nær nedre kant)
@@ -355,7 +357,7 @@ const PLAGG = [
     bak: ["logo", "ingen"],
     navnFelt: true,
     mal: {
-      front: { hals: { x: 50.2, y: 11.5 }, bredde: 47.8, cm: 60 },
+      front: { hals: { x: 50.2, y: 11.5 }, bredde: 47.8, cm: 60, adidas: { x: 36.8, y: 30.7 } },
       bak: { hals: { x: 50.0, y: 24.5 }, bredde: 47.3, cm: 60 },
     },
     sonerCm: { navn: { dy: 75.5 } }, // samme høyde som før cm-målene (nær nedre kant)
@@ -414,9 +416,9 @@ const PLAGG = [
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
     mal: {
-      front: { hals: { x: 49.6, y: 1.2 }, bredde: 33.7, cm: 40 },
+      front: { hals: { x: 49.6, y: 1.2 }, bredde: 33.7, cm: 40, adidas: { x: 60.9, y: 30.9 } },
     },
-    sonerCm: { bryst: { b: 10, dx: -17.5, dy: 34 } }, // nede på låret
+    sonerCm: { bryst: { b: 10 } }, // bredden; plasseringen følger adidas-logoen på det andre låret
   },
   {
     id: "tiro-sweat-pant",
@@ -441,9 +443,9 @@ const PLAGG = [
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
     mal: {
-      front: { hals: { x: 49.9, y: 1.2 }, bredde: 36.8, cm: 40 },
+      front: { hals: { x: 49.9, y: 1.2 }, bredde: 36.8, cm: 40, adidas: { x: 65.1, y: 30.1 } },
     },
-    sonerCm: { bryst: { b: 10, dx: -17.5, dy: 35 } }, // nede på låret
+    sonerCm: { bryst: { b: 10 } }, // bredden; plasseringen følger adidas-logoen på det andre låret
   },
 ];
 
@@ -461,7 +463,10 @@ const PLAGG = [
 //        det er ikke en nøyaktig avstand langs plagget (mockupene er litt strukket i høyden)
 // rot:   (valgfri) rotasjon i grader rundt midten av trykket, positiv med klokka. Brukes når trykket skal følge
 //        en skråstilt kant på plagget, f.eks. fallet på shortsbenet
-// Sonene sentreres på (dx, dy). Et plagg kan avvike med `sonerCm: { sone: { b, dx, dy, rot } }`.
+// Sonene sentreres på (dx, dy), bortsett fra bryst og tekst på plagg med `mal.front.adidas` (se beregnSoner).
+// Et plagg kan avvike med `sonerCm: { sone: { b, dx, dy, rot } }`. For bryst og tekst på plagg med adidas-logo
+// kan man i stedet flytte den speilvendte plasseringen sideveis med `speilDx` (cm, positiv mot høyre i bildet),
+// f.eks. når teksten ellers ville truffet et hvitt felt.
 const TRYKKSONER = {
   bryst: { side: "front", b: 14, dx: 14.5, dy: 26 },
   tekst: { side: "front", b: 18, dx: 14.5, dy: 26 },
@@ -489,6 +494,10 @@ function sonePaaPlagg(p, sone) {
 //           kragen (eller hetta) møter skuldrene. På jakker med hette som ligger nede bak er det
 //           underkanten av hetta, siden trykket må ligge under den
 //   bredde: bryst til bryst (arm til arm), prosent av lerretbredden
+//   adidas: (valgfri) midten av den hvite adidas-logoen på brystet (på bukser: det ene låret), prosent av
+//           lerretet, målt på bildet (tegnet rundt logoen, ikke fra mockup-malen). NTNUI-logoen foran
+//           (bryst og tekst) plasseres på samme høyde og speilvendt om `hals.x`, så den ligger like langt
+//           fra midtlinja/glidelåsen på motsatt side. Svart adidas-logo på hvit T-skjorte ligger på samme sted
 //   cm:     bredden i cm på referansestørrelsen (L herre). ANTATT, ikke hentet fra størrelsestabellen:
 //           54 cm på T-skjorte og jersey, 56 på treningsjakka, 60 på hettegenser, genser, full zip og
 //           regnjakke/windbreaker. På shorts og bukser er det midjen (flat, i bånd) som er målet, 40 cm
@@ -501,9 +510,13 @@ function beregnSoner(p) {
     const cmPerProsent = mal.cm / mal.bredde; // cm per prosent av lerretbredden (9 px)
     const px = (cm) => cm / cmPerProsent; // lengde i prosent av lerretbredden
     const rund = (v) => Math.round(v * 10) / 10;
+    // Brystlogoen (bryst og tekst) står på samme høyde som adidas-logoen og speilet om midtlinja, med
+    // mindre plagget har egen dx/dy i sonerCm. Plagg uten `adidas` (shorts) bruker dx og dy fra tabellen.
+    const ov = (p.sonerCm && p.sonerCm[navn]) || {};
+    const folgerAdidas = (navn === "bryst" || navn === "tekst") && mal.adidas;
     soner[navn] = {
-      x: rund(mal.hals.x + px(z.dx)),
-      y: rund(mal.hals.y + px(z.dy) * 0.9), // 1 % av høyden er 10 px, 1 % av bredden 9 px
+      x: rund(folgerAdidas && ov.dx === undefined ? 2 * mal.hals.x - mal.adidas.x + px(ov.speilDx || 0) : mal.hals.x + px(z.dx)),
+      y: rund(folgerAdidas && ov.dy === undefined ? mal.adidas.y : mal.hals.y + px(z.dy) * 0.9), // 1 % av høyden er 10 px, 1 % av bredden 9 px
       b: rund(px(z.b)),
     };
     if (z.h) soner[navn].h = rund(px(z.h) * 0.9);
