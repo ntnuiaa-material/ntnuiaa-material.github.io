@@ -2,6 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { _test } from "../src/shop.js";
+import { PLAGG, TRYKKSONER } from "../src/katalog.js";
 
 class Brukerfeil extends Error {
   constructor(melding, status = 400) { super(melding); this.status = status; }
@@ -49,4 +50,31 @@ test("løs opp pulje: 404 når pulja mangler, 409 når den er sendt", async () =
   await assert.rejects(() => _test.losOppPulje({ DB }, { id: 9 }, Brukerfeil), (e) => e.status === 404);
   await assert.rejects(() => _test.losOppPulje({ DB }, { id: 1 }, Brukerfeil), (e) => e.status === 409);
   assert.equal(DB.puljer.length, 1);
+});
+
+// ---------- Trykksoner i cm ----------
+
+test("trykksoner: samme fysiske bredde på alle plagg, med mindre plagget avviker", () => {
+  for (const p of PLAGG) {
+    for (const [navn, z] of Object.entries(TRYKKSONER)) {
+      const s = p.soner[navn];
+      if (!s) continue;
+      const mal = p.mal[z.side];
+      const b = (p.sonerCm && p.sonerCm[navn] && p.sonerCm[navn].b) || z.b;
+      const cm = s.b * (mal.cm / mal.bredde);
+      assert.ok(Math.abs(cm - b) < 0.3, `${p.id}.${navn}: ${cm.toFixed(2)} cm, ventet ${b}`);
+    }
+  }
+});
+
+test("trykksoner: Tiro jersey og Entrada TEE får samme plassering", () => {
+  const f = (id) => PLAGG.find((p) => p.id === id).soner;
+  for (const sone of ["bryst", "tekst", "logo", "navn"]) assert.deepEqual(f("tiro-drakt")[sone], f("entrada-tee")[sone]);
+});
+
+test("trykksoner: alle soner ligger innenfor lerretet", () => {
+  for (const p of PLAGG) for (const [navn, s] of Object.entries(p.soner)) {
+    assert.ok(s.x - s.b / 2 >= 0 && s.x + s.b / 2 <= 100, `${p.id}.${navn} går utenfor sidene`);
+    assert.ok(s.y > 0 && s.y < 100, `${p.id}.${navn} går utenfor toppen/bunnen`);
+  }
 });

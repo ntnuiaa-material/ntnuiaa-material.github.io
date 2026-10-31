@@ -33,9 +33,10 @@ const TRYKKPRIS = {
   NAVN_MAKS: 75,
 };
 
-// Plasseringene er i prosent av bildelerretet (900 × 1000). Tiro jersey, Entrada TEE og Entrada shorts
-// er regnet ut fra PSD-mockupene. De andre plaggene er generert med Nano Banana 2.1 fra katalogbilder, og
-// brystlogoen står speilvendt av adidas-logoen.
+// Trykket plasseres i cm, ikke i prosent: TRYKKSONER under er den ene tabellen, og hvert plagg har
+// `mal` (målt på bildene) som gjør cm om til prosent av bildelerretet (900 × 1000). Da får trykket samme
+// fysiske størrelse og plass på alle plagg, selv om mockupene fyller lerretet ulikt.
+// Mockupene er PSD-er (Tiro jersey, Entrada TEE og shorts) og bilder generert med Nano Banana 2.1.
 // Plaggbildene er laget fra de samme PSD-ene med NTNUI-trykket fjernet (verktoy/ i repoet).
 //
 // Regel fra Kristian: Climacool og alt som heter JERSEY er svart med hvite dekaler.
@@ -70,11 +71,9 @@ const PLAGG = [
     front: ["ntnui", "tekst", "ingen"],
     bak: ["logo", "ingen"],
     navnFelt: true,
-    soner: {
-      bryst: { x: 66.4, y: 26.6, b: 15.1 },
-      tekst: { x: 66.4, y: 26.8, b: 19.1 },
-      logo: { x: 49.9, y: 35.6, b: 42.6 },
-      navn: { x: 49.9, y: 85.8, b: 37.9, h: 3.8 },
+    mal: {
+      front: { hals: { x: 50.8, y: 0.3 }, bredde: 58.1, cm: 54 },
+      bak: { hals: { x: 49.7, y: 0.3 }, bredde: 55.2, cm: 54 },
     },
   },
   {
@@ -99,14 +98,9 @@ const PLAGG = [
     front: ["ntnui", "tekst", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
-    soner: {
-      bryst: { x: 66.4, y: 25.3, b: 15.1 },
-      tekst: { x: 66.4, y: 25.5, b: 19.1 },
-      logo: { x: 49.9, y: 35.6, b: 42.6 },
-      baktekst: { x: 50, y: 16.8, b: 49.1 },
-      motiv: { x: 50, y: 38.9, b: 38.5, h: 24.7 },
-      estd: { x: 49.9, y: 60.2, b: 15 },
-      navn: { x: 49.9, y: 85.8, b: 37.9, h: 3.8 },
+    mal: {
+      front: { hals: { x: 50.8, y: 0.3 }, bredde: 58.1, cm: 54 },
+      bak: { hals: { x: 49.7, y: 0.3 }, bredde: 55.2, cm: 54 },
     },
   },
   {
@@ -132,9 +126,11 @@ const PLAGG = [
     front: ["ntnui", "ingen"],
     bak: [],
     navnFelt: false,
-    soner: {
-      bryst: { x: 23, y: 62, b: 17 }, // nede på venstre lår, som Kristian markerte 30.10
+    // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
+    mal: {
+      front: { hals: { x: 48.4, y: 1.2 }, bredde: 61.7, cm: 40 },
     },
+    sonerCm: { bryst: { b: 10, dx: -16.5, dy: 43.8 } }, // nede på venstre lår, som Kristian markerte 30.10
   },
   {
     // Bare herremodell. Hvit (JZ6579, herre) finnes, men har ikke bilde ennå. Bildet er generert med Nano Banana 2.1
@@ -158,15 +154,11 @@ const PLAGG = [
     front: ["ntnui", "tekst", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
-    soner: {
-      bryst: { x: 62.4, y: 42.6, b: 13 },
-      tekst: { x: 62.4, y: 42.6, b: 17 },
-      logo: { x: 50, y: 50, b: 38 },
-      navn: { x: 50, y: 82, b: 36, h: 3.4 },
-      baktekst: { x: 50, y: 33, b: 44 },
-      motiv: { x: 50, y: 50, b: 34, h: 22 },
-      estd: { x: 50, y: 66, b: 13 },
+    mal: {
+      front: { hals: { x: 50.2, y: 28.3 }, bredde: 40.6, cm: 60 },
+      bak: { hals: { x: 50.0, y: 27.5 }, bredde: 44.4, cm: 60 },
     },
+    sonerCm: { navn: { dy: 82.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
   {
     id: "entrada-sweat-top",
@@ -189,15 +181,11 @@ const PLAGG = [
     front: ["ntnui", "tekst", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
-    soner: {
-      bryst: { x: 66.6, y: 23.6, b: 13 },
-      tekst: { x: 66.6, y: 23.6, b: 17 },
-      logo: { x: 50, y: 39, b: 38 },
-      navn: { x: 50, y: 80, b: 36, h: 3.4 },
-      baktekst: { x: 50, y: 17, b: 44 },
-      motiv: { x: 50, y: 39, b: 34, h: 22 },
-      estd: { x: 50, y: 60, b: 13 },
+    mal: {
+      front: { hals: { x: 49.9, y: 2.2 }, bredde: 54.1, cm: 60 },
+      bak: { hals: { x: 49.8, y: 0.8 }, bredde: 54.4, cm: 60 },
     },
+    sonerCm: { navn: { dy: 97.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
   {
     id: "tiro-sweat-crew",
@@ -220,12 +208,11 @@ const PLAGG = [
     front: ["ntnui", "tekst", "ingen"],
     bak: ["logo", "ingen"],
     navnFelt: true,
-    soner: {
-      bryst: { x: 65.9, y: 24.2, b: 13 },
-      tekst: { x: 65.9, y: 24.2, b: 17 },
-      logo: { x: 50, y: 36, b: 38 },
-      navn: { x: 50, y: 80, b: 36, h: 3.4 },
+    mal: {
+      front: { hals: { x: 50.0, y: 2.5 }, bredde: 53.8, cm: 60 },
+      bak: { hals: { x: 50.0, y: 1.0 }, bredde: 55.1, cm: 60 },
     },
+    sonerCm: { navn: { dy: 95.5 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
   {
     id: "tiro-full-zip",
@@ -248,12 +235,11 @@ const PLAGG = [
     front: ["ntnui", "tekst", "ingen"],
     bak: ["logo", "ingen"],
     navnFelt: true,
-    soner: {
-      bryst: { x: 61.8, y: 43.5, b: 13 },
-      tekst: { x: 61.8, y: 43.5, b: 17 },
-      logo: { x: 50, y: 47, b: 38 },
-      navn: { x: 50, y: 82, b: 36, h: 3.4 },
+    mal: {
+      front: { hals: { x: 50.4, y: 28.3 }, bredde: 43.6, cm: 60 },
+      bak: { hals: { x: 49.7, y: 28.8 }, bredde: 44.8, cm: 60 },
     },
+    sonerCm: { navn: { dy: 79.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
   {
     id: "tiro-treningsjakke",
@@ -277,12 +263,11 @@ const PLAGG = [
     front: ["ntnui", "tekst", "ingen"],
     bak: ["logo", "ingen"],
     navnFelt: true,
-    soner: {
-      bryst: { x: 64.4, y: 26.6, b: 13 },
-      tekst: { x: 64.4, y: 26.6, b: 17 },
-      logo: { x: 50, y: 37, b: 38 },
-      navn: { x: 50, y: 80, b: 36, h: 3.4 },
+    mal: {
+      front: { hals: { x: 50.0, y: 9.0 }, bredde: 50.7, cm: 56 },
+      bak: { hals: { x: 50.0, y: 6.2 }, bredde: 50.7, cm: 56 },
     },
+    sonerCm: { navn: { dy: 90.5 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
   {
     id: "tiro-windbreaker",
@@ -306,12 +291,11 @@ const PLAGG = [
     front: ["ntnui", "tekst", "ingen"],
     bak: ["logo", "ingen"],
     navnFelt: true,
-    soner: {
-      bryst: { x: 62.7, y: 33, b: 13 },
-      tekst: { x: 62.7, y: 33, b: 17 },
-      logo: { x: 50, y: 44, b: 38 },
-      navn: { x: 50, y: 80, b: 36, h: 3.4 },
+    mal: {
+      front: { hals: { x: 50.1, y: 14.8 }, bredde: 47.6, cm: 60 },
+      bak: { hals: { x: 50.0, y: 25.5 }, bredde: 48.9, cm: 60 },
     },
+    sonerCm: { navn: { dy: 74.5 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
   {
     id: "tiro-regnjakke",
@@ -335,12 +319,11 @@ const PLAGG = [
     front: ["ntnui", "tekst", "ingen"],
     bak: ["logo", "ingen"],
     navnFelt: true,
-    soner: {
-      bryst: { x: 63.9, y: 31.4, b: 13 },
-      tekst: { x: 63.9, y: 31.4, b: 17 },
-      logo: { x: 50, y: 42, b: 38 },
-      navn: { x: 50, y: 78, b: 36, h: 3.4 },
+    mal: {
+      front: { hals: { x: 50.2, y: 11.5 }, bredde: 47.8, cm: 60 },
+      bak: { hals: { x: 50.0, y: 24.5 }, bredde: 47.3, cm: 60 },
     },
+    sonerCm: { navn: { dy: 75.5 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
   {
     id: "tiro-shorts",
@@ -364,9 +347,11 @@ const PLAGG = [
     front: ["ntnui", "ingen"],
     bak: [],
     navnFelt: false,
-    soner: {
-      bryst: { x: 22, y: 78, b: 15 },
+    // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
+    mal: {
+      front: { hals: { x: 49.7, y: 1.2 }, bredde: 67.4, cm: 40 },
     },
+    sonerCm: { bryst: { b: 10, dx: -16.5, dy: 50.5 } }, // nede på låret
   },
   {
     id: "tiro-treningsbukse",
@@ -390,9 +375,11 @@ const PLAGG = [
     front: ["ntnui", "ingen"],
     bak: [],
     navnFelt: false,
-    soner: {
-      bryst: { x: 35, y: 27, b: 8 },
+    // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
+    mal: {
+      front: { hals: { x: 49.6, y: 1.2 }, bredde: 33.7, cm: 40 },
     },
+    sonerCm: { bryst: { b: 10, dx: -17.5, dy: 34 } }, // nede på låret
   },
   {
     id: "tiro-sweat-pant",
@@ -415,11 +402,76 @@ const PLAGG = [
     front: ["ntnui", "ingen"],
     bak: [],
     navnFelt: false,
-    soner: {
-      bryst: { x: 34, y: 30, b: 8 },
+    // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
+    mal: {
+      front: { hals: { x: 49.9, y: 1.2 }, bredde: 36.8, cm: 40 },
     },
+    sonerCm: { bryst: { b: 10, dx: -17.5, dy: 35 } }, // nede på låret
   },
 ];
+
+// ---------- Trykksoner i cm ----------
+// Tabellen er avledet av utseendet til Entrada TEE (slik det var før plasseringene ble regnet i cm), med
+// bryst til bryst-bredde 54 cm som målestokk. Vil man ha standardmål, er dette utgangspunktet:
+// bryst 9 cm bredt (dx 10, topp 17 cm under halsen), baktekst og logo/motiv 26 cm brede, estd 11 cm.
+// (Disse er mindre enn utseendet var: baktekst på Entrada TEE tilsvarer ca. 48 cm av 54 cm bryst.)
+//
+// side:  hvilken side av plagget sonen ligger på (bestemmer hvilken `mal` som brukes)
+// b:     bredde i cm (trykkfila skaleres til denne bredden)
+// h:     høyde i cm, bare for soner med fast boks (motiv) og for versalhøyden på navnet
+// dx:    cm sideveis fra midtlinja. Positiv er mot høyre i bildet (brukerens venstre side)
+// dy:    cm ned fra halsen til midten av trykket. Målt på mockupen med bredden som målestokk, så
+//        det er ikke en nøyaktig avstand langs plagget (mockupene er litt strukket i høyden)
+// Sonene sentreres på (dx, dy). Et plagg kan avvike med `sonerCm: { sone: { b, dx, dy } }`.
+const TRYKKSONER = {
+  bryst: { side: "front", b: 14, dx: 14.5, dy: 26 },
+  tekst: { side: "front", b: 18, dx: 14.5, dy: 26 },
+  logo: { side: "bak", b: 42, dx: 0, dy: 38.5 },
+  baktekst: { side: "bak", b: 48, dx: 0, dy: 18 },
+  motiv: { side: "bak", b: 38, h: 27, dx: 0, dy: 42 },
+  estd: { side: "bak", b: 15, dx: 0, dy: 65 },
+  navn: { side: "bak", b: 37, h: 4, dx: 0, dy: 93 },
+};
+
+// Sonene et plagg faktisk bruker, etter hva det kan trykkes på det
+function sonePaaPlagg(p, sone) {
+  if (sone === "bryst") return p.front.includes("ntnui");
+  if (sone === "tekst") return p.front.includes("tekst");
+  if (sone === "logo") return p.bak.includes("logo");
+  if (sone === "navn") return p.navnFelt;
+  return p.bak.includes("motiv"); // baktekst, motiv og estd hører sammen
+}
+
+// Gjør cm om til prosent av lerretet for ett plagg. Resultatet har samme form som `soner` hadde:
+// x og y er midten av trykket, b og h er bredde og høyde. Sider uten `mal` får ingen soner.
+//
+// `mal` per side, målt i bildene (ikke på selve plagget):
+//   hals:   halsen (x, y i prosent av lerretet): midtlinja i høyde med skulderlinja ved halsen, der
+//           kragen (eller hetta) møter skuldrene. På jakker med hette som ligger nede bak er det
+//           underkanten av hetta, siden trykket må ligge under den
+//   bredde: bryst til bryst (arm til arm), prosent av lerretbredden
+//   cm:     bredden i cm på referansestørrelsen (L herre). ANTATT, ikke hentet fra størrelsestabellen:
+//           54 cm på T-skjorte og jersey, 56 på treningsjakka, 60 på hettegenser, genser, full zip og
+//           regnjakke/windbreaker. På shorts og bukser er det midjen (flat, i bånd) som er målet, 40 cm
+function beregnSoner(p) {
+  const soner = {};
+  for (const [navn, z0] of Object.entries(TRYKKSONER)) {
+    const mal = p.mal && p.mal[z0.side];
+    if (!mal || !sonePaaPlagg(p, navn)) continue;
+    const z = { ...z0, ...(p.sonerCm && p.sonerCm[navn]) };
+    const cmPerProsent = mal.cm / mal.bredde; // cm per prosent av lerretbredden (9 px)
+    const px = (cm) => cm / cmPerProsent; // lengde i prosent av lerretbredden
+    const rund = (v) => Math.round(v * 10) / 10;
+    soner[navn] = {
+      x: rund(mal.hals.x + px(z.dx)),
+      y: rund(mal.hals.y + px(z.dy) * 0.9), // 1 % av høyden er 10 px, 1 % av bredden 9 px
+      b: rund(px(z.b)),
+    };
+    if (z.h) soner[navn].h = rund(px(z.h) * 0.9);
+  }
+  return soner;
+}
+for (const p of PLAGG) p.soner = beregnSoner(p);
 
 // plagg: åpner designeren med dette plagget. Uten plagg er kortet bare et bilde.
 const KOLLEKSJON = [

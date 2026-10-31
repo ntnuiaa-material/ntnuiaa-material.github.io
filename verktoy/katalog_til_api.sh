@@ -7,6 +7,6 @@ cd "$(dirname "$0")/.."
   echo
   cat docs/shop/katalog.js
   echo
-  echo "export { PLAGG, GRUPPER, GENERISK, TRYKKPRIS, prisFor, finnPlagg, finnGruppe, fargerFor };"
+  echo "export { PLAGG, GRUPPER, GENERISK, TRYKKPRIS, TRYKKSONER, prisFor, finnPlagg, finnGruppe, fargerFor };"
 } > api/src/katalog.js
 echo "api/src/katalog.js oppdatert"
