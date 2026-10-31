@@ -18,14 +18,18 @@
   // Anonymiserer gamle utlån (12 mnd) og shop-bestillinger (6 mnd), kl. 03 den 1. hver måned
   "triggers": { "crons": ["0 3 1 * *"] },
 
-  // E-post fra shopen via Resend. API-nøkkelen er secret: wrangler secret put RESEND_API_KEY
+  // E-post fra shopen via SMTP fra den ekte postkassa hos Domeneshop (src/smtp.js).
+  // Passordet er secret, ikke vars:
+  //   wrangler secret put SMTP_BRUKER    (material@ntnui-alesund.no)
+  //   wrangler secret put SMTP_PASSORD
+  // Tidligere Resend (RESEND_API_KEY, avsender material-shop@ntnui-alesund.no) kan komme tilbake
+  // når vi har kontroll over DNS for ntnui-alesund.no. Resend sender bare til kontoeieren uten verifisert domene.
   "vars": {
     "TILLATTE_ADRESSER": "https://ntnuiaa-material.github.io,http://localhost:8787",
-    // Midlertidig: Resend sin testadresse, til DNS for ntnui-alesund.no er lagt inn hos Domeneshop.
-    // Testadressen kan bare sende til e-posten Resend-kontoen er registrert med (material@), så
-    // kvitteringen til kunden er slått av. Når domenet er verifisert: EPOST_FRA = "NTNUI Ålesund <material-shop@ntnui-alesund.no>" og KVITTERING = "pa".
-    "EPOST_FRA": "NTNUI Ålesund <onboarding@resend.dev>",
-    "KVITTERING": "av",
+    "SMTP_HOST": "smtp.domeneshop.no",
+    "SMTP_PORT": "465",
+    "EPOST_FRA_ADRESSE": "material@ntnui-alesund.no",
+    "EPOST_FRA_NAVN": "NTNUI Ålesund Materialansvarlig",
     "VARSEL_TIL": "material@ntnui-alesund.no",
     "SHOP_ADMIN_URL": "https://ntnuiaa-material.github.io/shop/admin/"
   }

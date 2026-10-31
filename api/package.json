@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
+    "test": "node --test test",
     "deploy": "wrangler deploy",
     "db:lokal": "wrangler d1 execute lager --local --file schema.sql",
     "db:remote": "wrangler d1 execute lager --remote --file schema.sql"

@@ -1,10 +1,12 @@
-// E-post via Resend (resend.com). Kvittering til kunden på språket kunden valgte på nettsida,
-// og varsel til materialansvarlig om hver nye bestilling.
+// E-post via SMTP (src/smtp.js) fra den ekte postkassa material@ntnui-alesund.no hos Domeneshop.
+// Kvittering til kunden på språket kunden valgte på nettsida, og varsel til materialansvarlig
+// om hver nye bestilling.
 //
-// Krever secret RESEND_API_KEY (wrangler secret put RESEND_API_KEY). Uten den sendes ingenting,
-// og bestillingen lagres som vanlig. Avsender og mottaker for varsel står i wrangler.jsonc.
+// Krever secrets SMTP_BRUKER og SMTP_PASSORD (wrangler secret put). Uten dem sendes ingenting,
+// og bestillingen lagres som vanlig. Server, avsender og mottaker for varsel står i wrangler.jsonc.
 
 import { finnPlagg, GENERISK } from "./katalog.js";
+import { sendMeldinger } from "./smtp.js";
 
 const TEKST = {
   nb: {
@@ -17,6 +19,7 @@ const TEKST = {
     total: "Totalt",
     betaling: "Du betaler når du henter hos Intersport Rongve, Høgvollveien 8. Ingen betaling på forhånd.",
     sporsmal: "Spørsmål eller endringer? Svar på denne e-posten.",
+    sikkerhet: "Vi vil aldri be deg om personopplysninger, passord eller betaling på e-post, eller be deg klikke på lenker utenfor ntnui-alesund.no.",
     hilsen: "Hilsen NTNUI Ålesund",
     farge: { svart: "svart", hvit: "hvit" },
     kjonn: { herre: "herre", dame: "dame" },
@@ -36,6 +39,7 @@ const TEKST = {
     total: "Total",
     betaling: "You pay when you pick up at Intersport Rongve, Høgvollveien 8. No payment in advance.",
     sporsmal: "Questions or changes? Reply to this email.",
+    sikkerhet: "We will never ask for personal information, passwords or payment by email, or ask you to click links outside ntnui-alesund.no.",
     hilsen: "Best regards, NTNUI Ålesund",
     farge: { svart: "black", hvit: "white" },
     kjonn: { herre: "men", dame: "women" },
@@ -84,15 +88,16 @@ ${rader.map((r) => `<tr><td style="padding:12px 0;border-bottom:1px solid #dfe9e
 </table>
 <p style="margin:18px 0 0;padding:14px 16px;background:#fafae0;border-radius:10px;font-size:14px;line-height:1.5">${esc(t.betaling)}</p>
 <p style="margin:20px 0 0;font-size:14px;color:#56665b">${esc(t.sporsmal)}<br>${esc(t.hilsen)}</p>
+<p style="margin:20px 0 0;padding-top:16px;border-top:1px solid #dfe9e1;font-size:12px;line-height:1.5;color:#56665b">${esc(t.sikkerhet)}</p>
 </td></tr></table></td></tr></table></body></html>`;
 
   const tekst = [
     t.hei(fornavn), "", t.intro, "", `${t.ordrenr}: ${b.ordrenr}`, "",
     ...rader.map((r) => `${r.tittel} – ${r.sum}\n  ${r.detaljer}`), "",
-    `${t.total}: ${kroner(b.sum, sprak)}`, "", t.betaling, "", t.sporsmal, t.hilsen,
+    `${t.total}: ${kroner(b.sum, sprak)}`, "", t.betaling, "", t.sporsmal, t.hilsen, "", t.sikkerhet,
   ].join("\n");
 
-  return { to: b.epost, subject: t.emne(b.ordrenr), html, text: tekst };
+  return { til: b.epost, emne: t.emne(b.ordrenr), html, text: tekst };
 }
 
 // Varselet til materialansvarlig er alltid på norsk
@@ -106,28 +111,23 @@ function varsel(b, linjer, env) {
     ...(b.kommentar ? ["", `Kommentar: ${b.kommentar}`] : []),
     "", `Se alle bestillinger: ${env.SHOP_ADMIN_URL}`,
   ].join("\n");
-  return { to: env.VARSEL_TIL, subject: `Ny bestilling ${b.ordrenr} – ${b.navn}`, text: tekst };
+  return { til: env.VARSEL_TIL, emne: `Ny bestilling ${b.ordrenr} – ${b.navn}`, text: tekst };
 }
 
-async function send(env, melding) {
-  const svar = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: env.EPOST_FRA, reply_to: env.VARSEL_TIL, ...melding }),
-  });
-  if (!svar.ok) throw new Error(`Resend ${svar.status}: ${await svar.text()}`);
-}
-
-// Sender kvittering og varsel. Feiler aldri bestillingen: svarer bare om kvitteringen gikk.
+// Sender kvittering og varsel i én SMTP-økt. Feiler aldri bestillingen: svarer bare om kvitteringen gikk.
 export async function sendEposter(env, bestilling, linjer) {
-  if (!env.RESEND_API_KEY) return false;
-  const [kunde, admin] = await Promise.allSettled([
-    env.KVITTERING === "av" ? Promise.reject(new Error("Kvittering er slått av")) : send(env, kvittering(bestilling, linjer)),
-    env.VARSEL_TIL ? send(env, varsel(bestilling, linjer, env)) : Promise.resolve(),
-  ]);
-  if (admin.status === "rejected") console.error(admin.reason);
-  if (kunde.status === "rejected" && env.KVITTERING !== "av") console.error(kunde.reason);
-  return kunde.status === "fulfilled";
+  if (!env.SMTP_BRUKER || !env.SMTP_PASSORD) return false;
+  const meldinger = [kvittering(bestilling, linjer)];
+  if (env.VARSEL_TIL) meldinger.push(varsel(bestilling, linjer, env));
+  try {
+    const [kunde, admin] = await sendMeldinger(env, meldinger);
+    if (admin && !admin.ok) console.error("Varsel til materialansvarlig feilet:", admin.feil?.message);
+    if (!kunde.ok) console.error("Kvittering til kunden feilet:", kunde.feil?.message);
+    return kunde.ok;
+  } catch (feil) {
+    console.error("E-post feilet:", feil?.message);
+    return false;
+  }
 }
 
 export const _test = { kvittering, varsel };
