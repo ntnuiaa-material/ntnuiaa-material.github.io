@@ -111,7 +111,7 @@ const PLAGG = [
   },
   {
     // Samme plagg som Entrada26 T-skjorte i bildene (svart med hvite detaljer), så bildene og målene er delt.
-    // Bare herremodell (JZ2505). Ungdomsmodellen JZ2524 selges ikke. 199 × 0,75 = 149,25, rundet til 150.
+    // Herre (JZ2505) og dame (JZ2492, Regular). Ungdomsmodellen JZ2524 selges ikke. 199 × 0,75 = 149,25, rundet til 150.
     id: "entrada-jersey",
     navn: { nb: "Entrada26 jersey", en: "Entrada26 jersey" },
     kategori: "CASUAL",
@@ -120,15 +120,15 @@ const PLAGG = [
     farger: {
       svart: { front: "img/plagg/entrada-svart-front.webp", bak: "img/plagg/entrada-svart-bak.webp", prikk: "#111111" },
     },
-    artikler: { "svart:herre": "JZ2505" },
-    storrelser: { herre: HERRE },
+    artikler: { "svart:herre": "JZ2505", "svart:dame": "JZ2492" },
+    storrelser: { herre: HERRE, dame: DAME },
     stoff: { nb: "Climacool · polyester", en: "Climacool · polyester" },
     info: {
-      passform: { herre: "Slim" },
+      passform: { herre: "Slim", dame: "Regular" },
       teknologi: "Climacool",
       materiale: { nb: "100 % resirkulert polyester", en: "100% recycled polyester" },
     },
-    kjonn: ["herre"],
+    kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
     front: ["ntnui", "tekst", "ingen"],
     bak: ["motiv", "logo", "ingen"],

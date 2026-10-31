@@ -98,10 +98,13 @@ test("trykksoner: rotasjonen fra sonerCm følger med til sona", () => {
   assert.equal(PLAGG.find((p) => p.id === "tiro-drakt").soner.bryst.rot, undefined);
 });
 
-test("Entrada26 jersey: herre, JZ2505, 150 kr og samme soner som Entrada TEE", () => {
+test("Entrada26 jersey: herre JZ2505 og dame JZ2492, 150 kr og samme soner som Entrada TEE", () => {
   const j = PLAGG.find((p) => p.id === "entrada-jersey");
-  assert.deepEqual(j.kjonn, ["herre"]);
+  assert.deepEqual(j.kjonn, ["herre", "dame"]);
   assert.equal(j.artikler["svart:herre"], "JZ2505");
+  assert.equal(j.artikler["svart:dame"], "JZ2492");
+  assert.deepEqual(j.storrelser.dame, ["2XS", "XS", "S", "M", "L", "XL", "2XL"]);
+  assert.deepEqual(j.info.passform, { herre: "Slim", dame: "Regular" });
   assert.equal(j.pris, Math.round(j.katalogpris * 0.75 / 5) * 5);
   assert.equal(j.pris, 150);
   assert.deepEqual(j.soner, PLAGG.find((p) => p.id === "entrada-tee").soner);
