@@ -36,7 +36,7 @@ const TRYKKPRIS = {
 // Trykket plasseres i cm, ikke i prosent: TRYKKSONER under er den ene tabellen, og hvert plagg har
 // `mal` (målt på bildene) som gjør cm om til prosent av bildelerretet (900 × 1000). Da får trykket samme
 // fysiske størrelse og plass på alle plagg, selv om mockupene fyller lerretet ulikt.
-// Mockupene er PSD-er (Tiro jersey, Entrada TEE og shorts) og bilder generert med Nano Banana 2.1.
+// Mockupene er PSD-er (Tiro jersey, Entrada TEE og Tiro shorts) og bilder generert med Nano Banana 2.1.
 // Plaggbildene er laget fra de samme PSD-ene med NTNUI-trykket fjernet (verktoy/ i repoet).
 //
 // Regel fra Kristian: Climacool og alt som heter JERSEY er svart med hvite dekaler.
@@ -134,13 +134,16 @@ const PLAGG = [
   },
   {
     // Står ikke på kolleksjonsarket fra Intersport. Medlemsprisen er regnet ut, ikke bekreftet.
+    // Bildene er generert med Nano Banana 2.1 fra Tiro-shortsen (uten striper), 31.10.2026, og passer i samme
+    // plaggboks som Tiro-bildene. Derfor er `mal` og trykksonene de samme som på tiro-shorts. Baksidebildet
+    // er klart, men vises først når `sider` og `bak` åpner for ryggtrykk (Tiro-shortsen har ikke det).
     id: "entrada-short",
     navn: { nb: "Entrada26 shorts", en: "Entrada26 shorts" },
     kategori: "SHORTS",
     katalogpris: 199,
     pris: 150,
     farger: {
-      svart: { front: "img/plagg/entrada-short-svart-front.webp", prikk: "#111111" },
+      svart: { front: "img/plagg/entrada-short-svart-front.webp?v=20261031", bak: "img/plagg/entrada-short-svart-bak.webp?v=20261031", prikk: "#111111" },
     },
     artikler: { "svart:herre": "JZ2521", "svart:dame": "JZ2533" },
     storrelser: { herre: HERRE, dame: DAME },
@@ -157,9 +160,10 @@ const PLAGG = [
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
     mal: {
-      front: { hals: { x: 48.4, y: 1.2 }, bredde: 61.7, cm: 40 },
+      front: { hals: { x: 49.7, y: 1.2 }, bredde: 67.4, cm: 40 },
     },
-    sonerCm: { bryst: { b: 10, dx: -16.5, dy: 43.8 } }, // nede på venstre lår, som Kristian markerte 30.10
+    // Som tiro-shorts: nede på venstre lår, rett over fallet, rotert etter fallet (samme omriss)
+    sonerCm: { bryst: { b: 10, dx: -16.5, dy: 54.5, rot: 3.5 } },
   },
   {
     // Bare herremodell. Hvit (JZ6579, herre) finnes, men har ikke bilde ennå. Bildet er generert med Nano Banana 2.1
