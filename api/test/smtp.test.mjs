@@ -175,12 +175,77 @@ test("mangler secrets gir feil før tilkobling", async () => {
   await assert.rejects(sendMeldinger({ ...env, SMTP_PASSORD: "" }, [], { koble: async () => assert.fail() }), /mangler/);
 });
 
+const linjerEn = [{ plagg: "ukjent", antall: 1, stykkpris: 100, farge: "svart", kjonn: "herre", storrelse: "M", gruppe: "Generisk", front: "ingen", bak: "ingen", navn: null }];
+const SIKKERHET = {
+  nb: "Vi vil aldri be deg om personopplysninger, passord eller betaling på e-post, eller be deg klikke på lenker utenfor ntnui-alesund.no.",
+  en: "We will never ask for personal information, passwords or payment by email, or ask you to click links outside ntnui-alesund.no.",
+};
+const AUTOMATISK = {
+  nb: "Denne e-posten er automatisk generert. Du kan likevel svare på den hvis du har spørsmål.",
+  en: "This email was generated automatically. You can still reply if you have questions.",
+};
+const kvitt = (sprak) => epostTest.kvittering({ navn: "Kari Nordmann", epost: "kari@stud.ntnu.no", ordrenr: "NTNUI-1001", sum: 100, sprak }, linjerEn);
+
 test("kvitteringen har sikkerhetsmerknad på riktig språk og ingen lenker", () => {
-  const linjer = [{ plagg: "ukjent", antall: 1, stykkpris: 100, farge: "svart", kjonn: "herre", storrelse: "M", gruppe: "Generisk", front: "ingen", bak: "ingen", navn: null }];
-  for (const [sprak, tekst] of [["nb", "Vi vil aldri be deg om personopplysninger, passord eller betaling på e-post, eller be deg klikke på lenker utenfor ntnui-alesund.no."],
-    ["en", "We will never ask for personal information, passwords or payment by email, or ask you to click links outside ntnui-alesund.no."]]) {
-    const k = epostTest.kvittering({ navn: "Kari Nordmann", epost: "kari@stud.ntnu.no", ordrenr: "NTNUI-1001", sum: 100, sprak }, linjer);
-    assert.ok(k.html.includes(tekst) && k.text.endsWith(tekst));
+  for (const sprak of ["nb", "en"]) {
+    const k = kvitt(sprak);
+    assert.ok(k.html.includes(SIKKERHET[sprak]) && k.text.endsWith(SIKKERHET[sprak]));
     assert.ok(!/href=|https?:\/\//i.test(k.html + k.text));
   }
+});
+
+test("kvitteringen er merket som automatisk generert, rett over sikkerhetsmerknaden, uten å endre emnet", () => {
+  for (const sprak of ["nb", "en"]) {
+    const k = kvitt(sprak);
+    assert.ok(k.html.includes(AUTOMATISK[sprak]));
+    assert.ok(k.text.endsWith(`${AUTOMATISK[sprak]}\n\n${SIKKERHET[sprak]}`));
+    assert.ok(k.html.indexOf(AUTOMATISK[sprak]) < k.html.indexOf(SIKKERHET[sprak]));
+  }
+  assert.equal(kvitt("nb").emne, "Bestillingen din er mottatt – NTNUI-1001");
+  assert.equal(kvitt("en").emne, "Your order has been received – NTNUI-1001");
+  assert.ok(!epostTest.varsel({ navn: "K", telefon: "1", epost: "a@b.no", ordrenr: "N", sum: 1 }, [], { VARSEL_TIL: "a@b.no" }).text.includes("automatisk"));
+});
+
+test("kvittering med logo: multipart/related med alternative og inline PNG med CID", () => {
+  const k = kvitt("nb");
+  assert.match(k.html, /<img src="cid:logo@ntnui-alesund\.no" alt="NTNUI Ålesund" width="\d+" height="\d+"/);
+  assert.ok(!/data:/i.test(k.html));
+  const m = byggMelding({ fra: { navn: "x", adresse: "material@ntnui-alesund.no" }, til: "kari@stud.ntnu.no", emne: "E", text: k.text, html: k.html, bilder: k.bilder, grense: "ALT", grenseRelated: "REL" });
+  assert.ok(!/(^|[^\r])\n/.test(m), "bare CRLF");
+  assert.ok(m.includes('Content-Type: multipart/related; type="multipart/alternative"; boundary="REL"'));
+  // Rekkefølge: related åpnes, alternative ligger inni, så bildet, så related lukkes
+  const iRel = m.indexOf("--REL\r\n"), iAlt = m.indexOf('Content-Type: multipart/alternative; boundary="ALT"');
+  const iAltSlutt = m.indexOf("--ALT--"), iBilde = m.indexOf("Content-Type: image/png"), iRelSlutt = m.indexOf("--REL--");
+  assert.ok(iRel > 0 && iRel < iAlt && iAlt < iAltSlutt && iAltSlutt < iBilde && iBilde < iRelSlutt);
+  assert.ok(m.endsWith("--REL--\r\n"));
+  const bildeDel = m.slice(iBilde, iRelSlutt);
+  assert.ok(bildeDel.includes("Content-ID: <logo@ntnui-alesund.no>\r\n"));
+  assert.ok(bildeDel.includes("Content-Disposition: inline\r\n"));
+  assert.ok(bildeDel.includes("Content-Transfer-Encoding: base64\r\n"));
+  const b64 = bildeDel.split("\r\n\r\n")[1].replace(/\r\n$/, "");
+  for (const l of b64.split("\r\n")) assert.ok(l.length <= 76);
+  const png = Buffer.from(b64.replace(/\r\n/g, ""), "base64");
+  assert.deepEqual([...png.subarray(0, 8)], [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  assert.ok(png.length < 15000);
+  // HTML-delen i alternative dekodes og refererer til cid, ingen lenker
+  const htmlDel = m.slice(m.indexOf("Content-Type: text/html"), iAltSlutt).split("\r\n\r\n")[1];
+  const html = Buffer.from(htmlDel.replace(/\r\n/g, ""), "base64").toString("utf8");
+  assert.equal(html, k.html.replace(/\n/g, "\r\n"));
+  assert.ok(html.includes("cid:logo@ntnui-alesund.no") && !/href=|https?:\/\//i.test(html));
+  assert.ok(m.length < 40000, `meldingen er ${m.length} byte`);
+});
+
+test("full økt med kvittering: logoen går gjennom SMTP-laget uendret", async () => {
+  const s = falskServer();
+  const k = kvitt("en");
+  const res = await sendMeldinger(env, [k], { koble: async () => s.socket });
+  assert.equal(res[0].ok, true);
+  const data = s.logg.find((l) => l.data).data;
+  assert.ok(data.includes("Content-ID: <logo@ntnui-alesund.no>") && data.includes("multipart/related"));
+  assert.ok(data.includes(k.bilder[0].base64.slice(0, 76) + "\r\n"));
+});
+
+test("uten bilder er meldingen som før (multipart/alternative på toppnivå)", () => {
+  const m = byggMelding({ fra: { navn: "x", adresse: "a@b.no" }, til: "a@b.no", emne: "x", text: "t", html: "<p>h</p>", grense: "G" });
+  assert.ok(m.includes('Content-Type: multipart/alternative; boundary="G"') && !m.includes("multipart/related") && !m.includes("image/png"));
 });

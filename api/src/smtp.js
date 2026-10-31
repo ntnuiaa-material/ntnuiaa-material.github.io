@@ -2,7 +2,8 @@
 //
 // Sender via Domeneshop sin SMTP-server med implisitt TLS (port 465) og innlogging som den
 // ekte postkassa. Støtter AUTH PLAIN og AUTH LOGIN, flere mottakere, dot-stuffing og MIME
-// (multipart/alternative med tekst og HTML, emne kodet etter RFC 2047).
+// (multipart/alternative med tekst og HTML, emne kodet etter RFC 2047). Med innebygde bilder
+// (CID, f.eks. logoen i kvitteringen) pakkes alternative inn i multipart/related.
 //
 // Secrets (wrangler secret put): SMTP_BRUKER og SMTP_PASSORD. De logges aldri, og feilmeldingene
 // under inneholder bare kommandoens navn og svaret fra serveren, aldri det som ble sendt.
@@ -64,8 +65,13 @@ function dotStuff(tekst) {
   return tekst.replace(/(^|\n)\./g, "$1..");
 }
 
+// Base64 som allerede er ferdig kodet (f.eks. et bilde), brutt på 76 tegn
+const brytBase64 = (b64) => (b64.match(/.{1,76}/g) || []).join(CRLF);
+
 // Bygger hele meldingen med CRLF. fra = { navn, adresse }, til = én adresse eller liste.
-export function byggMelding({ fra, til, svarTil, emne, text, html, dato = new Date(), id = crypto.randomUUID(), grense }) {
+// bilder: [{ cid, type, base64 }] sendes inline som multipart/related rundt tekst og HTML.
+// HTML refererer til dem med <img src="cid:...">. grense og grenseRelated er for tester.
+export function byggMelding({ fra, til, svarTil, emne, text, html, bilder = [], dato = new Date(), id = crypto.randomUUID(), grense, grenseRelated }) {
   const mottakere = (Array.isArray(til) ? til : [til]).map(sjekkAdresse);
   const domene = fra.adresse.split("@")[1];
   const hode = [
@@ -85,15 +91,32 @@ export function byggMelding({ fra, til, svarTil, emne, text, html, dato = new Da
   if (!html) return [...hode, ...tekstDel, ""].join(CRLF);
 
   const g = grense || `=_ntnui_${crypto.randomUUID().replace(/-/g, "")}`;
-  return [
-    ...hode,
-    `Content-Type: multipart/alternative; boundary="${g}"`, "",
+  const alternative = [
     `--${g}`, ...tekstDel,
     `--${g}`,
     "Content-Type: text/html; charset=UTF-8",
     "Content-Transfer-Encoding: base64", "",
     base64Linjer(html.replace(/\r?\n/g, CRLF)),
-    `--${g}--`, "",
+    `--${g}--`,
+  ];
+  if (!bilder.length) return [...hode, `Content-Type: multipart/alternative; boundary="${g}"`, "", ...alternative, ""].join(CRLF);
+
+  const r = grenseRelated || `=_ntnui_rel_${crypto.randomUUID().replace(/-/g, "")}`;
+  return [
+    ...hode,
+    `Content-Type: multipart/related; type="multipart/alternative"; boundary="${r}"`, "",
+    `--${r}`,
+    `Content-Type: multipart/alternative; boundary="${g}"`, "",
+    ...alternative,
+    ...bilder.flatMap((b) => [
+      `--${r}`,
+      `Content-Type: ${b.type}`,
+      "Content-Transfer-Encoding: base64",
+      `Content-ID: <${b.cid}>`,
+      "Content-Disposition: inline", "",
+      brytBase64(b.base64),
+    ]),
+    `--${r}--`, "",
   ].join(CRLF);
 }
 
@@ -196,7 +219,7 @@ async function standardKoble(host, port) {
 // Sender flere meldinger i én økt, hver i sin transaksjon. En melding som serveren avviser
 // stopper ikke de andre. Svarer med [{ ok: true } | { ok: false, feil }] i samme rekkefølge.
 // Feil på tilkobling eller innlogging kastes.
-// meldinger: [{ til, emne, text, html }]
+// meldinger: [{ til, emne, text, html, bilder }]
 export async function sendMeldinger(env, meldinger, { koble = standardKoble, tidsgrense = TIDSGRENSE_MS } = {}) {
   if (!env.SMTP_BRUKER || !env.SMTP_PASSORD) throw new Error("SMTP: SMTP_BRUKER eller SMTP_PASSORD mangler");
   const fra = { navn: env.EPOST_FRA_NAVN, adresse: env.EPOST_FRA_ADRESSE };

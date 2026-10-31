@@ -7,6 +7,7 @@
 
 import { finnPlagg, GENERISK } from "./katalog.js";
 import { sendMeldinger } from "./smtp.js";
+import { LOGO_BREDDE, LOGO_HOYDE, LOGO_CID, LOGO_PNG_BASE64 } from "./logo.js";
 
 const TEKST = {
   nb: {
@@ -19,6 +20,7 @@ const TEKST = {
     total: "Totalt",
     betaling: "Du betaler når du henter hos Intersport Rongve, Høgvollveien 8. Ingen betaling på forhånd.",
     sporsmal: "Spørsmål eller endringer? Svar på denne e-posten.",
+    automatisk: "Denne e-posten er automatisk generert. Du kan likevel svare på den hvis du har spørsmål.",
     sikkerhet: "Vi vil aldri be deg om personopplysninger, passord eller betaling på e-post, eller be deg klikke på lenker utenfor ntnui-alesund.no.",
     hilsen: "Hilsen NTNUI Ålesund",
     farge: { svart: "svart", hvit: "hvit" },
@@ -39,6 +41,7 @@ const TEKST = {
     total: "Total",
     betaling: "You pay when you pick up at Intersport Rongve, Høgvollveien 8. No payment in advance.",
     sporsmal: "Questions or changes? Reply to this email.",
+    automatisk: "This email was generated automatically. You can still reply if you have questions.",
     sikkerhet: "We will never ask for personal information, passwords or payment by email, or ask you to click links outside ntnui-alesund.no.",
     hilsen: "Best regards, NTNUI Ålesund",
     farge: { svart: "black", hvit: "white" },
@@ -76,7 +79,7 @@ function kvittering(b, linjer) {
   const html = `<!doctype html><html lang="${sprak === "en" ? "en" : "nb"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body style="margin:0;background:#eef5ee;font-family:Helvetica,Arial,sans-serif;color:#0b1f12">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef5ee;padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden">
-<tr><td style="background:#007d32;padding:22px 28px;color:#fafa00;font-size:20px;font-weight:bold;letter-spacing:.5px">NTNUI ÅLESUND</td></tr>
+<tr><td bgcolor="#007d32" style="background:#007d32;padding:16px 28px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="font-size:0;line-height:0"><img src="cid:${LOGO_CID}" alt="NTNUI Ålesund" width="${LOGO_BREDDE}" height="${LOGO_HOYDE}" style="display:block;border:0;outline:none;text-decoration:none;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:24px;font-weight:bold;color:#fafa00"></td></tr></table></td></tr>
 <tr><td style="padding:28px">
 <p style="margin:0 0 12px;font-size:18px;font-weight:bold">${esc(t.hei(fornavn))}</p>
 <p style="margin:0 0 20px;font-size:15px;line-height:1.5">${esc(t.intro)}</p>
@@ -88,16 +91,17 @@ ${rader.map((r) => `<tr><td style="padding:12px 0;border-bottom:1px solid #dfe9e
 </table>
 <p style="margin:18px 0 0;padding:14px 16px;background:#fafae0;border-radius:10px;font-size:14px;line-height:1.5">${esc(t.betaling)}</p>
 <p style="margin:20px 0 0;font-size:14px;color:#56665b">${esc(t.sporsmal)}<br>${esc(t.hilsen)}</p>
-<p style="margin:20px 0 0;padding-top:16px;border-top:1px solid #dfe9e1;font-size:12px;line-height:1.5;color:#56665b">${esc(t.sikkerhet)}</p>
+<p style="margin:20px 0 0;padding-top:16px;border-top:1px solid #dfe9e1;font-size:12px;line-height:1.5;color:#56665b">${esc(t.automatisk)}</p>
+<p style="margin:8px 0 0;font-size:12px;line-height:1.5;color:#56665b">${esc(t.sikkerhet)}</p>
 </td></tr></table></td></tr></table></body></html>`;
 
   const tekst = [
     t.hei(fornavn), "", t.intro, "", `${t.ordrenr}: ${b.ordrenr}`, "",
     ...rader.map((r) => `${r.tittel} – ${r.sum}\n  ${r.detaljer}`), "",
-    `${t.total}: ${kroner(b.sum, sprak)}`, "", t.betaling, "", t.sporsmal, t.hilsen, "", t.sikkerhet,
+    `${t.total}: ${kroner(b.sum, sprak)}`, "", t.betaling, "", t.sporsmal, t.hilsen, "", t.automatisk, "", t.sikkerhet,
   ].join("\n");
 
-  return { til: b.epost, emne: t.emne(b.ordrenr), html, text: tekst };
+  return { til: b.epost, emne: t.emne(b.ordrenr), html, text: tekst, bilder: [{ cid: LOGO_CID, type: "image/png", base64: LOGO_PNG_BASE64 }] };
 }
 
 // Varselet til materialansvarlig er alltid på norsk
