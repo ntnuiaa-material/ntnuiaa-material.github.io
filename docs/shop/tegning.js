@@ -54,6 +54,16 @@ function trykkLag(valg, side) {
     }
   }
   for (const l of lag) if (l.posisjon) l.sone = s[l.posisjon];
+  // Motivet har ikke fast boks: størrelsen følger motivets proporsjoner (se motivMaal i katalog.js). Sona i
+  // katalogen er den største boksen. cm og cmH er det som faktisk trykkes, og det admin skriver i ZIP/CSV.
+  const motiv = lag.find((l) => l.posisjon === "motiv");
+  if (motiv && g && g.motivAspekt) {
+    const z = soneMaal(p, "motiv");
+    const m = motivMaal(z, g.motivAspekt);
+    motiv.cm = m.b;
+    motiv.cmH = m.h;
+    motiv.sone = { ...motiv.sone, b: Math.round(motiv.sone.b * m.b / z.b * 100) / 100, h: Math.round(motiv.sone.h * m.h / z.h * 100) / 100 };
+  }
   return lag;
 }
 

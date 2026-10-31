@@ -2,7 +2,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { _test } from "../src/shop.js";
-import { PLAGG, TRYKKSONER } from "../src/katalog.js";
+import { readFileSync } from "node:fs";
+import { PLAGG, GRUPPER, TRYKKSONER, motivMaal } from "../src/katalog.js";
 
 class Brukerfeil extends Error {
   constructor(melding, status = 400) { super(melding); this.status = status; }
@@ -111,4 +112,25 @@ test("trykksoner: alle soner ligger innenfor lerretet", () => {
     assert.ok(s.x - s.b / 2 >= 0 && s.x + s.b / 2 <= 100, `${p.id}.${navn} går utenfor sidene`);
     assert.ok(s.y > 0 && s.y < 100, `${p.id}.${navn} går utenfor toppen/bunnen`);
   }
+});
+
+test("motiv: motivAspekt stemmer med viewBox i begge SVG-ene, og viewBox er beskåret til motivet", () => {
+  for (const g of GRUPPER.filter((x) => x.motiv)) {
+    for (const f of ["hvit", "sort"]) {
+      const svg = readFileSync(new URL(`../../docs/shop/img/motiv/${g.slug}-${f}.svg`, import.meta.url), "utf8");
+      const [, , , w, h] = svg.match(/viewBox="([-\d.]+) ([-\d.]+) ([\d.]+) ([\d.]+)"/).map(Number);
+      assert.ok(Math.abs(w / h / g.motivAspekt - 1) < 0.01, `${g.slug}-${f}: aspekt ${(w / h).toFixed(3)}, katalogen sier ${g.motivAspekt}`);
+    }
+  }
+});
+
+test("motiv: alle motiv får samme areal, innenfor største boks, og Klatring fyller bredden", () => {
+  const z = TRYKKSONER.motiv;
+  for (const g of GRUPPER.filter((x) => x.motiv)) {
+    const m = motivMaal(z, g.motivAspekt);
+    assert.ok(m.b <= z.b + 0.01 && m.h <= z.h + 0.01, `${g.slug}: ${m.b} x ${m.h} cm er utenfor boksen`);
+    assert.ok(Math.abs(m.b / m.h / g.motivAspekt - 1) < 0.01, `${g.slug}: proporsjonene er endret`);
+    assert.ok(m.b * m.h >= z.areal * 0.97 && m.b * m.h <= z.areal * 1.03, `${g.slug}: areal ${(m.b * m.h).toFixed(0)} cm²`);
+  }
+  assert.equal(motivMaal(z, GRUPPER.find((x) => x.slug === "klatring").motivAspekt).b, z.b);
 });

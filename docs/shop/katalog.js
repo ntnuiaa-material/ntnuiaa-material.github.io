@@ -3,27 +3,29 @@
 // Trykkprisene er Eriks svar 03.09.2026.
 
 // motiv: gruppa har Entrada-filer (tekst foran, tekst bak, ESTD og motiv) som SVG fra PDF-ene
+// motivAspekt: bredde / høyde på motivfila (viewBox, beskåret til selve motivet). Må stemme med img/motiv/<slug>-*.svg
+//   (api/test sjekker det). Brukes av motivMaal() for å regne ut hvor stort motivet trykkes.
 // vektor: gruppelogoen finnes som SVG med kurver i img/logo/trykk/<slug>.svg (brukes som trykkfil bak).
 //   Uten vektor blir WebP-en på siden (560×560) lagt i ZIP-en, og admin merker den «kun rasterfil».
 const GRUPPER = [
   { navn: "Badminton", slug: "badminton", motiv: false, vektor: true },
-  { navn: "Basketball", slug: "basketball", motiv: true, vektor: true },
-  { navn: "Crosstrain", slug: "crosstrain", motiv: true, vektor: true },
-  { navn: "Dans", slug: "dans", motiv: true, vektor: true },
-  { navn: "Fotball", slug: "fotball", motiv: true, vektor: true },
-  { navn: "Futsal Damer", slug: "futsal-damer", motiv: true, vektor: true },
-  { navn: "Futsal Herrer", slug: "futsal-herrer", motiv: true, vektor: true },
-  { navn: "Golf", slug: "golf", motiv: true, vektor: true },
-  { navn: "Håndball", slug: "handball", motiv: true, vektor: true },
-  { navn: "Klatring", slug: "klatring", motiv: true, vektor: true },
-  { navn: "Løping", slug: "loping", motiv: true, vektor: true },
-  { navn: "Padel", slug: "padel", motiv: true, vektor: true },
-  { navn: "Seiling", slug: "seiling", motiv: true, vektor: true },
+  { navn: "Basketball", slug: "basketball", motiv: true, motivAspekt: 1.042, vektor: true },
+  { navn: "Crosstrain", slug: "crosstrain", motiv: true, motivAspekt: 1.164, vektor: true },
+  { navn: "Dans", slug: "dans", motiv: true, motivAspekt: 1.19, vektor: true },
+  { navn: "Fotball", slug: "fotball", motiv: true, motivAspekt: 1.042, vektor: true },
+  { navn: "Futsal Damer", slug: "futsal-damer", motiv: true, motivAspekt: 1.211, vektor: true },
+  { navn: "Futsal Herrer", slug: "futsal-herrer", motiv: true, motivAspekt: 1.19, vektor: true },
+  { navn: "Golf", slug: "golf", motiv: true, motivAspekt: 1.405, vektor: true },
+  { navn: "Håndball", slug: "handball", motiv: true, motivAspekt: 0.998, vektor: true },
+  { navn: "Klatring", slug: "klatring", motiv: true, motivAspekt: 1.407, vektor: true },
+  { navn: "Løping", slug: "loping", motiv: true, motivAspekt: 1.305, vektor: true },
+  { navn: "Padel", slug: "padel", motiv: true, motivAspekt: 0.989, vektor: true },
+  { navn: "Seiling", slug: "seiling", motiv: true, motivAspekt: 1.369, vektor: true },
   { navn: "Styrkesport", slug: "styrkesport", motiv: false, vektor: true },
-  { navn: "Svømming", slug: "svomming", motiv: true, vektor: true },
-  { navn: "Tennis", slug: "tennis", motiv: true, vektor: true },
-  { navn: "Turn & Calisthenics", slug: "turn-og-calisthenics", motiv: true, vektor: true },
-  { navn: "Volleyball", slug: "volleyball", motiv: true, vektor: true },
+  { navn: "Svømming", slug: "svomming", motiv: true, motivAspekt: 1.0, vektor: true },
+  { navn: "Tennis", slug: "tennis", motiv: true, motivAspekt: 1.15, vektor: true },
+  { navn: "Turn & Calisthenics", slug: "turn-og-calisthenics", motiv: true, motivAspekt: 1.228, vektor: true },
+  { navn: "Volleyball", slug: "volleyball", motiv: true, motivAspekt: 1.022, vektor: true },
 ];
 const GENERISK = "generisk";
 
@@ -457,7 +459,8 @@ const PLAGG = [
 //
 // side:  hvilken side av plagget sonen ligger på (bestemmer hvilken `mal` som brukes)
 // b:     bredde i cm (trykkfila skaleres til denne bredden)
-// h:     høyde i cm, bare for soner med fast boks (motiv) og for versalhøyden på navnet
+// h:     høyde i cm, bare for soner med fast boks (motiv, da som største høyde) og for versalhøyden på navnet
+// areal: (bare motiv) ønsket areal i cm² av boksen rundt motivet, se motivMaal()
 // dx:    cm sideveis fra midtlinja. Positiv er mot høyre i bildet (brukerens venstre side)
 // dy:    cm ned fra halsen til midten av trykket. Målt på mockupen med bredden som målestokk, så
 //        det er ikke en nøyaktig avstand langs plagget (mockupene er litt strukket i høyden)
@@ -472,10 +475,24 @@ const TRYKKSONER = {
   tekst: { side: "front", b: 18, dx: 14.5, dy: 26 },
   logo: { side: "bak", b: 42, dx: 0, dy: 38.5 },
   baktekst: { side: "bak", b: 48, dx: 0, dy: 18 },
-  motiv: { side: "bak", b: 38, h: 27, dx: 0, dy: 42 },
+  // motiv: b og h er største boks (cm), ikke selve motivet. Hvert motiv trykkes så stort at flatearealet av
+  // boksen rundt det blir `areal` cm² (= Klatring på 38 × 27 cm), men innenfor b og h. Brede motiv blir
+  // dermed 38 cm brede, kvadratiske og runde vokser i høyden opp til 32 cm. Se motivMaal().
+  motiv: { side: "bak", b: 38, h: 32, areal: 1026, dx: 0, dy: 42 },
   estd: { side: "bak", b: 15, dx: 0, dy: 65 },
   navn: { side: "bak", b: 37, h: 4, dx: 0, dy: 93 },
 };
+
+// Hvor stort et motiv trykkes, i cm: {b, h}. `z` er motivsona (TRYKKSONER.motiv, evt. med plaggets avvik) og
+// `aspekt` bredde/høyde på motivfila. Alle motiv får samme areal (z.areal) slik at de oppleves like store, men
+// aldri bredere enn z.b eller høyere enn z.h. Plassen mellom «NTNUI ÅLESUND» (underkant ca. 21 cm under halsen) og
+// ESTD (overkant ca. 64 cm) er ca. 43 cm, og motivet er sentrert på dy 42, så h 32 gir minst 5 cm luft på hver side.
+function motivMaal(z, aspekt) {
+  let b = Math.min(z.b, Math.sqrt(z.areal * aspekt));
+  let h = b / aspekt;
+  if (h > z.h) { h = z.h; b = h * aspekt; }
+  return { b: Math.round(b * 10) / 10, h: Math.round(h * 10) / 10 };
+}
 
 // Sonene et plagg faktisk bruker, etter hva det kan trykkes på det
 function sonePaaPlagg(p, sone) {

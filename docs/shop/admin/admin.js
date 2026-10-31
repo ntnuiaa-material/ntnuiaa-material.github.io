@@ -225,7 +225,8 @@ function trykkFor(l) {
   const p = finnPlagg(l.plagg);
   return ["front", "bak"].flatMap((side) => trykkLag(v, side).filter((x) => x.posisjon).map((x) => {
     const m = soneMaal(p, x.posisjon);
-    return { ...x, side, cm: x.posisjon === "navn" ? m.h : m.b, rot: m.rot || 0 };
+    // Motivet har egen størrelse regnet ut per gruppe (cm og cmH fra trykkLag), ikke bare bredden på sona
+    return { ...x, side, cm: x.cm ?? (x.posisjon === "navn" ? m.h : m.b), rot: m.rot || 0 };
   }));
 }
 
@@ -316,7 +317,7 @@ async function forhandsvisning(b, l, nr, antallLinjer) {
     [`Farge: ${NAVN[l.farge] || l.farge}   ·   Snitt: ${NAVN[l.kjonn]}   ·   Størrelse: ${l.storrelse}   ·   Antall: ${l.antall}`, ""],
     [`Gruppe: ${gruppeTekst(l)}`, ""],
     ...trykk.map((t) => {
-      const mal = (t.posisjon === "navn" ? `«${t.tekst}», versalhøyde ${t.cm} cm` : `${t.cm} cm bredt`)
+      const mal = (t.posisjon === "navn" ? `«${t.tekst}», versalhøyde ${t.cm} cm` : `${t.cm} cm bredt${t.cmH ? `, ${t.cmH} cm høyt` : ""}`)
         + (t.rot ? `, rotert ${String(t.rot).replace(".", ",")}°` : "");
       const kunRaster = t.posisjon === "logo" && !t.trykkSrc ? " – kun rasterfil" : "";
       return [`${POSISJON_TEKST[t.posisjon]}: ${mal}   (${t.fil}.${t.type === "navn" ? "png" : (t.trykkSrc || t.src).split(".").pop()})${kunRaster}`, ""];
