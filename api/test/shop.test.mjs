@@ -79,6 +79,15 @@ test("trykksoner: rotasjonen fra sonerCm følger med til sona", () => {
   assert.equal(PLAGG.find((p) => p.id === "tiro-drakt").soner.bryst.rot, undefined);
 });
 
+test("Entrada26 jersey: herre, JZ2505, 150 kr og samme soner som Entrada TEE", () => {
+  const j = PLAGG.find((p) => p.id === "entrada-jersey");
+  assert.deepEqual(j.kjonn, ["herre"]);
+  assert.equal(j.artikler["svart:herre"], "JZ2505");
+  assert.equal(j.pris, Math.round(j.katalogpris * 0.75 / 5) * 5);
+  assert.equal(j.pris, 150);
+  assert.deepEqual(j.soner, PLAGG.find((p) => p.id === "entrada-tee").soner);
+});
+
 test("trykksoner: alle soner ligger innenfor lerretet", () => {
   for (const p of PLAGG) for (const [navn, s] of Object.entries(p.soner)) {
     assert.ok(s.x - s.b / 2 >= 0 && s.x + s.b / 2 <= 100, `${p.id}.${navn} går utenfor sidene`);

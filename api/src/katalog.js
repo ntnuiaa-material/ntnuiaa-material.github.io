@@ -106,6 +106,35 @@ const PLAGG = [
     },
   },
   {
+    // Samme plagg som Entrada26 T-skjorte i bildene (svart med hvite detaljer), så bildene og målene er delt.
+    // Bare herremodell (JZ2505). Ungdomsmodellen JZ2524 selges ikke. 199 × 0,75 = 149,25, rundet til 150.
+    id: "entrada-jersey",
+    navn: { nb: "Entrada26 jersey", en: "Entrada26 jersey" },
+    kategori: "CASUAL",
+    katalogpris: 199,
+    pris: 150,
+    farger: {
+      svart: { front: "img/plagg/entrada-svart-front.webp", bak: "img/plagg/entrada-svart-bak.webp", prikk: "#111111" },
+    },
+    artikler: { "svart:herre": "JZ2505" },
+    storrelser: { herre: HERRE },
+    stoff: { nb: "Climacool · polyester", en: "Climacool · polyester" },
+    info: {
+      passform: { herre: "Slim" },
+      teknologi: "Climacool",
+      materiale: { nb: "100 % resirkulert polyester", en: "100% recycled polyester" },
+    },
+    kjonn: ["herre"],
+    sider: ["front", "bak"],
+    front: ["ntnui", "tekst", "ingen"],
+    bak: ["motiv", "logo", "ingen"],
+    navnFelt: true,
+    mal: {
+      front: { hals: { x: 50.8, y: 0.3 }, bredde: 58.1, cm: 54 },
+      bak: { hals: { x: 49.7, y: 0.3 }, bredde: 55.2, cm: 54 },
+    },
+  },
+  {
     // Står ikke på kolleksjonsarket fra Intersport. Medlemsprisen er regnet ut, ikke bekreftet.
     id: "entrada-short",
     navn: { nb: "Entrada26 shorts", en: "Entrada26 shorts" },
