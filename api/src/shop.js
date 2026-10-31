@@ -7,6 +7,7 @@
 //   GET  /api/admin/shop               alle bestillinger med linjer, og puljene
 //   POST /api/admin/shop/pulje         samle nye bestillinger i en ny pulje
 //   POST /api/admin/shop/pulje/status  merk en pulje som sendt eller levert
+//   POST /api/admin/shop/pulje/los-opp løs opp en pulje som ikke er sendt (bestillingene blir nye igjen)
 //   POST /api/admin/shop/avbestill     avbestill en bestilling som ikke er sendt
 
 import { PLAGG, GRUPPER, GENERISK, prisFor, finnPlagg, fargerFor } from "./katalog.js";
@@ -25,6 +26,7 @@ export async function shopRuter(request, env, sti, metode, { Brukerfeil, lesJson
     if (metode === "GET" && sti === "/api/admin/shop") return json(await hentShop(env));
     if (metode === "POST" && sti === "/api/admin/shop/pulje") return json(await lagPulje(env, await lesJson(request), Brukerfeil));
     if (metode === "POST" && sti === "/api/admin/shop/pulje/status") return json(await puljeStatus(env, await lesJson(request), Brukerfeil));
+    if (metode === "POST" && sti === "/api/admin/shop/pulje/los-opp") return json(await losOppPulje(env, await lesJson(request), Brukerfeil));
     if (metode === "POST" && sti === "/api/admin/shop/avbestill") return json(await avbestill(env, await lesJson(request), Brukerfeil));
   }
   return null;
@@ -154,6 +156,21 @@ async function puljeStatus(env, data, Brukerfeil) {
   return { ok: true };
 }
 
+// Sletter pulja og setter bestillingene tilbake til 'ny'. Bare for puljer som ikke er sendt.
+// Batch i D1 kjøres som én transaksjon, så pulja forsvinner ikke uten at bestillingene slippes.
+async function losOppPulje(env, data, Brukerfeil) {
+  const id = Number(data.id);
+  if (!Number.isInteger(id)) throw new Brukerfeil("Ugyldig forespørsel.");
+  const pulje = await env.DB.prepare("SELECT * FROM shop_puljer WHERE id = ?").bind(id).first();
+  if (!pulje) throw new Brukerfeil("Pulja finnes ikke.", 404);
+  if (pulje.sendt) throw new Brukerfeil("Pulja er sendt til Intersport og kan ikke løses opp.", 409);
+  await env.DB.batch([
+    env.DB.prepare("UPDATE shop_bestillinger SET status = 'ny', pulje_id = NULL WHERE pulje_id = ? AND status = 'pulje'").bind(id),
+    env.DB.prepare("DELETE FROM shop_puljer WHERE id = ?").bind(id),
+  ]);
+  return { ok: true };
+}
+
 async function avbestill(env, data, Brukerfeil) {
   const id = Number(data.id);
   const b = await env.DB.prepare(
@@ -171,4 +188,4 @@ function tekst(verdi, navn, maks, Brukerfeil) {
   return t.slice(0, maks);
 }
 
-export const _test = { sjekkLinje, PLAGG };
+export const _test = { sjekkLinje, PLAGG, losOppPulje };

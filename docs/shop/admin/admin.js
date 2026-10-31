@@ -152,6 +152,7 @@ function puljeKort(p) {
     `<button type="button" class="knapp knapp-hoved liten" data-csv="${p.id}">Last ned ark til Erik</button>`,
     !p.sendt ? `<button type="button" class="knapp knapp-gul liten" data-status="sendt" data-pulje="${p.id}">Merk som sendt</button>`
       : !p.levert ? `<button type="button" class="knapp knapp-gul liten" data-status="levert" data-pulje="${p.id}">Merk som levert</button>` : "",
+    !p.sendt ? `<button type="button" class="knapp fare liten" data-los-opp="${p.id}">Løs opp pulje</button>` : "",
     p.levert ? `<button type="button" class="knapp knapp-sekundaer liten" data-status="levert" data-angre="1" data-pulje="${p.id}">Angre levert</button>`
       : p.sendt ? `<button type="button" class="knapp knapp-sekundaer liten" data-status="sendt" data-angre="1" data-pulje="${p.id}">Angre sendt</button>` : "",
   ].join("");
@@ -270,6 +271,15 @@ document.addEventListener("click", (e) => {
   const avb = e.target.closest("[data-avbestill]");
   if (avb && confirm("Avbestille denne bestillingen? Det kan ikke angres.")) {
     handling(() => kall("/api/admin/shop/avbestill", { id: Number(avb.dataset.avbestill) }), "Bestillingen er avbestilt.");
+    return;
+  }
+  const los = e.target.closest("[data-los-opp]");
+  if (los) {
+    const id = Number(los.dataset.losOpp);
+    const antall = data.bestillinger.filter((b) => b.pulje_id === id).length;
+    if (confirm(`Løse opp pulja? ${antall} ${antall === 1 ? "bestilling" : "bestillinger"} blir nye igjen, og pulja slettes.`)) {
+      handling(() => kall("/api/admin/shop/pulje/los-opp", { id }), "Pulja er løst opp.");
+    }
     return;
   }
   const st = e.target.closest("[data-status]");
