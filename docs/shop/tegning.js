@@ -39,7 +39,9 @@ function trykkLag(valg, side) {
     }
   } else {
     if (valg.bak === "logo") {
-      lag.push({ nokkel: `bak:logo:${valg.gruppe}`, type: "bilde", posisjon: "logo", src: logoKildeFor(valg.gruppe), fil: "trykk-bak-logo" });
+      // src er rasterfila som vises på skjermen. trykkSrc er vektorfila som ZIP-en til Intersport bruker (kun admin)
+      lag.push({ nokkel: `bak:logo:${valg.gruppe}`, type: "bilde", posisjon: "logo", src: logoKildeFor(valg.gruppe), fil: "trykk-bak-logo",
+        trykkSrc: g && g.vektor ? `img/logo/trykk/${g.slug}.svg` : null });
     } else if (valg.bak === "motiv" && g) {
       lag.push(
         { nokkel: `bak:baktekst:${f}`, type: "bilde", posisjon: "baktekst", src: `img/tekst/${g.slug}-bak-${f}.svg`, fil: "trykk-bak-baktekst" },

@@ -209,6 +209,12 @@ const MAAL_KOLONNER = [
   ["baktekst", "Bredde tekst bak (cm)"], ["motiv", "Bredde motiv bak (cm)"], ["estd", "Bredde ESTD bak (cm)"], ["navn", "Høyde navn bak (cm)"],
 ];
 
+// Kolonnen «Logo bak, fil» i ZIP-arket: SVG når gruppa har vektorlogo, ellers «kun rasterfil»
+function logoFilTekst(trykk) {
+  const t = trykk.find((x) => x.posisjon === "logo");
+  return t ? (t.trykkSrc ? "SVG" : "kun rasterfil") : "";
+}
+
 function valgFor(l) {
   return { plagg: l.plagg, farge: l.farge, gruppe: l.gruppe, front: l.front, bak: l.bak, navn: l.navn || "" };
 }
@@ -224,7 +230,7 @@ function trykkFor(l) {
 }
 
 function byggCsv(puljeId, utvidet) {
-  const kol = utvidet ? [...CSV_KOLONNER, "Mappe", ...MAAL_KOLONNER.map(([, t]) => t)] : CSV_KOLONNER;
+  const kol = utvidet ? [...CSV_KOLONNER, "Mappe", ...MAAL_KOLONNER.map(([, t]) => t), "Logo bak, fil"] : CSV_KOLONNER;
   const rader = [kol];
   for (const b of data.bestillinger.filter((x) => x.pulje_id === puljeId)) {
     for (const l of b.linjer) {
@@ -239,6 +245,7 @@ function byggCsv(puljeId, utvidet) {
             const t = trykk.find((x) => x.posisjon === pos);
             rad.push(t ? String(t.cm).replace(".", ",") : "");
           }
+          rad.push(logoFilTekst(trykk));
         }
         rader.push(rad);
       }
@@ -311,7 +318,8 @@ async function forhandsvisning(b, l, nr, antallLinjer) {
     ...trykk.map((t) => {
       const mal = (t.posisjon === "navn" ? `«${t.tekst}», versalhøyde ${t.cm} cm` : `${t.cm} cm bredt`)
         + (t.rot ? `, rotert ${String(t.rot).replace(".", ",")}°` : "");
-      return [`${POSISJON_TEKST[t.posisjon]}: ${mal}   (${t.fil}.${t.type === "navn" ? "png" : t.src.split(".").pop()})`, ""];
+      const kunRaster = t.posisjon === "logo" && !t.trykkSrc ? " – kun rasterfil" : "";
+      return [`${POSISJON_TEKST[t.posisjon]}: ${mal}   (${t.fil}.${t.type === "navn" ? "png" : (t.trykkSrc || t.src).split(".").pop()})${kunRaster}`, ""];
     }),
   ];
   if (!trykk.length) rader.push(["Ingen trykk", ""]);
@@ -351,15 +359,17 @@ async function forhandsvisning(b, l, nr, antallLinjer) {
   return tilBytes(await canvasPng(c));
 }
 
-// Selve trykkfila: originalen fra siden (SVG, eller WebP for gruppelogoene), og navnet som PNG i 300 dpi
+// Selve trykkfila: originalen fra siden (SVG), og navnet som PNG i 300 dpi. Gruppelogoen bak er SVG fra
+// img/logo/trykk/ (kurver, ikke tekst), og bare grupper uten den får WebP-en fra siden
 async function trykkfil(l, t) {
   if (t.type === "navn") {
     const png = await tilBytes(await canvasPng(await navnCanvas(t.tekst, t.farge, t.cm, 300)));
     return { navn: `${t.fil}.png`, data: settDpi(png, 300) };
   }
-  const svar = await fetch(`../${t.src}`);
-  if (!svar.ok) throw new Error(`Fikk ikke hentet ${t.src}`);
-  return { navn: `${t.fil}.${t.src.split(".").pop()}`, data: new Uint8Array(await svar.arrayBuffer()) };
+  const src = t.trykkSrc || t.src;
+  const svar = await fetch(`../${src}`);
+  if (!svar.ok) throw new Error(`Fikk ikke hentet ${src}`);
+  return { navn: `${t.fil}.${src.split(".").pop()}`, data: new Uint8Array(await svar.arrayBuffer()) };
 }
 
 async function lastNedZip(puljeId, knapp) {

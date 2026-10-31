@@ -3,25 +3,27 @@
 // Trykkprisene er Eriks svar 03.09.2026.
 
 // motiv: gruppa har Entrada-filer (tekst foran, tekst bak, ESTD og motiv) som SVG fra PDF-ene
+// vektor: gruppelogoen finnes som SVG med kurver i img/logo/trykk/<slug>.svg (brukes som trykkfil bak).
+//   Uten vektor blir WebP-en på siden (560×560) lagt i ZIP-en, og admin merker den «kun rasterfil».
 const GRUPPER = [
-  { navn: "Badminton", slug: "badminton", motiv: false },
-  { navn: "Basketball", slug: "basketball", motiv: true },
-  { navn: "Crosstrain", slug: "crosstrain", motiv: true },
-  { navn: "Dans", slug: "dans", motiv: true },
-  { navn: "Fotball", slug: "fotball", motiv: true },
-  { navn: "Futsal Damer", slug: "futsal-damer", motiv: true },
-  { navn: "Futsal Herrer", slug: "futsal-herrer", motiv: true },
-  { navn: "Golf", slug: "golf", motiv: true },
-  { navn: "Håndball", slug: "handball", motiv: true },
-  { navn: "Klatring", slug: "klatring", motiv: true },
-  { navn: "Løping", slug: "loping", motiv: true },
-  { navn: "Padel", slug: "padel", motiv: true },
-  { navn: "Seiling", slug: "seiling", motiv: true },
-  { navn: "Styrkesport", slug: "styrkesport", motiv: false },
-  { navn: "Svømming", slug: "svomming", motiv: true },
-  { navn: "Tennis", slug: "tennis", motiv: true },
-  { navn: "Turn & Calisthenics", slug: "turn-og-calisthenics", motiv: true },
-  { navn: "Volleyball", slug: "volleyball", motiv: true },
+  { navn: "Badminton", slug: "badminton", motiv: false, vektor: true },
+  { navn: "Basketball", slug: "basketball", motiv: true, vektor: true },
+  { navn: "Crosstrain", slug: "crosstrain", motiv: true, vektor: true },
+  { navn: "Dans", slug: "dans", motiv: true, vektor: true },
+  { navn: "Fotball", slug: "fotball", motiv: true, vektor: true },
+  { navn: "Futsal Damer", slug: "futsal-damer", motiv: true, vektor: true },
+  { navn: "Futsal Herrer", slug: "futsal-herrer", motiv: true, vektor: true },
+  { navn: "Golf", slug: "golf", motiv: true, vektor: true },
+  { navn: "Håndball", slug: "handball", motiv: true, vektor: true },
+  { navn: "Klatring", slug: "klatring", motiv: true, vektor: true },
+  { navn: "Løping", slug: "loping", motiv: true, vektor: true },
+  { navn: "Padel", slug: "padel", motiv: true, vektor: true },
+  { navn: "Seiling", slug: "seiling", motiv: true, vektor: true },
+  { navn: "Styrkesport", slug: "styrkesport", motiv: false, vektor: true },
+  { navn: "Svømming", slug: "svomming", motiv: true, vektor: true },
+  { navn: "Tennis", slug: "tennis", motiv: true, vektor: true },
+  { navn: "Turn & Calisthenics", slug: "turn-og-calisthenics", motiv: true, vektor: true },
+  { navn: "Volleyball", slug: "volleyball", motiv: true, vektor: true },
 ];
 const GENERISK = "generisk";
 
