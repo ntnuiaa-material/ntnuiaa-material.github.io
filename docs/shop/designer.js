@@ -56,7 +56,8 @@ function artikkel() {
 // ---------- Lagene på plagget ----------
 
 function plassering(sone, boks = false) {
-  return `left:${sone.x}%;top:${sone.y}%;width:${sone.b}%${boks && sone.h ? `;height:${sone.h}%` : ""}`;
+  const rot = sone.rot ? `;transform:translate(-50%,-50%) rotate(${sone.rot}deg)` : "";
+  return `left:${sone.x}%;top:${sone.y}%;width:${sone.b}%${boks && sone.h ? `;height:${sone.h}%` : ""}${rot}`;
 }
 
 // Lagene kommer fra tegning.js, som admin bruker til forhåndsvisningene. Her gjøres de om til HTML.

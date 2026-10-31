@@ -107,6 +107,11 @@ async function tegnSide(ctx, valg, side, { x = 0, y = 0, bredde = LERRET_B, rot 
     const cx = x + s.x / 100 * W, cy = y + s.y / 100 * H;
     ctx.save();
     ctx.globalAlpha = TRYKK_OPASITET;
+    if (s.rot) { // rotasjon rundt midten av trykket, som `rotate` i CSS-en i designeren
+      ctx.translate(cx, cy);
+      ctx.rotate(s.rot * Math.PI / 180);
+      ctx.translate(-cx, -cy);
+    }
     if (l.type === "bilde") {
       const w = s.b / 100 * W, h = w * img.naturalHeight / img.naturalWidth;
       ctx.drawImage(img, cx - w / 2, cy - h / 2, w, h);

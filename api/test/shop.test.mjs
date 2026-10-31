@@ -72,6 +72,13 @@ test("trykksoner: Tiro jersey og Entrada TEE får samme plassering", () => {
   for (const sone of ["bryst", "tekst", "logo", "navn"]) assert.deepEqual(f("tiro-drakt")[sone], f("entrada-tee")[sone]);
 });
 
+test("trykksoner: rotasjonen fra sonerCm følger med til sona", () => {
+  const sh = PLAGG.find((p) => p.id === "tiro-shorts");
+  assert.equal(sh.soner.bryst.rot, sh.sonerCm.bryst.rot);
+  assert.ok(sh.soner.bryst.rot > 0 && sh.soner.bryst.rot < 10);
+  assert.equal(PLAGG.find((p) => p.id === "tiro-drakt").soner.bryst.rot, undefined);
+});
+
 test("trykksoner: alle soner ligger innenfor lerretet", () => {
   for (const p of PLAGG) for (const [navn, s] of Object.entries(p.soner)) {
     assert.ok(s.x - s.b / 2 >= 0 && s.x + s.b / 2 <= 100, `${p.id}.${navn} går utenfor sidene`);

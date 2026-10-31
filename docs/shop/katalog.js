@@ -351,7 +351,9 @@ const PLAGG = [
     mal: {
       front: { hals: { x: 49.7, y: 1.2 }, bredde: 67.4, cm: 40 },
     },
-    sonerCm: { bryst: { b: 10, dx: -16.5, dy: 50.5 } }, // nede på låret
+    // Nede på venstre lår, rett over fallet. Trykket er rotert 3,5° med klokka, så det følger fallet på benet
+    // (kanten stiger ca. 3,3° mot venstre i bildet, målt 31.10.2026)
+    sonerCm: { bryst: { b: 10, dx: -16.5, dy: 54.5, rot: 3.5 } },
   },
   {
     id: "tiro-treningsbukse",
@@ -422,7 +424,9 @@ const PLAGG = [
 // dx:    cm sideveis fra midtlinja. Positiv er mot høyre i bildet (brukerens venstre side)
 // dy:    cm ned fra halsen til midten av trykket. Målt på mockupen med bredden som målestokk, så
 //        det er ikke en nøyaktig avstand langs plagget (mockupene er litt strukket i høyden)
-// Sonene sentreres på (dx, dy). Et plagg kan avvike med `sonerCm: { sone: { b, dx, dy } }`.
+// rot:   (valgfri) rotasjon i grader rundt midten av trykket, positiv med klokka. Brukes når trykket skal følge
+//        en skråstilt kant på plagget, f.eks. fallet på shortsbenet
+// Sonene sentreres på (dx, dy). Et plagg kan avvike med `sonerCm: { sone: { b, dx, dy, rot } }`.
 const TRYKKSONER = {
   bryst: { side: "front", b: 14, dx: 14.5, dy: 26 },
   tekst: { side: "front", b: 18, dx: 14.5, dy: 26 },
@@ -468,6 +472,7 @@ function beregnSoner(p) {
       b: rund(px(z.b)),
     };
     if (z.h) soner[navn].h = rund(px(z.h) * 0.9);
+    if (z.rot) soner[navn].rot = z.rot;
   }
   return soner;
 }
