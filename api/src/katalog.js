@@ -483,17 +483,18 @@ const TRYKKSONER = {
   bryst: { side: "front", b: 14, dx: 14.5, dy: 26 },
   tekst: { side: "front", b: 18, dx: 14.5, dy: 26 },
   logo: { side: "bak", b: 42, dx: 0, dy: 38.5 },
-  // baktekst ligger over logo/motiv-boksen (logoen er 42 cm, 17,5 til 59,5 cm under halsen) med 2 cm luft
-  baktekst: { side: "bak", b: 48, dx: 0, dy: 12.5 },
-  // motiv: samme bredde og midte som gruppelogoen (b og h er største boks, cm). Motivet er like bredt som logoen,
-  // høyden følger proporsjonene, men aldri høyere enn h (= b). Se motivMaal() og visuellMotiv()
-  motiv: { side: "bak", b: 42, h: 42, dx: 0, dy: 38.5 },
-  estd: { side: "bak", b: 15, dx: 0, dy: 65 },
+  // baktekst, motiv og estd er én blokk. Tallene her er Entrada TEE: baktekst 17,5 cm under halsen, 4 cm luft, motivet,
+  // 4 cm luft, estd, og navnet nederst. Andre plagg regnes ut av visuellMotiv() med samme andeler
+  baktekst: { side: "bak", b: 48, dx: 0, dy: 17.5 },
+  // motiv: 0,9 × logoens bredde (b og h er største boks, cm). Høyden følger proporsjonene, men aldri høyere enn h (= b).
+  // Se motivMaal() og visuellMotiv()
+  motiv: { side: "bak", b: 37.8, h: 37.8, dx: 0, dy: 43.4 },
+  estd: { side: "bak", b: 15, dx: 0, dy: 67.4 },
   navn: { side: "bak", b: 37, h: 4, dx: 0, dy: 93 },
 };
 
 // Hvor stort et motiv trykkes, i cm: {b, h}. `z` er motivsona (TRYKKSONER.motiv, evt. med plaggets avvik, som er
-// logoens bredde og midte) og `aspekt` bredde/høyde på motivfila. Motivet er z.b bredt, så ringen står like stor
+// 0,9 × logoens bredde) og `aspekt` bredde/høyde på motivfila. Motivet er z.b bredt, så ringen står nesten like stor
 // som gruppelogoen på samme plagg. Høyden følger aspektet. Blir motivet høyere enn z.h (høyere enn bredt, i dag
 // Padel og Håndball), settes høyden til z.h og bredden krympes litt.
 function motivMaal(z, aspekt) {
@@ -551,22 +552,28 @@ function visuellLogo(p) {
 }
 for (const p of PLAGG) visuellLogo(p);
 
-// Motivet bak (baktekst, motiv og ESTD) følger logoen: motivet er like bredt som gruppelogoen på samme plagg og har
-// samme midte, så ringen i motivet ser like stor ut som ringen i logoen (på Entrada TEE 42 cm, se visuellLogo()).
-// Høyden er størst b (kvadratisk boks som logoen), og det er denne boksen resten legger seg rundt:
-//   baktekst: 2 cm over boksen. Bredden skaleres med f (under), og den må ligge under kragen/hetta
-//   estd:     2 cm under boksen, men aldri høyere enn tabellen (skalert med kv)
+// Motivet bak (baktekst, motiv og ESTD) er én blokk som følger logoen på plagget: motivet er MOTIV_ANDEL (0,9) av
+// logoens bredde, så ringen står litt mindre enn logoringen. Fra toppen:
+//   baktekst: dy fra tabellen (17,5 på Entrada TEE) skalert med kv, så den står på samme sted relativt til
+//             høyden på bildet. Bredden skaleres med f (under) og den ligger under kragen/hetta
+//   motiv:    en kvadratisk boks, b = h = 0,9 × logo-b, MOTIV_LUFT cm under baktekst
+//   estd:     MOTIV_LUFT cm under boksen
+//   navn:     ligger der plagget har det (sonerCm.navn.dy), og må ha minst NAVN_LUFT cm til ESTD
+// Er det ikke plass til NAVN_LUFT (3 cm) mellom ESTD og navnet, flyttes navnet ned (bare hettejakkene) i stedet for
+// at luften eller motivet krymper.
 // f = min(kb, kv): kb er ryggbredden i cm mot 54 cm på Entrada TEE, kv bildehøyden (hals til bunn) i cm mot Entrada
 // TEE. På hettejakker er bildet lavere i forhold til bredden (kv < kb), og baktekst som er bredere enn ryggfeltet tar i
 // skulderfeltene, så tekstene skalerer med f. Plagg uten `mal.bak.bunn` (TEE, jersey) har kb = kv = 1, tabellen uendret.
 const TEE_BILDEHOYDE_CM = 108.1;   // (bunn - hals) i cm på Entrada TEE: (99,8 - 0,3) % / 0,9 * 54 / 55,2
 const BAKTEKST_ASPEKT = 8.33;      // bredde / høyde på baktekst-SVG-ene (alle like)
 const ESTD_ASPEKT = 6.5;           // ca. bredde / høyde på ESTD-SVG-ene (6,5 til 6,8)
-const MOTIV_LUFT = 2;              // cm mellom baktekst/ESTD og logo- og motivboksen
+const MOTIV_ANDEL = 0.9;           // motivbredde / logobredde
+const MOTIV_LUFT = 4;              // cm luft over og under motivboksen (mot baktekst og ESTD)
+const NAVN_LUFT = 3;               // minste luft mellom ESTD og navnet
 function visuellMotiv(p) {
   if (!p.bak.includes("motiv")) return;
   const mal = p.mal && p.mal.bak;
-  const rund = (v) => Math.round(v * 2) / 2;
+  const rund = (v) => Math.round(v * 10) / 10;
   let kb = 1, kv = 1;
   if (mal && mal.bunn !== undefined) {
     const cmPerProsent = mal.cm / mal.bredde;
@@ -575,15 +582,25 @@ function visuellMotiv(p) {
   }
   const f = Math.min(kb, kv);
   const logo = { ...TRYKKSONER.logo, ...(p.sonerCm && p.sonerCm.logo) };
-  const baktekstB = rund(TRYKKSONER.baktekst.b * f);
-  const estdB = rund(TRYKKSONER.estd.b * f);
+  const navn = { ...TRYKKSONER.navn, ...(p.sonerCm && p.sonerCm.navn) };
+  const boks = rund(MOTIV_ANDEL * logo.b);
+  const bakB = Math.round(TRYKKSONER.baktekst.b * f * 2) / 2;
+  const estdB = Math.round(TRYKKSONER.estd.b * f * 2) / 2;
+  const bakH = bakB / BAKTEKST_ASPEKT, estdH = estdB / ESTD_ASPEKT;
+  const bakDy = rund(TRYKKSONER.baktekst.dy * kv);
+  const luft = MOTIV_LUFT;
+  const motivDy = rund(bakDy + bakH / 2 + luft + boks / 2);
+  const estdDy = rund(motivDy + boks / 2 + luft + estdH / 2);
   const ny = {
-    motiv: { b: logo.b, h: logo.b, dy: logo.dy },
-    baktekst: { b: baktekstB, dy: rund(logo.dy - logo.b / 2 - MOTIV_LUFT - baktekstB / BAKTEKST_ASPEKT / 2) },
-    estd: { b: estdB, dy: Math.max(rund(TRYKKSONER.estd.dy * kv), rund(logo.dy + logo.b / 2 + MOTIV_LUFT + estdB / ESTD_ASPEKT / 2)) },
+    baktekst: { b: bakB, dy: bakDy },
+    motiv: { b: boks, h: boks, dy: motivDy },
+    estd: { b: estdB, dy: estdDy },
   };
   p.sonerCm = { ...p.sonerCm };
   for (const [z, v] of Object.entries(ny)) if (!p.sonerCm[z]) p.sonerCm[z] = v;
+  // Ikke plass til NAVN_LUFT mellom ESTD og navnet (hettejakker, der navnet ligger høyt): navnet flyttes ned
+  const navnDy = rund(estdDy + estdH / 2 + NAVN_LUFT + navn.h / 2);
+  if (navnDy > navn.dy) p.sonerCm.navn = { ...p.sonerCm.navn, dy: navnDy };
 }
 for (const p of PLAGG) visuellMotiv(p);
 
