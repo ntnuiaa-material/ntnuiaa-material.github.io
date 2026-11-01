@@ -155,7 +155,7 @@ test("motiv bak finnes på alle overdeler, og gruppenavn foran på alle plagg", 
   assert.throws(() => sjekkLinje(lagLinje("tiro-shorts", { front: "tekst", gruppe: "Badminton" }), Brukerfeil), /motiv/);
 });
 
-test("motiv bak: 0,9 × logobredden, og baktekst, motiv, ESTD og navn har luft", () => {
+test("motiv bak: 0,9 × logobredden, tekstene like brede som på sweat top, og baktekst, motiv, ESTD og navn har luft", () => {
   for (const p of PLAGG.filter((x) => x.bak.includes("motiv"))) {
     const logo = { ...TRYKKSONER.logo, ...(p.sonerCm && p.sonerCm.logo) };
     const z = { ...TRYKKSONER.motiv, ...(p.sonerCm && p.sonerCm.motiv) };
@@ -166,16 +166,24 @@ test("motiv bak: 0,9 × logobredden, og baktekst, motiv, ESTD og navn har luft",
       if (g.motivAspekt >= 1) assert.equal(m.b, z.b, `${p.id}/${g.slug}: ikke full motivbredde`);
     }
     // Loddrett rekkefølge i prosent av lerretshøyden: baktekst, motivboksen (høyde = motivbredden), ESTD, navn.
-    // 4 cm luft over og under motivboksen, og minst 3 cm mellom ESTD og navnet
+    // ca. 4 cm luft (3,6 × kb) over og under motivboksen, og minst 3 cm mellom ESTD og navnet
     const s = p.soner;
     const cm = (prosent) => prosent / 0.9 * (p.mal.bak.cm / p.mal.bak.bredde);
     const bakH = s.baktekst.b / 8.33 * 0.9, estdH = s.estd.b / 6.5 * 0.9;
-    assert.ok(cm((s.motiv.y - s.motiv.h / 2) - (s.baktekst.y + bakH / 2)) >= 3.9, `${p.id}: baktekst treffer motivet`);
-    assert.ok(cm(s.estd.y - estdH / 2 - (s.motiv.y + s.motiv.h / 2)) >= 3.9, `${p.id}: motivet treffer ESTD`);
+    assert.ok(cm((s.motiv.y - s.motiv.h / 2) - (s.baktekst.y + bakH / 2)) >= 3.5, `${p.id}: baktekst treffer motivet`);
+    assert.ok(cm(s.estd.y - estdH / 2 - (s.motiv.y + s.motiv.h / 2)) >= 3.5, `${p.id}: motivet treffer ESTD`);
     assert.ok(cm(s.navn.y - s.navn.h / 2 - (s.estd.y + estdH / 2)) >= 2.9, `${p.id}: ESTD treffer navnet`);
     assert.ok(s.baktekst.y - bakH / 2 > p.mal.bak.hals.y, `${p.id}: baktekst over halsen/hetta`);
+    // Baktekst og ESTD er like brede i prosent av lerretet som på Entrada sweat top (48,5 % og 15 %)
+    if (p.mal.bak.bunn !== undefined) {
+      assert.ok(Math.abs(s.baktekst.b - 48.5) < 0.6, `${p.id}: baktekst ${s.baktekst.b} % av lerretet`);
+      assert.ok(Math.abs(s.estd.b - 15) < 0.5, `${p.id}: ESTD ${s.estd.b} % av lerretet`);
+    }
   }
-  assert.equal(PLAGG.find((x) => x.id === "entrada-tee").sonerCm.baktekst.dy, 17.5);
+  // Referansene er uendret: Entrada TEE og sweat top
+  const sonerCm = (id) => PLAGG.find((x) => x.id === id).sonerCm;
+  assert.deepEqual([sonerCm("entrada-tee").baktekst, sonerCm("entrada-tee").motiv, sonerCm("entrada-tee").estd], [{ b: 48, dy: 17.5 }, { b: 37.8, h: 37.8, dy: 43.3 }, { b: 15, dy: 67.4 }]);
+  assert.deepEqual([sonerCm("entrada-sweat-top").baktekst, sonerCm("entrada-sweat-top").motiv, sonerCm("entrada-sweat-top").estd], [{ b: 53.5, dy: 19.6 }, { b: 41.9, h: 41.9, dy: 47.8 }, { b: 16.5, dy: 74 }]);
 });
 
 test("gruppenavn foran på bukser og shorts ligger på samme sted som NTNUI-logoen, men er bredere", () => {

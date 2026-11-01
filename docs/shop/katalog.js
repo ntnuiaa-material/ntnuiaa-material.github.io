@@ -550,43 +550,44 @@ function visuellLogo(p) {
 }
 for (const p of PLAGG) visuellLogo(p);
 
-// Motivet bak (baktekst, motiv og ESTD) er én blokk som følger logoen på plagget: motivet er MOTIV_ANDEL (0,9) av
-// logoens bredde, så ringen står litt mindre enn logoringen. Fra toppen:
-//   baktekst: dy fra tabellen (17,5 på Entrada TEE) skalert med kv, så den står på samme sted relativt til
-//             høyden på bildet. Bredden skaleres med f (under) og den ligger under kragen/hetta
-//   motiv:    en kvadratisk boks, b = h = 0,9 × logo-b, MOTIV_LUFT cm under baktekst
-//   estd:     MOTIV_LUFT cm under boksen
-//   navn:     ligger der plagget har det (sonerCm.navn.dy), og må ha minst NAVN_LUFT cm til ESTD
-// Er det ikke plass til NAVN_LUFT (3 cm) mellom ESTD og navnet, flyttes navnet ned (bare hettejakkene) i stedet for
-// at luften eller motivet krymper.
-// f = min(kb, kv): kb er ryggbredden i cm mot 54 cm på Entrada TEE, kv bildehøyden (hals til bunn) i cm mot Entrada
-// TEE. På hettejakker er bildet lavere i forhold til bredden (kv < kb), og baktekst som er bredere enn ryggfeltet tar i
-// skulderfeltene, så tekstene skalerer med f. Plagg uten `mal.bak.bunn` (TEE, jersey) har kb = kv = 1, tabellen uendret.
-const TEE_BILDEHOYDE_CM = 108.1;   // (bunn - hals) i cm på Entrada TEE: (99,8 - 0,3) % / 0,9 * 54 / 55,2
+// Motivet bak (baktekst, motiv og ESTD) er én blokk som skaleres med ryggbredden. Referansen er Entrada sweat top
+// (60 cm rygg, kb = 1,11), som Kristian godkjente: baktekst rett under kragen, blokka fyller øvre rygg. Alle plagg
+// med `mal.bak.bunn` får de samme andelene av ryggbredden (kb = ryggbredde i cm / 54, 54 cm på Entrada TEE), så
+// blokka er like stor og står like langt under halsen på sweat top, hettegenser og jakker. Bildehøyden brukes ikke:
+// den gjorde hettejakkene (der hetta tar toppen av bildet) mindre og lavere. For hettejakker er `hals` underkanten
+// av hetta, så baktekst og blokk flyttes ned under hetta og følger ryggen. Fra toppen:
+//   baktekst: 17,6 × kb under halsen (19,6 cm på sweat top), men HETTE_OPP høyere på hettejakker. Bredden er
+//             BAKTEKST_PROSENT av lerretbredden (som på sweat top, ikke av ryggbredden: se under)
+//   motiv:    en kvadratisk boks, b = h = MOTIV_ANDEL (0,9) × logo-b, 3,6 × kb cm (4 cm på sweat top) under baktekst
+//   estd:     ESTD_PROSENT av lerretbredden, 3,6 × kb cm under boksen
+//   navn:     ligger der plagget har det (sonerCm.navn.dy), men flyttes ned så det er minst NAVN_LUFT (3) cm til ESTD
+// Plagg uten `mal.bak.bunn` (Entrada TEE, jersey og Tiro-drakt) har kb = 1 og bruker tallene fra tabellen
+// (baktekst 17,5, luft 4 cm).
 const BAKTEKST_ASPEKT = 8.33;      // bredde / høyde på baktekst-SVG-ene (alle like)
 const ESTD_ASPEKT = 6.5;           // ca. bredde / høyde på ESTD-SVG-ene (6,5 til 6,8)
 const MOTIV_ANDEL = 0.9;           // motivbredde / logobredde
-const MOTIV_LUFT = 4;              // cm luft over og under motivboksen (mot baktekst og ESTD)
-const NAVN_LUFT = 3;               // minste luft mellom ESTD og navnet
+const NAVN_LUFT = 3;               // minste luft mellom ESTD og navnet (cm)
+const BAKTEKST_PROSENT = 48.5;     // bredden på baktekst i % av lerretbredden (Entrada sweat top: 53,5 cm)
+const ESTD_PROSENT = 15;           // bredden på ESTD i % av lerretbredden (sweat top: 16,5 cm)
+const HETTE_OPP = 4;               // cm baktekst på hettejakker flyttes opp: `hals` er underkanten av hetta på sidene, men
+                                   // midt på ryggen går hetta høyere opp, så det er plass til å starte tettere på
 function visuellMotiv(p) {
   if (!p.bak.includes("motiv")) return;
   const mal = p.mal && p.mal.bak;
   const rund = (v) => Math.round(v * 10) / 10;
-  let kb = 1, kv = 1;
-  if (mal && mal.bunn !== undefined) {
-    const cmPerProsent = mal.cm / mal.bredde;
-    kb = (mal.rygg || mal.bredde) * cmPerProsent / 54;
-    kv = (mal.bunn - mal.hals.y) / 0.9 * cmPerProsent / TEE_BILDEHOYDE_CM;
-  }
-  const f = Math.min(kb, kv);
+  const medBunn = Boolean(mal && mal.bunn !== undefined);
+  const kb = medBunn ? (mal.rygg || mal.bredde) * mal.cm / mal.bredde / 54 : 1;
   const logo = { ...TRYKKSONER.logo, ...(p.sonerCm && p.sonerCm.logo) };
   const navn = { ...TRYKKSONER.navn, ...(p.sonerCm && p.sonerCm.navn) };
   const boks = rund(MOTIV_ANDEL * logo.b);
-  const bakB = Math.round(TRYKKSONER.baktekst.b * f * 2) / 2;
-  const estdB = Math.round(TRYKKSONER.estd.b * f * 2) / 2;
+  // Tekstene (baktekst og ESTD) har samme bredde i prosent av lerretet som på sweat top. Det er det man ser: på
+  // hettejakker er plagget mindre i bildet, så de ble for små når de ble regnet av ryggbredden (cm)
+  const cmPerProsent = medBunn ? mal.cm / mal.bredde : 54 / 55.2;
+  const bakB = medBunn ? Math.round(BAKTEKST_PROSENT * cmPerProsent * 2) / 2 : TRYKKSONER.baktekst.b;
+  const estdB = medBunn ? Math.round(ESTD_PROSENT * cmPerProsent * 2) / 2 : TRYKKSONER.estd.b;
   const bakH = bakB / BAKTEKST_ASPEKT, estdH = estdB / ESTD_ASPEKT;
-  const bakDy = rund(TRYKKSONER.baktekst.dy * kv);
-  const luft = MOTIV_LUFT;
+  const bakDy = medBunn ? rund(17.6 * kb - (mal.rygg ? HETTE_OPP : 0)) : TRYKKSONER.baktekst.dy;
+  const luft = medBunn ? 3.6 * kb : 4;
   const motivDy = rund(bakDy + bakH / 2 + luft + boks / 2);
   const estdDy = rund(motivDy + boks / 2 + luft + estdH / 2);
   const ny = {
@@ -596,7 +597,7 @@ function visuellMotiv(p) {
   };
   p.sonerCm = { ...p.sonerCm };
   for (const [z, v] of Object.entries(ny)) if (!p.sonerCm[z]) p.sonerCm[z] = v;
-  // Ikke plass til NAVN_LUFT mellom ESTD og navnet (hettejakker, der navnet ligger høyt): navnet flyttes ned
+  // Ikke plass til NAVN_LUFT mellom ESTD og navnet: navnet flyttes ned
   const navnDy = rund(estdDy + estdH / 2 + NAVN_LUFT + navn.h / 2);
   if (navnDy > navn.dy) p.sonerCm.navn = { ...p.sonerCm.navn, dy: navnDy };
 }
