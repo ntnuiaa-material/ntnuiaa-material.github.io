@@ -200,7 +200,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.2, y: 28.3 }, bredde: 40.6, cm: 60, adidas: { x: 38.3, y: 42.1 } },
-      bak: { hals: { x: 50.0, y: 27.5 }, bredde: 44.4, cm: 60, bunn: 99.8, rygg: 51 },
+      bak: { hals: { x: 50.0, y: 27.5 }, bredde: 44.4, cm: 60, bunn: 99.8, rygg: 51, tekstMaks: 40 },
     },
     sonerCm: { navn: { dy: 82.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -281,7 +281,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.4, y: 28.3 }, bredde: 43.6, cm: 60, adidas: { x: 38.8, y: 42.9 } },
-      bak: { hals: { x: 49.7, y: 28.8 }, bredde: 44.8, cm: 60, bunn: 99.7, rygg: 51 },
+      bak: { hals: { x: 49.7, y: 28.8 }, bredde: 44.8, cm: 60, bunn: 99.7, rygg: 51, tekstMaks: 40 },
     },
     sonerCm: { navn: { dy: 79.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
