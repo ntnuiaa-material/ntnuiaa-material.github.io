@@ -159,7 +159,7 @@ test("motiv bak: 0,9 × logobredden, tekstene like brede som på sweat top, og b
   for (const p of PLAGG.filter((x) => x.bak.includes("motiv"))) {
     const logo = { ...TRYKKSONER.logo, ...(p.sonerCm && p.sonerCm.logo) };
     const z = { ...TRYKKSONER.motiv, ...(p.sonerCm && p.sonerCm.motiv) };
-    assert.ok(Math.abs(z.b - 0.9 * logo.b) < 0.06, `${p.id}: motivet skal være 0,9 × logobredden (${z.b} mot ${logo.b})`);
+    assert.ok(Math.abs(z.b - (0.9 * logo.b - (p.mal.bak.motivMindre || 0))) < 0.06, `${p.id}: motivet skal være 0,9 × logobredden minus motivMindre (${z.b} mot ${logo.b})`);
     for (const g of GRUPPER.filter((x) => x.motiv)) {
       const m = motivMaal(z, g.motivAspekt);
       assert.ok(m.h <= z.h + 0.01 && m.b <= z.b + 0.01, `${p.id}/${g.slug}: utenfor boksen`);
