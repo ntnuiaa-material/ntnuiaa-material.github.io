@@ -420,7 +420,7 @@ const PLAGG = [
     mal: {
       front: { hals: { x: 49.6, y: 1.2 }, bredde: 33.7, cm: 40, adidas: { x: 60.9, y: 30.9 } },
     },
-    sonerCm: { bryst: { b: 10 } }, // bredden; plasseringen følger adidas-logoen på det andre låret
+    sonerCm: { bryst: { b: 10, speilDx: -2 } }, // bredden; speilet om adidas-logoen, 2 cm lenger ut mot sida
   },
   {
     id: "tiro-sweat-pant",
