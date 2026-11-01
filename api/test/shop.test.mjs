@@ -174,9 +174,15 @@ test("motiv bak: 0,9 × logobredden, tekstene like brede som på sweat top, og b
     assert.ok(cm(s.estd.y - estdH / 2 - (s.motiv.y + s.motiv.h / 2)) >= 3.5, `${p.id}: motivet treffer ESTD`);
     assert.ok(cm(s.navn.y - s.navn.h / 2 - (s.estd.y + estdH / 2)) >= 2.9, `${p.id}: ESTD treffer navnet`);
     assert.ok(s.baktekst.y - bakH / 2 > p.mal.bak.hals.y, `${p.id}: baktekst over halsen/hetta`);
+    if (p.mal.bak.rygg) {
+      // Hettejakker: baktekst rett under hetta (3 til 8 cm), og ca. 6 cm luft mellom ESTD og navnet
+      assert.ok(cm(s.baktekst.y - bakH / 2 - p.mal.bak.hals.y) < 8, `${p.id}: baktekst for langt under hetta`);
+      assert.ok(cm(s.navn.y - s.navn.h / 2 - (s.estd.y + estdH / 2)) >= 5.7, `${p.id}: for lite luft mellom ESTD og navn`);
+    }
     // Baktekst og ESTD er like brede i prosent av lerretet som på Entrada sweat top (48,5 % og 15 %)
     if (p.mal.bak.bunn !== undefined) {
-      assert.ok(Math.abs(s.baktekst.b - 48.5) < 0.6, `${p.id}: baktekst ${s.baktekst.b} % av lerretet`);
+      const maks = Math.min(48.5, p.mal.bak.tekstMaks || 99);
+      assert.ok(Math.abs(s.baktekst.b - maks) < 0.6, `${p.id}: baktekst ${s.baktekst.b} % av lerretet, skulle være ${maks}`);
       assert.ok(Math.abs(s.estd.b - 15) < 0.5, `${p.id}: ESTD ${s.estd.b} % av lerretet`);
     }
   }
