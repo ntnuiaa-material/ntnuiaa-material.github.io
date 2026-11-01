@@ -10,6 +10,10 @@ const startGruppe = finnGruppe(params.get("gruppe")) ? params.get("gruppe") : GR
 function urlNavn(v) {
   return (v || "").toUpperCase().replace(/[^A-ZÆØÅ0-9 .\-]/g, "").slice(0, 12).trim();
 }
+// NTNUI-logoen er standardvalget foran, selv om «Gruppenavn» står først i knapperaden
+function standardFront(p) {
+  return p.front.includes("ntnui") ? "ntnui" : p.front[0];
+}
 const urlFarge = params.get("farge");
 const urlFront = params.get("front");
 const urlBak = params.get("bak");
@@ -18,7 +22,7 @@ const valg = {
   plagg: startPlagg.id,
   farge: startPlagg.farger[urlFarge] ? urlFarge : Object.keys(startPlagg.farger)[0],
   gruppe: startGruppe,
-  front: startPlagg.front.includes(urlFront) ? urlFront : startPlagg.front[0],
+  front: startPlagg.front.includes(urlFront) ? urlFront : standardFront(startPlagg),
   bak: startPlagg.bak.includes(urlBak) ? urlBak : startPlagg.bak[0] || "ingen",
   navn: startPlagg.navnFelt ? urlNavn(params.get("navn")) : "",
   kjonn: "",
@@ -39,7 +43,7 @@ function motivMulig() {
 function rettOpp() {
   const p = plagg();
   if (!p.farger[valg.farge]) valg.farge = Object.keys(p.farger)[0];
-  valg.front = p.front.includes(onske.front) ? onske.front : p.front[0];
+  valg.front = p.front.includes(onske.front) ? onske.front : standardFront(p);
   if (valg.front === "tekst" && !motivMulig()) valg.front = "ntnui";
   if (!p.bak.length) valg.bak = "ingen";
   else if (p.bak.includes(onske.bak)) valg.bak = onske.bak;

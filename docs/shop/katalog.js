@@ -72,7 +72,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
@@ -101,7 +101,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
@@ -130,7 +130,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
@@ -161,7 +161,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: [],
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
@@ -193,7 +193,7 @@ const PLAGG = [
     },
     kjonn: ["herre"],
     sider: ["front", "bak"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
@@ -220,7 +220,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
@@ -247,7 +247,7 @@ const PLAGG = [
     },
     kjonn: ["herre"],
     sider: ["front", "bak"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
@@ -274,7 +274,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
@@ -302,7 +302,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
@@ -330,7 +330,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
@@ -358,7 +358,7 @@ const PLAGG = [
     },
     kjonn: ["herre"],
     sider: ["front", "bak"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
@@ -386,7 +386,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: [],
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
@@ -419,7 +419,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: [],
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
@@ -447,7 +447,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front"],
-    front: ["ntnui", "tekst", "ingen"],
+    front: ["tekst", "ntnui", "ingen"],
     bak: [],
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
