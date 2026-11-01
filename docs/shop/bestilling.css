@@ -1701,3 +1701,32 @@ form.kurv-steg .knapp { margin-top: 12px; }
 /* Bunnmerket får plass i hele bredden uten å kuttes */
 .bunn { container-type: inline-size; }
 .bunn-merke { font-size: min(10.4cqi, 210px); overflow: visible; text-align: center; }
+
+/* «i samarbeid med Intersport Rongve» over merket på forsiden: liten og dempet, som på Instagram-plakaten.
+   RONGVE er tekst (ikke en del av bildet), så den følger tekstfargen i både mørkt og lyst tema. */
+.helt-samarbeid {
+  margin: 0 0 clamp(8px, 2vw, 22px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--dempet);
+}
+.samarbeid-merke {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.samarbeid-merke img { display: block; width: auto; height: 15px; }
+.samarbeid-rongve {
+  font-family: var(--font-tekst);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  margin-right: -0.32em;
+  line-height: 1;
+  color: var(--tekst);
+}
