@@ -203,17 +203,8 @@ function sammendrag(linjer) {
 // Én rad per plagg, samme kolonner som arket fra Nettskjema-tiden. Semikolon og BOM, så
 // norsk Excel åpner fila riktig med dobbeltklikk.
 const CSV_KOLONNER = ["Nr", "Navn", "Telefon", "E-post", "Plagg", "Modell", "Artikkel", "Farge", "Snitt", "Størrelse", "Trykk", "Trykkfarge", "Egennavn"];
-// ZIP-en har i tillegg mappa til bestillingen og bredden på hvert trykk i cm (ca., fra størrelse L herre)
-const MAAL_KOLONNER = [
-  ["bryst", "Bredde NTNUI-logo foran (cm)"], ["tekst", "Bredde tekst foran (cm)"], ["logo", "Bredde logo bak (cm)"],
-  ["baktekst", "Bredde tekst bak (cm)"], ["motiv", "Bredde motiv bak (cm)"], ["estd", "Bredde ESTD bak (cm)"], ["navn", "Høyde navn bak (cm)"],
-];
-
-// Kolonnen «Logo bak, fil» i ZIP-arket: SVG når gruppa har vektorlogo, ellers «kun rasterfil»
-function logoFilTekst(trykk) {
-  const t = trykk.find((x) => x.posisjon === "logo");
-  return t ? (t.trykkSrc ? "SVG" : "kun rasterfil") : "";
-}
+// ZIP-en har i tillegg mappa til bestillingen. Mål i cm er bevisst utelatt: Erik plasserer etter
+// forhåndsvisningen i mappa
 
 function valgFor(l) {
   return { plagg: l.plagg, farge: l.farge, gruppe: l.gruppe, front: l.front, bak: l.bak, navn: l.navn || "" };
@@ -231,23 +222,15 @@ function trykkFor(l) {
 }
 
 function byggCsv(puljeId, utvidet) {
-  const kol = utvidet ? [...CSV_KOLONNER, "Mappe", ...MAAL_KOLONNER.map(([, t]) => t), "Logo bak, fil"] : CSV_KOLONNER;
+  const kol = utvidet ? [...CSV_KOLONNER, "Mappe"] : CSV_KOLONNER;
   const rader = [kol];
   for (const b of data.bestillinger.filter((x) => x.pulje_id === puljeId)) {
     for (const l of b.linjer) {
       const pl = finnPlagg(l.plagg);
-      const trykk = trykkFor(l);
       for (let i = 0; i < l.antall; i++) {
         const rad = [b.ordrenr, b.navn, b.telefon, b.epost, plaggNavn(l.plagg), pl ? pl.kategori : "", l.artikkel || "",
           NAVN[l.farge] || l.farge, NAVN[l.kjonn], l.storrelse, trykkTekst(l), trykkfarge(l), l.navn || ""];
-        if (utvidet) {
-          rad.push(b.ordrenr);
-          for (const [pos] of MAAL_KOLONNER) {
-            const t = trykk.find((x) => x.posisjon === pos);
-            rad.push(t ? String(t.cm).replace(".", ",") : "");
-          }
-          rad.push(logoFilTekst(trykk));
-        }
+        if (utvidet) rad.push(b.ordrenr);
         rader.push(rad);
       }
     }
@@ -317,14 +300,13 @@ async function forhandsvisning(b, l, nr, antallLinjer) {
     [`Farge: ${NAVN[l.farge] || l.farge}   ·   Snitt: ${NAVN[l.kjonn]}   ·   Størrelse: ${l.storrelse}   ·   Antall: ${l.antall}`, ""],
     [`Gruppe: ${gruppeTekst(l)}`, ""],
     ...trykk.map((t) => {
-      const mal = (t.posisjon === "navn" ? `«${t.tekst}», versalhøyde ${t.cm} cm` : `${t.cm} cm bredt${t.cmH ? `, ${t.cmH} cm høyt` : ""}`)
-        + (t.rot ? `, rotert ${String(t.rot).replace(".", ",")}°` : "");
+      const tekst = t.posisjon === "navn" ? ` «${t.tekst}»` : "";
       const kunRaster = t.posisjon === "logo" && !t.trykkSrc ? " – kun rasterfil" : "";
-      return [`${POSISJON_TEKST[t.posisjon]}: ${mal}   (${t.fil}.${t.type === "navn" ? "png" : (t.trykkSrc || t.src).split(".").pop()})${kunRaster}`, ""];
+      return [`${POSISJON_TEKST[t.posisjon]}:${tekst}   (${t.fil}.${t.type === "navn" ? "png" : (t.trykkSrc || t.src).split(".").pop()})${kunRaster}`, ""];
     }),
   ];
   if (!trykk.length) rader.push(["Ingen trykk", ""]);
-  rader.push(["Forhåndsvisning fra shopen. Mål i cm er ca. og regnet fra størrelse L herre.", "liten"]);
+  rader.push(["Forhåndsvisning fra shopen. Plasser trykkene som på bildet.", "liten"]);
 
   const linjeH = 46;
   const tekstH = 20 + rader.reduce((s, [, t]) => s + (t === "tittel" ? 80 : linjeH), 0) + 20;
