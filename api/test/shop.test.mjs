@@ -127,14 +127,17 @@ test("motiv: motivAspekt stemmer med viewBox i begge SVG-ene, og viewBox er besk
   }
 });
 
-test("motiv: alle motiv får samme areal, innenfor største boks, og Klatring fyller bredden", () => {
+test("motiv: like bredt som logoen, med høyden fra motivAspekt, og høyden kappes ved logoens bredde", () => {
   const z = TRYKKSONER.motiv;
+  const kappet = [];
   for (const g of GRUPPER.filter((x) => x.motiv)) {
     const m = motivMaal(z, g.motivAspekt);
     assert.ok(m.b <= z.b + 0.01 && m.h <= z.h + 0.01, `${g.slug}: ${m.b} x ${m.h} cm er utenfor boksen`);
     assert.ok(Math.abs(m.b / m.h / g.motivAspekt - 1) < 0.01, `${g.slug}: proporsjonene er endret`);
-    assert.ok(m.b * m.h >= z.areal * 0.97 && m.b * m.h <= z.areal * 1.03, `${g.slug}: areal ${(m.b * m.h).toFixed(0)} cm²`);
+    if (m.b < z.b - 0.05) kappet.push(g.slug); else assert.equal(m.b, z.b, `${g.slug}: skal være like bredt som logoen`);
   }
+  // Bare de som er litt høyere enn brede
+  assert.deepEqual(kappet.sort(), ["handball", "padel"]);
   assert.equal(motivMaal(z, GRUPPER.find((x) => x.slug === "klatring").motivAspekt).b, z.b);
 });
 
@@ -152,20 +155,26 @@ test("motiv bak finnes på alle overdeler, og gruppenavn foran på alle plagg", 
   assert.throws(() => sjekkLinje(lagLinje("tiro-shorts", { front: "tekst", gruppe: "Badminton" }), Brukerfeil), /motiv/);
 });
 
-test("motiv bak: samme areal for alle grupper på hvert plagg, og baktekst, motiv, ESTD og navn kolliderer ikke", () => {
+test("motiv bak: like bredt som logoen og med samme midte på hvert plagg, og baktekst, motiv, ESTD og navn kolliderer ikke", () => {
   for (const p of PLAGG.filter((x) => x.bak.includes("motiv"))) {
+    const logo = { ...TRYKKSONER.logo, ...(p.sonerCm && p.sonerCm.logo) };
     const z = { ...TRYKKSONER.motiv, ...(p.sonerCm && p.sonerCm.motiv) };
+    assert.equal(z.b, logo.b, `${p.id}: motivet skal være like bredt som logoen`);
+    assert.equal(z.dy, logo.dy, `${p.id}: motivet skal ha samme midte som logoen`);
     for (const g of GRUPPER.filter((x) => x.motiv)) {
       const m = motivMaal(z, g.motivAspekt);
-      assert.ok(m.b <= z.b + 0.01 && m.h <= z.h + 0.01, `${p.id}/${g.slug}: utenfor boksen`);
-      assert.ok(m.b * m.h >= z.areal * 0.95 && m.b * m.h <= z.areal * 1.05, `${p.id}/${g.slug}: areal ${(m.b * m.h).toFixed(0)} cm² mot ${z.areal}`);
+      assert.ok(m.h <= z.h + 0.01 && m.b <= logo.b + 0.01, `${p.id}/${g.slug}: utenfor logoboksen`);
+      if (g.motivAspekt >= 1) assert.equal(m.b, logo.b, `${p.id}/${g.slug}: ikke like bredt som logoen`);
     }
-    // Loddrett rekkefølge (i prosent av lerretshøyden): baktekst, motiv (største høyde), ESTD, navn
+    // Loddrett rekkefølge i prosent av lerretshøyden: baktekst, motivboksen (høyde = logoens bredde), ESTD, navn.
+    // Minst 1,5 cm luft mellom baktekst og boksen, og mellom boksen og ESTD
     const s = p.soner;
-    const motivH = (s.motiv.h) / 2;
-    assert.ok(s.baktekst.y < s.motiv.y - motivH, `${p.id}: baktekst treffer motivet`);
-    assert.ok(s.motiv.y + motivH < s.estd.y, `${p.id}: motivet treffer ESTD`);
+    const cm = (prosent) => prosent / 0.9 * (p.mal.bak.cm / p.mal.bak.bredde);
+    const bakH = s.baktekst.b / 8.33 * 0.9;
+    assert.ok(cm((s.motiv.y - s.motiv.h / 2) - (s.baktekst.y + bakH / 2)) >= 1.5, `${p.id}: baktekst treffer motivet`);
+    assert.ok(cm(s.estd.y - (s.motiv.y + s.motiv.h / 2)) >= 1.5, `${p.id}: motivet treffer ESTD`);
     assert.ok(s.estd.y + 2 < s.navn.y, `${p.id}: ESTD treffer navnet`);
+    assert.ok(s.baktekst.y - bakH / 2 > p.mal.bak.hals.y, `${p.id}: baktekst over halsen/hetta`);
   }
 });
 
