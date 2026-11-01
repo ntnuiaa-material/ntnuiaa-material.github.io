@@ -1517,6 +1517,8 @@ form.kurv-steg .knapp { margin-top: 12px; }
 }
 
 @media (max-width: 560px) {
+  /* «KOLLEKSJONEN» ble ca. 388 px bred med 44 px og ga vannrett scroll på 360 px-skjermer */
+  .seksjon-topp h2 { font-size: clamp(28px, 9.5vw, 44px); }
   .nav { gap: 8px; padding-left: 12px; }
   .nav-lenker { display: none; }
   .kurv-knapp > span:not(.kurv-antall) { display: none; }
