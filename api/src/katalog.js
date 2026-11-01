@@ -75,7 +75,7 @@ const PLAGG = [
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
     front: ["ntnui", "tekst", "ingen"],
-    bak: ["logo", "ingen"],
+    bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.8, y: 0.3 }, bredde: 58.1, cm: 54, adidas: { x: 34.4, y: 26.7 } },
@@ -163,7 +163,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front"],
-    front: ["ntnui", "ingen"],
+    front: ["ntnui", "tekst", "ingen"],
     bak: [],
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
@@ -171,7 +171,10 @@ const PLAGG = [
       front: { hals: { x: 49.7, y: 1.2 }, bredde: 67.4, cm: 40 },
     },
     // Som tiro-shorts: nede på venstre lår, rett over fallet, rotert etter fallet (samme omriss)
-    sonerCm: { bryst: { b: 10, dx: -16.5, dy: 54.5, rot: 3.5 } },
+    sonerCm: {
+      bryst: { b: 10, dx: -16.5, dy: 54.5, rot: 3.5 },
+      tekst: { b: 12, dx: -16.5, dy: 54.5, rot: 3.5 }, // gruppenavnet på samme sted som logoen, litt bredere
+    },
   },
   {
     // Bare herremodell. Hvit (JZ6579, herre) finnes, men har ikke bilde ennå. Bildet er generert med Nano Banana 2.1
@@ -247,7 +250,7 @@ const PLAGG = [
     kjonn: ["herre"],
     sider: ["front", "bak"],
     front: ["ntnui", "tekst", "ingen"],
-    bak: ["logo", "ingen"],
+    bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.0, y: 2.5 }, bredde: 53.8, cm: 60, adidas: { x: 34.8, y: 23.4 } },
@@ -274,7 +277,7 @@ const PLAGG = [
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
     front: ["ntnui", "tekst", "ingen"],
-    bak: ["logo", "ingen"],
+    bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.4, y: 28.3 }, bredde: 43.6, cm: 60, adidas: { x: 38.8, y: 42.9 } },
@@ -302,7 +305,7 @@ const PLAGG = [
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
     front: ["ntnui", "tekst", "ingen"],
-    bak: ["logo", "ingen"],
+    bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.0, y: 9.0 }, bredde: 50.7, cm: 56, adidas: { x: 36.3, y: 25.9 } },
@@ -330,7 +333,7 @@ const PLAGG = [
     kjonn: ["herre", "dame"],
     sider: ["front", "bak"],
     front: ["ntnui", "tekst", "ingen"],
-    bak: ["logo", "ingen"],
+    bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.1, y: 14.8 }, bredde: 47.6, cm: 60, adidas: { x: 37.4, y: 32.5 } },
@@ -358,7 +361,7 @@ const PLAGG = [
     kjonn: ["herre"],
     sider: ["front", "bak"],
     front: ["ntnui", "tekst", "ingen"],
-    bak: ["logo", "ingen"],
+    bak: ["motiv", "logo", "ingen"],
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.2, y: 11.5 }, bredde: 47.8, cm: 60, adidas: { x: 36.8, y: 30.7 } },
@@ -385,7 +388,7 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front"],
-    front: ["ntnui", "ingen"],
+    front: ["ntnui", "tekst", "ingen"],
     bak: [],
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
@@ -394,7 +397,10 @@ const PLAGG = [
     },
     // Nede på venstre lår, rett over fallet. Trykket er rotert 3,5° med klokka, så det følger fallet på benet
     // (kanten stiger ca. 3,3° mot venstre i bildet, målt 31.10.2026)
-    sonerCm: { bryst: { b: 10, dx: -16.5, dy: 54.5, rot: 3.5 } },
+    sonerCm: {
+      bryst: { b: 10, dx: -16.5, dy: 54.5, rot: 3.5 },
+      tekst: { b: 12, dx: -16.5, dy: 54.5, rot: 3.5 }, // gruppenavnet på samme sted som logoen, litt bredere
+    },
   },
   {
     id: "tiro-treningsbukse",
@@ -415,14 +421,15 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front"],
-    front: ["ntnui", "ingen"],
+    front: ["ntnui", "tekst", "ingen"],
     bak: [],
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
     mal: {
       front: { hals: { x: 49.6, y: 1.2 }, bredde: 33.7, cm: 40, adidas: { x: 60.9, y: 30.9 } },
     },
-    sonerCm: { bryst: { b: 10 } }, // bredden; plasseringen følger adidas-logoen på det andre låret
+    // bredden; speilet om adidas-logoen, 2 cm lenger ut mot sida. Gruppenavnet har samme plass, litt bredere
+    sonerCm: { bryst: { b: 10, speilDx: -2 }, tekst: { b: 12, speilDx: -2 } },
   },
   {
     id: "tiro-sweat-pant",
@@ -442,14 +449,15 @@ const PLAGG = [
     },
     kjonn: ["herre", "dame"],
     sider: ["front"],
-    front: ["ntnui", "ingen"],
+    front: ["ntnui", "tekst", "ingen"],
     bak: [],
     navnFelt: false,
     // Midjen er målestokken (flat bredde i bånd, antatt 40 cm), halsen er øverst midt på linningen
     mal: {
       front: { hals: { x: 49.9, y: 1.2 }, bredde: 36.8, cm: 40, adidas: { x: 65.1, y: 30.1 } },
     },
-    sonerCm: { bryst: { b: 10 } }, // bredden; plasseringen følger adidas-logoen på det andre låret
+    // bredden; plasseringen følger adidas-logoen på det andre låret. Gruppenavnet har samme plass, litt bredere
+    sonerCm: { bryst: { b: 10 }, tekst: { b: 12 } },
   },
 ];
 
@@ -543,6 +551,34 @@ function visuellLogo(p) {
   } };
 }
 for (const p of PLAGG) visuellLogo(p);
+
+// Samme tankegang for motivet bak (baktekst, motiv og ESTD). Målene følger ryggbredden (kb: plaggets ryggbredde i cm
+// mot 54 cm på Entrada TEE), men må også rommes av høyden: på plagg der bildet er lavere i forhold til bredden
+// (hettejakker og -gensere, der hetta tar toppen) er kv, bildehøyden i cm mot Entrada TEE, mindre enn kb. Da ville
+// motivet truffet ESTD, og baktekst som er bredere enn ryggfeltet tar i skulderfeltene. Alt tre skalerer derfor med
+// f = min(kb, kv * MOTIV_SLACK), også arealet (f²) og største høyde, så alle motiv fortsatt får samme areal på plagget
+// (se motivMaal). Plasseringen (dy) er samme andel av høyden fra halsen til nederkanten
+// som på Entrada TEE (108,1 cm i bildet). Plagg uten `mal.bak.bunn` bruker tabellen uendret, som Entrada TEE.
+const TEE_BILDEHOYDE_CM = 108.1;   // (bunn - hals) i cm på Entrada TEE: (99,8 - 0,3) % / 0,9 * 54 / 55,2
+const MOTIV_SLACK = 1.0;
+function visuellMotiv(p) {
+  const mal = p.mal && p.mal.bak;
+  if (!mal || mal.bunn === undefined || !p.bak.includes("motiv")) return;
+  const cmPerProsent = mal.cm / mal.bredde;
+  const kb = (mal.rygg || mal.bredde) * cmPerProsent / 54;
+  const kv = (mal.bunn - mal.hals.y) / 0.9 * cmPerProsent / TEE_BILDEHOYDE_CM;
+  const f = Math.min(kb, kv * MOTIV_SLACK);
+  const rund = (v) => Math.round(v * 2) / 2;
+  const dy = (z) => rund(TRYKKSONER[z].dy * kv);
+  const ny = {
+    baktekst: { b: rund(TRYKKSONER.baktekst.b * f), dy: dy("baktekst") },
+    motiv: { b: rund(TRYKKSONER.motiv.b * f), h: rund(TRYKKSONER.motiv.h * f), areal: Math.round(TRYKKSONER.motiv.areal * f * f), dy: dy("motiv") },
+    estd: { b: rund(TRYKKSONER.estd.b * f), dy: dy("estd") },
+  };
+  p.sonerCm = { ...p.sonerCm };
+  for (const [z, v] of Object.entries(ny)) if (!p.sonerCm[z]) p.sonerCm[z] = v;
+}
+for (const p of PLAGG) visuellMotiv(p);
 
 function beregnSoner(p) {
   const soner = {};

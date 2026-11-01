@@ -57,7 +57,7 @@ test("kolGyldig avviser det designeren ikke tillater", () => {
   for (const avvik of [
     { gruppe: "Badminton", bak: "motiv" },          // gruppa har ikke motiv
     { gruppe: "Styrkesport", front: "tekst" },      // ingen tekst foran uten motiv
-    { plagg: "tiro-drakt", bak: "motiv" },          // Tiro-jersey har bare logo bak
+    { plagg: "tiro-shorts", bak: "motiv" },         // shorts har ikke ryggtrykk
     { plagg: "tiro-shorts", bak: "logo" },          // shorts har ikke ryggtrykk
     { plagg: "tiro-drakt", farge: "hvit" },         // hvit finnes bare på Entrada-tee
     { plagg: "tiro-shorts", bak: "ingen", navn: "X" }, // navn bare på plagg med navnfelt

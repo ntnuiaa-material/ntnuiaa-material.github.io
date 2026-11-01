@@ -137,3 +137,42 @@ test("motiv: alle motiv får samme areal, innenfor største boks, og Klatring fy
   }
   assert.equal(motivMaal(z, GRUPPER.find((x) => x.slug === "klatring").motivAspekt).b, z.b);
 });
+
+test("motiv bak finnes på alle overdeler, og gruppenavn foran på alle plagg", () => {
+  for (const p of PLAGG) {
+    assert.ok(p.front.includes("tekst"), `${p.id}: mangler gruppenavn foran`);
+    if (p.sider.includes("bak")) assert.deepEqual(p.bak, ["motiv", "logo", "ingen"], `${p.id}: bak`);
+  }
+  // API-et godtar kombinasjonene
+  const { sjekkLinje } = _test;
+  const lagLinje = (plagg, vis) => ({ plagg, farge: "svart", kjonn: "herre", storrelse: "M", gruppe: "Fotball", front: "ntnui", bak: "ingen", navn: "", antall: 1, ...vis });
+  assert.equal(sjekkLinje(lagLinje("tiro-drakt", { bak: "motiv", navn: "ola" }), Brukerfeil).stykkpris, 225 + 165);
+  assert.equal(sjekkLinje(lagLinje("tiro-regnjakke", { bak: "motiv", front: "tekst" }), Brukerfeil).stykkpris, 1160 + 165);
+  assert.equal(sjekkLinje(lagLinje("tiro-treningsbukse", { front: "tekst" }), Brukerfeil).stykkpris, 450 + 30);
+  assert.throws(() => sjekkLinje(lagLinje("tiro-shorts", { front: "tekst", gruppe: "Badminton" }), Brukerfeil), /motiv/);
+});
+
+test("motiv bak: samme areal for alle grupper på hvert plagg, og baktekst, motiv, ESTD og navn kolliderer ikke", () => {
+  for (const p of PLAGG.filter((x) => x.bak.includes("motiv"))) {
+    const z = { ...TRYKKSONER.motiv, ...(p.sonerCm && p.sonerCm.motiv) };
+    for (const g of GRUPPER.filter((x) => x.motiv)) {
+      const m = motivMaal(z, g.motivAspekt);
+      assert.ok(m.b <= z.b + 0.01 && m.h <= z.h + 0.01, `${p.id}/${g.slug}: utenfor boksen`);
+      assert.ok(m.b * m.h >= z.areal * 0.95 && m.b * m.h <= z.areal * 1.05, `${p.id}/${g.slug}: areal ${(m.b * m.h).toFixed(0)} cm² mot ${z.areal}`);
+    }
+    // Loddrett rekkefølge (i prosent av lerretshøyden): baktekst, motiv (største høyde), ESTD, navn
+    const s = p.soner;
+    const motivH = (s.motiv.h) / 2;
+    assert.ok(s.baktekst.y < s.motiv.y - motivH, `${p.id}: baktekst treffer motivet`);
+    assert.ok(s.motiv.y + motivH < s.estd.y, `${p.id}: motivet treffer ESTD`);
+    assert.ok(s.estd.y + 2 < s.navn.y, `${p.id}: ESTD treffer navnet`);
+  }
+});
+
+test("gruppenavn foran på bukser og shorts ligger på samme sted som NTNUI-logoen, men er bredere", () => {
+  for (const id of ["entrada-short", "tiro-shorts", "tiro-treningsbukse", "tiro-sweat-pant"]) {
+    const p = PLAGG.find((x) => x.id === id);
+    assert.deepEqual([p.soner.tekst.x, p.soner.tekst.y, p.soner.tekst.rot], [p.soner.bryst.x, p.soner.bryst.y, p.soner.bryst.rot], id);
+    assert.ok(p.soner.tekst.b > p.soner.bryst.b && p.soner.tekst.b < 15 / (p.mal.front.cm / p.mal.front.bredde) , id);
+  }
+});
