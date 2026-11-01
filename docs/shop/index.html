@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap">
-  <link rel="stylesheet" href="bestilling.css?v=202610312040">
+  <link rel="stylesheet" href="bestilling.css?v=202611010900">
 </head>
 <body>
   <div class="bakgrunn" aria-hidden="true">
@@ -96,8 +96,16 @@
       <div class="seksjon-topp reveal">
         <h2 id="kol-tittel" data-i18n="kol.tittel">Kolleksjonen</h2>
         <p class="seksjon-ingress" data-i18n="kol.ingress">Et utvalg av hvordan plaggene kan se ut. Trykk på et plagg for å lage din egen versjon.</p>
+        <div class="skinne-piler">
+          <button type="button" class="ikon-knapp" data-skinne="forrige" aria-label="Forrige">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>
+          </button>
+          <button type="button" class="ikon-knapp" data-skinne="neste" aria-label="Neste">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg>
+          </button>
+        </div>
       </div>
-      <div class="skinne" id="skinne"></div>
+      <div class="skinne" id="skinne" tabindex="0" role="region"></div>
     </section>
 
     <section class="band reveal" aria-labelledby="band-tittel">
@@ -224,28 +232,10 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="katalog.js?v=202610311910"></script>
-  <script src="felles.js?v=202610312010"></script>
-  <script>
-
-    function tegnKolleksjon() {
-      $("#skinne").innerHTML = KOLLEKSJON.map((k, i) => `
-        <${k.plagg ? `a href="designer.html?plagg=${k.plagg}&gruppe=${encodeURIComponent(k.gruppe)}"` : "div"} class="lookbook reveal">
-          <div class="lookbook-bilde">
-            <img src="${k.bilde}" alt="${escape(k.tittel[sprak])}" loading="${i < 2 ? "eager" : "lazy"}">
-          </div>
-          <div class="lookbook-tekst">
-            <span class="mono dempet">0${i + 1} · ${escape(k.gruppe)}</span>
-            <h3>${escape(k.tittel[sprak])}</h3>
-            ${k.plagg
-              ? `<span class="lookbook-lenke">${escape(t("kol.cta"))} <span aria-hidden="true">→</span></span>`
-              : `<span class="lookbook-lenke dempet">${escape(t("kol.kommer"))}</span>`}
-          </div>
-        </${k.plagg ? "a" : "div"}>`).join("");
-      observerInn($("#skinne"));
-    }
-    vedSprak.push(tegnKolleksjon);
-    start();
-  </script>
+  <script src="katalog.js?v=202611010900"></script>
+  <script src="felles.js?v=202611010900"></script>
+  <script src="tegning.js?v=202611010900"></script>
+  <script src="kolleksjon.js?v=202611010900"></script>
+  <script>start();</script>
 </body>
 </html>

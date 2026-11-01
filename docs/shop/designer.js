@@ -5,13 +5,22 @@ const params = new URLSearchParams(location.search);
 const startPlagg = finnPlagg(params.get("plagg")) || PLAGG[0];
 const startGruppe = finnGruppe(params.get("gruppe")) ? params.get("gruppe") : GRUPPER[0].navn;
 
+// Valgfrie parametre som gjenskaper en kombinasjon (brukes av kortene i kolleksjonen): farge, front, bak og navn.
+// Ugyldige verdier for plagget ignoreres, og rettOpp() under sjekker resten (f.eks. motiv uten motivgruppe).
+function urlNavn(v) {
+  return (v || "").toUpperCase().replace(/[^A-ZÆØÅ0-9 .\-]/g, "").slice(0, 12).trim();
+}
+const urlFarge = params.get("farge");
+const urlFront = params.get("front");
+const urlBak = params.get("bak");
+
 const valg = {
   plagg: startPlagg.id,
-  farge: Object.keys(startPlagg.farger)[0],
+  farge: startPlagg.farger[urlFarge] ? urlFarge : Object.keys(startPlagg.farger)[0],
   gruppe: startGruppe,
-  front: startPlagg.front[0],
-  bak: startPlagg.bak[0] || "ingen",
-  navn: "",
+  front: startPlagg.front.includes(urlFront) ? urlFront : startPlagg.front[0],
+  bak: startPlagg.bak.includes(urlBak) ? urlBak : startPlagg.bak[0] || "ingen",
+  navn: startPlagg.navnFelt ? urlNavn(params.get("navn")) : "",
   kjonn: "",
   storrelse: "",
 };
@@ -19,7 +28,7 @@ const valg = {
 const plagg = () => finnPlagg(valg.plagg);
 
 // Det brukeren sist valgte. Valgene følger med når plagget byttes, så langt plagget har dem.
-const onske = { front: valg.front, bak: valg.bak, navn: "" };
+const onske = { front: valg.front, bak: valg.bak, navn: valg.navn };
 
 // Motiv finnes ikke for alle grupper, og aldri for generisk
 function motivMulig() {
@@ -225,6 +234,12 @@ function oppdater() {
   const url = new URL(location.href);
   url.searchParams.set("plagg", valg.plagg);
   url.searchParams.set("gruppe", valg.gruppe);
+  // Resten av valget følger med i adressen, så lenken kan deles og gjenskaper det samme plagget
+  url.searchParams.set("farge", valg.farge);
+  url.searchParams.set("front", valg.front);
+  url.searchParams.set("bak", valg.bak);
+  if (valg.navn) url.searchParams.set("navn", valg.navn);
+  else url.searchParams.delete("navn");
   history.replaceState(null, "", url);
 }
 

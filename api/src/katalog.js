@@ -545,19 +545,6 @@ function beregnSoner(p) {
 }
 for (const p of PLAGG) p.soner = beregnSoner(p);
 
-// plagg: åpner designeren med dette plagget. Uten plagg er kortet bare et bilde.
-const KOLLEKSJON = [
-  { bilde: "img/kolleksjon/sport-svart.webp", plagg: "tiro-drakt", tittel: { nb: "Tiro26 League jersey", en: "Tiro26 League jersey" }, gruppe: "Klatring" },
-  { bilde: "img/kolleksjon/casual-svart.webp", plagg: "entrada-tee", tittel: { nb: "Entrada26 T-skjorte · Svart", en: "Entrada26 tee · Black" }, gruppe: "Klatring" },
-  { bilde: "img/kolleksjon/casual-hvit.webp", plagg: "entrada-tee", tittel: { nb: "Entrada26 T-skjorte · Hvit", en: "Entrada26 tee · White" }, gruppe: "Volleyball" },
-  { bilde: "img/kolleksjon/hoody.webp", plagg: "entrada-hoody", tittel: { nb: "Entrada26 hoody", en: "Entrada26 hoodie" }, gruppe: "Klatring" },
-  { bilde: "img/kolleksjon/sweat-top.webp", plagg: "entrada-sweat-top", tittel: { nb: "Entrada26 sweat top", en: "Entrada26 sweat top" }, gruppe: "Klatring" },
-  { bilde: "img/kolleksjon/sweat-crew.webp", plagg: "tiro-sweat-crew", tittel: { nb: "Tiro26 sweat crew", en: "Tiro26 sweat crew" }, gruppe: "Klatring" },
-  { bilde: "img/kolleksjon/full-zip.webp", plagg: "tiro-full-zip", tittel: { nb: "Tiro26 full zip hoodie", en: "Tiro26 full zip hoodie" }, gruppe: "Klatring" },
-  { bilde: "img/kolleksjon/treningsjakke.webp", plagg: "tiro-treningsjakke", tittel: { nb: "Tiro26 treningsjakke", en: "Tiro26 training jacket" }, gruppe: "Klatring" },
-  { bilde: "img/kolleksjon/windbreaker.webp", plagg: "tiro-windbreaker", tittel: { nb: "Tiro26 windbreaker", en: "Tiro26 windbreaker" }, gruppe: "Klatring" },
-];
-
 function finnPlagg(id) {
   return PLAGG.find((p) => p.id === id);
 }
