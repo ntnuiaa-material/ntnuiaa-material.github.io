@@ -197,7 +197,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.2, y: 28.3 }, bredde: 40.6, cm: 60, adidas: { x: 38.3, y: 42.1 } },
-      bak: { hals: { x: 50.0, y: 27.5 }, bredde: 44.4, cm: 60 },
+      bak: { hals: { x: 50.0, y: 27.5 }, bredde: 44.4, cm: 60, bunn: 99.8, rygg: 51 },
     },
     sonerCm: { navn: { dy: 82.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -224,7 +224,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 49.9, y: 2.2 }, bredde: 54.1, cm: 60, adidas: { x: 34.4, y: 22.9 } },
-      bak: { hals: { x: 49.8, y: 0.8 }, bredde: 54.4, cm: 60 },
+      bak: { hals: { x: 49.8, y: 0.8 }, bredde: 54.4, cm: 60, bunn: 99.5 },
     },
     sonerCm: { navn: { dy: 97.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -251,7 +251,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.0, y: 2.5 }, bredde: 53.8, cm: 60, adidas: { x: 34.8, y: 23.4 } },
-      bak: { hals: { x: 50.0, y: 1.0 }, bredde: 55.1, cm: 60 },
+      bak: { hals: { x: 50.0, y: 1.0 }, bredde: 55.1, cm: 60, bunn: 99.7 },
     },
     sonerCm: { navn: { dy: 95.5 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -278,7 +278,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.4, y: 28.3 }, bredde: 43.6, cm: 60, adidas: { x: 38.8, y: 42.9 } },
-      bak: { hals: { x: 49.7, y: 28.8 }, bredde: 44.8, cm: 60 },
+      bak: { hals: { x: 49.7, y: 28.8 }, bredde: 44.8, cm: 60, bunn: 99.7, rygg: 51 },
     },
     sonerCm: { navn: { dy: 79.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -306,7 +306,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.0, y: 9.0 }, bredde: 50.7, cm: 56, adidas: { x: 36.3, y: 25.9 } },
-      bak: { hals: { x: 50.0, y: 6.2 }, bredde: 50.7, cm: 56 },
+      bak: { hals: { x: 50.0, y: 6.2 }, bredde: 50.7, cm: 56, bunn: 99.8 },
     },
     sonerCm: { navn: { dy: 90.5 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -334,7 +334,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.1, y: 14.8 }, bredde: 47.6, cm: 60, adidas: { x: 37.4, y: 32.5 } },
-      bak: { hals: { x: 50.0, y: 25.5 }, bredde: 48.9, cm: 60 },
+      bak: { hals: { x: 50.0, y: 25.5 }, bredde: 48.9, cm: 60, bunn: 99.8, rygg: 51 },
     },
     sonerCm: { navn: { dy: 74.5 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -362,7 +362,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.2, y: 11.5 }, bredde: 47.8, cm: 60, adidas: { x: 36.8, y: 30.7 } },
-      bak: { hals: { x: 50.0, y: 24.5 }, bredde: 47.3, cm: 60 },
+      bak: { hals: { x: 50.0, y: 24.5 }, bredde: 47.3, cm: 60, bunn: 99.8, rygg: 51 },
     },
     sonerCm: { navn: { dy: 75.5 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -517,9 +517,33 @@ function sonePaaPlagg(p, sone) {
 //           lerretet, målt på bildet (tegnet rundt logoen, ikke fra mockup-malen). NTNUI-logoen foran
 //           (bryst og tekst) plasseres på samme høyde og speilvendt om `hals.x`, så den ligger like langt
 //           fra midtlinja/glidelåsen på motsatt side. Svart adidas-logo på hvit T-skjorte ligger på samme sted
+//   rygg:   (valgfri, bak) synlig ryggbredde i prosent av lerretet når `bredde` er smalere enn det som ser ut som
+//           ryggen i bildet (hettejakker: hetta og armene gjør at bildet er skalert ned). Brukes bare av visuellLogo()
+//   bunn:   (valgfri, bak) y til nederkanten av plagget i prosent av lerretet. Gir ryggtrykket «logo» samme
+//           synlige størrelse og plass som på Entrada TEE, se visuellLogo()
 //   cm:     bredden i cm på referansestørrelsen (L herre). ANTATT, ikke hentet fra størrelsestabellen:
 //           54 cm på T-skjorte og jersey, 56 på treningsjakka, 60 på hettegenser, genser, full zip og
 //           regnjakke/windbreaker. På shorts og bukser er det midjen (flat, i bånd) som er målet, 40 cm
+// Ryggloggen skal se like stor og stå like høyt på alle overdeler som på Entrada TEE. Der er logoen 42 cm av
+// 54 cm bryst, og midten ligger 38,5 cm under halsen. Mockupene av jakker og gensere er både bredere (antatt
+// 60 cm) og høyere i bildet enn teen, så samme cm-mål ga en logo som så mindre ut og satt lavere. Derfor regnes
+// logoen på plagg med `mal.bak.bunn` ut relativt til selve bildet: samme andel av ryggbredden, og midten på
+// samme andel av avstanden fra halsen (underkant av hetta på hettejakker) til nederkanten. Resultatet blir et
+// avvik i sonerCm.logo, så designer, forhåndsvisning og ZIP/CSV bruker de samme cm-målene.
+const LOGO_ANDEL_BREDDE = 42 / 54; // logobredde / ryggbredde (Entrada TEE)
+const LOGO_ANDEL_HOYDE = 0.356;    // (midt - hals) / (bunn - hals); 38,5 cm på Entrada TEE (halsen 0,3 %, bunnen 99,8 %)
+function visuellLogo(p) {
+  const mal = p.mal && p.mal.bak;
+  if (!mal || mal.bunn === undefined || !p.bak.includes("logo") || (p.sonerCm && p.sonerCm.logo)) return;
+  const cmPerProsent = mal.cm / mal.bredde;
+  const rund = (v) => Math.round(v * 2) / 2; // hele og halve cm
+  p.sonerCm = { ...p.sonerCm, logo: {
+    b: rund(LOGO_ANDEL_BREDDE * (mal.rygg || mal.bredde) * cmPerProsent),
+    dy: rund(LOGO_ANDEL_HOYDE * (mal.bunn - mal.hals.y) * cmPerProsent / 0.9),
+  } };
+}
+for (const p of PLAGG) visuellLogo(p);
+
 function beregnSoner(p) {
   const soner = {};
   for (const [navn, z0] of Object.entries(TRYKKSONER)) {
