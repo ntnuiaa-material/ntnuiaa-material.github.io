@@ -198,7 +198,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.2, y: 28.3 }, bredde: 40.6, cm: 60, adidas: { x: 38.3, y: 42.1 } },
-      bak: { hals: { x: 50.0, y: 27.5 }, bredde: 44.4, cm: 60, bunn: 99.8, rygg: 51, tekstMaks: 40 },
+      bak: { hals: { x: 50.0, y: 27.5 }, bredde: 44.4, cm: 60, bunn: 99.8, rygg: 51, tekstMaks: 40, motivNed: 3, motivMindre: 1 },
     },
     sonerCm: { navn: { dy: 82.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -279,7 +279,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.4, y: 28.3 }, bredde: 43.6, cm: 60, adidas: { x: 38.8, y: 42.9 } },
-      bak: { hals: { x: 49.7, y: 28.8 }, bredde: 44.8, cm: 60, bunn: 99.7, rygg: 51, tekstMaks: 40 },
+      bak: { hals: { x: 49.7, y: 28.8 }, bredde: 44.8, cm: 60, bunn: 99.7, rygg: 51, tekstMaks: 40, motivNed: 3, motivMindre: 2 },
     },
     sonerCm: { navn: { dy: 79.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -525,6 +525,8 @@ function sonePaaPlagg(p, sone) {
 //           fra midtlinja/glidelåsen på motsatt side. Svart adidas-logo på hvit T-skjorte ligger på samme sted
 //   rygg:   (valgfri, bak) synlig ryggbredde i prosent av lerretet når `bredde` er smalere enn det som ser ut som
 //           ryggen i bildet (hettejakker: hetta og armene gjør at bildet er skalert ned). Brukes bare av visuellLogo()
+//   motivNed: (valgfri, bak, hettejakker) cm hele motivblokka flyttes ned i tillegg, etter øyemål per plagg
+//   motivMindre: (valgfri, bak) cm motivboksen gjøres smalere enn MOTIV_ANDEL × logo-b, etter øyemål per plagg
 //   tekstMaks: (valgfri, bak) største bredde i % av lerretet for «NTNUI ÅLESUND» bak, når de hvite eller grå
 //           skulderfeltene begrenser det mørke feltet (windbreaker og regnjakke). Brukes av visuellMotiv()
 //   bunn:   (valgfri, bak) y til nederkanten av plagget i prosent av lerretet. Gir ryggtrykket «logo» samme
@@ -584,7 +586,7 @@ function visuellMotiv(p) {
   const kb = medBunn ? (mal.rygg || mal.bredde) * mal.cm / mal.bredde / 54 : 1;
   const logo = { ...TRYKKSONER.logo, ...(p.sonerCm && p.sonerCm.logo) };
   const navn = { ...TRYKKSONER.navn, ...(p.sonerCm && p.sonerCm.navn) };
-  const boks = rund(MOTIV_ANDEL * logo.b);
+  const boks = rund(MOTIV_ANDEL * logo.b - ((mal && mal.motivMindre) || 0));
   // Tekstene (baktekst og ESTD) har samme bredde i prosent av lerretet som på sweat top. Det er det man ser: på
   // hettejakker er plagget mindre i bildet, så de ble for små når de ble regnet av ryggbredden (cm)
   const cmPerProsent = medBunn ? mal.cm / mal.bredde : 54 / 55.2;
@@ -592,7 +594,7 @@ function visuellMotiv(p) {
   const estdB = medBunn ? Math.round(ESTD_PROSENT * cmPerProsent * 2) / 2 : TRYKKSONER.estd.b;
   const bakH = bakB / BAKTEKST_ASPEKT, estdH = estdB / ESTD_ASPEKT;
   const hette = medBunn && Boolean(mal.rygg); // hettejakke: hals er underkanten av hetta midt på ryggen (målt)
-  const bakDy = hette ? rund(bakH / 2 + HETTE_LUFT) : medBunn ? rund(17.6 * kb) : TRYKKSONER.baktekst.dy;
+  const bakDy = hette ? rund(bakH / 2 + HETTE_LUFT + (mal.motivNed || 0)) : medBunn ? rund(17.6 * kb) : TRYKKSONER.baktekst.dy;
   const luft = medBunn ? 3.6 * kb : 4;
   const motivDy = rund(bakDy + bakH / 2 + luft + boks / 2);
   const estdDy = rund(motivDy + boks / 2 + luft + estdH / 2);
