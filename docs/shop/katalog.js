@@ -279,7 +279,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.4, y: 28.3 }, bredde: 43.6, cm: 60, adidas: { x: 38.8, y: 42.9 } },
-      bak: { hals: { x: 49.7, y: 28.8 }, bredde: 44.8, cm: 60, bunn: 99.7, rygg: 51, tekstMaks: 40, motivNed: 3, motivMindre: 2 },
+      bak: { hals: { x: 49.7, y: 28.8 }, bredde: 44.8, cm: 60, bunn: 99.7, rygg: 51, tekstMaks: 40, motivNed: 3, motivMindre: 2, logoSkala: 0.85 },
     },
     sonerCm: { navn: { dy: 79.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
