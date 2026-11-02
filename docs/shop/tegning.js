@@ -22,6 +22,7 @@ function logoKildeFor(gruppe) {
 // Lagene på en side, nederst først. `valg` har plagg, farge, gruppe, front, bak og navn.
 // type: base (plaggbildet), bilde (trykkfil, bredden styrer høyden), boks (trykkfil i fast boks),
 // navn (tekst). `posisjon` er sonen i katalogen, og trykkfilene har `fil` med et filnavn-forslag.
+// Sponsorlogoen (posisjon «sponsor», se sponsorFor i katalog.js) har i tillegg `merke` med navnet på sponsoren.
 function trykkLag(valg, side) {
   const p = finnPlagg(valg.plagg);
   const s = p.soner;
@@ -34,6 +35,12 @@ function trykkLag(valg, side) {
   if (side === "front") {
     if (valg.front === "ntnui") {
       lag.push({ nokkel: "front:ntnui", type: "bilde", posisjon: "bryst", src: "../img/ntnui-logo.svg", fil: "trykk-front-bryst" });
+      // Sponsoren kommer av seg selv, rett under NTNUI-logoen. Hvit tekst på mørke plagg, sort på lyse; merket er grønt
+      const sponsor = sponsorFor(p, valg.gruppe, valg.front);
+      if (sponsor) {
+        lag.push({ nokkel: `front:sponsor:${g.sponsor}:${f}`, type: "boks", posisjon: "sponsor", src: `${sponsor.fil}-${f}.svg`,
+          fil: "trykk-front-sponsor", merke: sponsor.navn, aspekt: sponsor.aspekt });
+      }
     } else if (valg.front === "tekst" && g) {
       lag.push({ nokkel: `front:tekst:${g.slug}:${f}`, type: "bilde", posisjon: "tekst", src: `img/tekst/${g.slug}-front-${f}.svg`, fil: "trykk-front-tekst" });
     }
@@ -56,13 +63,15 @@ function trykkLag(valg, side) {
   for (const l of lag) if (l.posisjon) l.sone = s[l.posisjon];
   // Motivet har ikke fast boks: størrelsen følger motivets proporsjoner (se motivMaal i katalog.js). Sona i
   // katalogen er den største boksen. cm og cmH er det som faktisk trykkes, og det admin skriver i ZIP/CSV.
-  const motiv = lag.find((l) => l.posisjon === "motiv");
-  if (motiv && g && g.motivAspekt) {
-    const z = soneMaal(p, "motiv");
-    const m = motivMaal(z, g.motivAspekt);
-    motiv.cm = m.b;
-    motiv.cmH = m.h;
-    motiv.sone = { ...motiv.sone, b: Math.round(motiv.sone.b * m.b / z.b * 100) / 100, h: Math.round(motiv.sone.h * m.h / z.h * 100) / 100 };
+  // Sponsorlogoen er på samme måte en boks (sonen er største boks), og skaleres etter proporsjonene på filen
+  for (const [posisjon, aspekt] of [["motiv", g && g.motivAspekt], ["sponsor", (lag.find((l) => l.posisjon === "sponsor") || {}).aspekt]]) {
+    const l = lag.find((x) => x.posisjon === posisjon);
+    if (!l || !aspekt) continue;
+    const z = soneMaal(p, posisjon);
+    const m = motivMaal(z, aspekt);
+    l.cm = m.b;
+    l.cmH = m.h;
+    l.sone = { ...l.sone, b: Math.round(l.sone.b * m.b / z.b * 100) / 100, h: Math.round(l.sone.h * m.h / z.h * 100) / 100 };
   }
   return lag;
 }

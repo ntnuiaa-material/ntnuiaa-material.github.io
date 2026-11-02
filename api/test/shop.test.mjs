@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { _test } from "../src/shop.js";
 import { readFileSync } from "node:fs";
-import { PLAGG, GRUPPER, TRYKKSONER, motivMaal } from "../src/katalog.js";
+import { PLAGG, GRUPPER, SPONSORER, TRYKKSONER, motivMaal, prisFor, sponsorFor } from "../src/katalog.js";
 
 class Brukerfeil extends Error {
   constructor(melding, status = 400) { super(melding); this.status = status; }
@@ -198,4 +198,55 @@ test("gruppenavn foran på bukser og shorts ligger på samme sted som NTNUI-logo
     assert.deepEqual([p.soner.tekst.x, p.soner.tekst.y, p.soner.tekst.rot], [p.soner.bryst.x, p.soner.bryst.y, p.soner.bryst.rot], id);
     assert.ok(p.soner.tekst.b > p.soner.bryst.b && p.soner.tekst.b < 15 / (p.mal.front.cm / p.mal.front.bredde) , id);
   }
+});
+
+// ---------- Sponsorlogo foran (Buldrehallen på Klatring) ----------
+
+test("sponsor: SVG-ene finnes i hvit og sort, aspektet stemmer, merket er grønt og bare teksten bytter farge", () => {
+  for (const [nokkel, sp] of Object.entries(SPONSORER)) {
+    const les = (f) => readFileSync(new URL(`../../docs/shop/${sp.fil}-${f}.svg`, import.meta.url), "utf8");
+    for (const f of ["hvit", "sort"]) {
+      const svg = les(f);
+      const [, , , w, h] = svg.match(/viewBox="([-\d.]+) ([-\d.]+) ([\d.]+) ([\d.]+)"/).map(Number);
+      assert.ok(Math.abs(w / h / sp.aspekt - 1) < 0.01, `${nokkel}-${f}: aspekt ${(w / h).toFixed(3)}, katalogen sier ${sp.aspekt}`);
+      assert.match(svg, /#6CC6B1/i, `${nokkel}-${f}: merket skal være grønt`);
+    }
+    assert.match(les("hvit"), /#FFFFFF/i);
+    assert.match(les("sort"), /#111111/i);
+    assert.doesNotMatch(les("sort"), /#FFFFFF/i);
+  }
+  for (const g of GRUPPER.filter((x) => x.sponsor)) assert.ok(SPONSORER[g.sponsor], `${g.slug}: ukjent sponsor ${g.sponsor}`);
+});
+
+test("sponsor: bare Klatring har sponsor, og den kommer bare med på overdeler med NTNUI-logo foran", () => {
+  assert.deepEqual(GRUPPER.filter((g) => g.sponsor).map((g) => `${g.slug}:${g.sponsor}`), ["klatring:buldrehallen"]);
+  const overdeler = PLAGG.filter((p) => ["SPORT", "CASUAL"].includes(p.kategori));
+  assert.equal(overdeler.length, 10);
+  for (const p of PLAGG) {
+    const over = overdeler.includes(p);
+    assert.equal(Boolean(p.soner.sponsor), over, `${p.id}: sponsorsonen skal bare finnes på overdeler`);
+    assert.equal(Boolean(sponsorFor(p, "Klatring", "ntnui")), over, `${p.id}: Klatring + NTNUI foran`);
+    assert.equal(sponsorFor(p, "Klatring", "tekst"), null, `${p.id}: ikke med for gruppenavn foran`);
+    assert.equal(sponsorFor(p, "Klatring", "ingen"), null, `${p.id}: ikke med uten trykk foran`);
+    for (const g of GRUPPER.filter((x) => x.navn !== "Klatring")) assert.equal(sponsorFor(p, g.navn, "ntnui"), null, `${p.id}/${g.slug}`);
+    assert.equal(sponsorFor(p, "generisk", "ntnui"), null);
+  }
+});
+
+test("sponsor: sentrert under NTNUI-brystlogoen med 2 cm luft, og prisen er uendret", () => {
+  const NTNUI_ASPEKT = 138.48 / 55.3;
+  for (const p of PLAGG.filter((x) => x.soner.sponsor)) {
+    const { bryst, sponsor } = p.soner;
+    const cmPerProsent = p.mal.front.cm / p.mal.front.bredde;
+    assert.equal(sponsor.x, bryst.x, `${p.id}: samme x som brystlogoen`);
+    const brystH = bryst.b * cmPerProsent / NTNUI_ASPEKT; // cm
+    const underkant = (bryst.y / 0.9) * cmPerProsent + brystH / 2;
+    const overkant = ((sponsor.y - sponsor.h / 2) / 0.9) * cmPerProsent;
+    assert.ok(Math.abs(overkant - underkant - 2) < 0.2, `${p.id}: luft ${(overkant - underkant).toFixed(2)} cm`);
+    assert.ok(Math.abs(sponsor.b * cmPerProsent - 13) < 0.3, `${p.id}: sponsorbredde`);
+    assert.ok(sponsor.x - sponsor.b / 2 > 0 && sponsor.x + sponsor.b / 2 < 100 && sponsor.y + sponsor.h / 2 < 100, `${p.id}: utenfor lerretet`);
+  }
+  const k = { plagg: "entrada-tee", farge: "svart", front: "ntnui", bak: "ingen", navn: "" };
+  assert.equal(prisFor({ ...k, gruppe: "Klatring" }).sum, prisFor({ ...k, gruppe: "Fotball" }).sum);
+  assert.equal(prisFor({ ...k, gruppe: "Klatring", bak: "logo" }).sum, prisFor({ ...k, gruppe: "Fotball", bak: "logo" }).sum);
 });

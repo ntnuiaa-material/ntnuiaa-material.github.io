@@ -71,9 +71,17 @@ function gruppeTekst(l) {
   return l.gruppe === GENERISK ? "Generisk" : l.gruppe;
 }
 
+// Sponsoren som kommer automatisk under NTNUI-logoen foran (Buldrehallen for Klatring), eller null
+function sponsorPaaLinje(l) {
+  const p = finnPlagg(l.plagg);
+  return p ? sponsorFor(p, l.gruppe, l.front) : null;
+}
+
 function trykkTekst(l) {
   const deler = [];
   if (l.front === "ntnui") deler.push("NTNUI-logo foran");
+  const sponsor = sponsorPaaLinje(l);
+  if (sponsor) deler.push(`${sponsor.navn}-logo foran (sponsor, under NTNUI-logoen)`);
   if (l.front === "tekst") deler.push(`${gruppeTekst(l)} tekst foran`);
   if (l.bak === "logo") deler.push(`${gruppeTekst(l)} logo bak`);
   if (l.bak === "motiv") deler.push(`${gruppeTekst(l)} motiv bak`);
@@ -82,6 +90,13 @@ function trykkTekst(l) {
 
 // Samme regel som arket til Erik fra Nettskjema-tiden
 function trykkfarge(l) {
+  const farge = trykkfargeBase(l);
+  const sponsor = sponsorPaaLinje(l);
+  // Sponsorlogoen har grønt merke, og teksten følger plaggfargen (hvit på mørke plagg, sort på lyse)
+  return sponsor ? `${farge}; ${sponsor.navn}: grønt merke + ${trykkfargeFor(finnPlagg(l.plagg), l.farge)} tekst` : farge;
+}
+
+function trykkfargeBase(l) {
   if (l.bak === "motiv" || l.front === "tekst") return l.farge === "hvit" ? "Svart" : "Hvit";
   if (l.bak === "logo") return "Farger (badge)";
   if (l.front === "ntnui") return "Farger (logo)";
@@ -260,7 +275,7 @@ function lastNedCsv(puljeId) {
 
 const SIDE_NAVN = { front: "Front", bak: "Rygg" };
 const POSISJON_TEKST = {
-  bryst: "Foran: NTNUI-logo", tekst: "Foran: tekst", logo: "Bak: logo", baktekst: "Bak: tekst øverst",
+  bryst: "Foran: NTNUI-logo", sponsor: "Foran: sponsorlogo under NTNUI-logoen", tekst: "Foran: tekst", logo: "Bak: logo", baktekst: "Bak: tekst øverst",
   motiv: "Bak: motiv", estd: "Bak: ESTD", navn: "Bak: navn",
 };
 
@@ -302,7 +317,8 @@ async function forhandsvisning(b, l, nr, antallLinjer) {
     ...trykk.map((t) => {
       const tekst = t.posisjon === "navn" ? ` «${t.tekst}»` : "";
       const kunRaster = t.posisjon === "logo" && !t.trykkSrc ? " – kun rasterfil" : "";
-      return [`${POSISJON_TEKST[t.posisjon]}:${tekst}   (${t.fil}.${t.type === "navn" ? "png" : (t.trykkSrc || t.src).split(".").pop()})${kunRaster}`, ""];
+      const merke = t.merke ? ` ${t.merke}` : "";
+      return [`${POSISJON_TEKST[t.posisjon]}:${tekst || merke}   (${t.fil}.${t.type === "navn" ? "png" : (t.trykkSrc || t.src).split(".").pop()})${kunRaster}`, ""];
     }),
   ];
   if (!trykk.length) rader.push(["Ingen trykk", ""]);

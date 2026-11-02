@@ -7,6 +7,10 @@
 //   (api/test sjekker det). Brukes av motivMaal() for å regne ut hvor stort motivet trykkes.
 // vektor: gruppelogoen finnes som SVG med kurver i img/logo/trykk/<slug>.svg (brukes som trykkfil bak).
 //   Uten vektor blir WebP-en på siden (560×560) lagt i ZIP-en, og admin merker den «kun rasterfil».
+// sponsor: (valgfri) nøkkel i SPONSORER under. Gruppas sponsorlogo kommer automatisk med foran, rett under
+//   NTNUI-logoen, på alle overdeler når kunden velger NTNUI-logo foran (front «ntnui»). Ikke noe eget valg, ingen
+//   prisendring, og ikke med for «tekst» eller «ingen» foran. Ny sponsor: legg den inn i SPONSORER, lag
+//   trykkfilene og sett `sponsor` på gruppa. Resten (designer, kolleksjon, ZIP og ark) følger av dette.
 const GRUPPER = [
   { navn: "Badminton", slug: "badminton", motiv: false, vektor: true },
   { navn: "Basketball", slug: "basketball", motiv: true, motivAspekt: 1.042, vektor: true },
@@ -17,7 +21,7 @@ const GRUPPER = [
   { navn: "Futsal Herrer", slug: "futsal-herrer", motiv: true, motivAspekt: 1.19, vektor: true },
   { navn: "Golf", slug: "golf", motiv: true, motivAspekt: 1.405, vektor: true },
   { navn: "Håndball", slug: "handball", motiv: true, motivAspekt: 0.998, vektor: true },
-  { navn: "Klatring", slug: "klatring", motiv: true, motivAspekt: 1.407, vektor: true },
+  { navn: "Klatring", slug: "klatring", motiv: true, motivAspekt: 1.407, vektor: true, sponsor: "buldrehallen" },
   { navn: "Løping", slug: "loping", motiv: true, motivAspekt: 1.305, vektor: true },
   { navn: "Padel", slug: "padel", motiv: true, motivAspekt: 0.989, vektor: true },
   { navn: "Seiling", slug: "seiling", motiv: true, motivAspekt: 1.369, vektor: true },
@@ -27,6 +31,16 @@ const GRUPPER = [
   { navn: "Turn & Calisthenics", slug: "turn-og-calisthenics", motiv: true, motivAspekt: 1.228, vektor: true },
   { navn: "Volleyball", slug: "volleyball", motiv: true, motivAspekt: 1.022, vektor: true },
 ];
+
+// Sponsorlogoene. Trykkfilene er SVG med kurver i `<fil>-hvit.svg` (hvit tekst, til mørke plagg) og `<fil>-sort.svg`
+// (sort tekst #111111, til plagg med `lys: true`). Merket beholder fargen sin i begge. Samme fil vises i designeren og
+// ligger i ZIP-en til Intersport, som de andre trykkfilene. Valget av variant gjøres av trykkfargeFor() i tegning.js.
+// navn:   vises i admin og ZIP-en
+// aspekt: bredde / høyde på SVG-ene (viewBox, beskåret til selve logoen). Må stemme med filene (api/test sjekker det)
+// fil:    sti uten `-hvit.svg` / `-sort.svg`, relativt til docs/shop/
+const SPONSORER = {
+  buldrehallen: { navn: "Buldrehallen", aspekt: 1.573, fil: "img/logo/trykk/buldrehallen" },
+};
 const GENERISK = "generisk";
 
 const TRYKKPRIS = {
@@ -474,12 +488,20 @@ const PLAGG = [
 // rot:   (valgfri) rotasjon i grader rundt midten av trykket, positiv med klokka. Brukes når trykket skal følge
 //        en skråstilt kant på plagget, f.eks. fallet på shortsbenet
 // Sonene sentreres på (dx, dy), bortsett fra bryst og tekst på plagg med `mal.front.adidas` (se beregnSoner).
+// sponsor: sponsorlogoen foran (GRUPPER.sponsor, i dag Buldrehallen på Klatring). Den har ikke egen dx og dy, men står
+//        sentrert under NTNUI-brystlogoen (samme x som `bryst`, altså speilet om adidas-logoen), med `luft` cm mellom
+//        underkanten av NTNUI-logoen og overkanten av sponsorboksen. b og h er den største boksen i cm: trykkfila skaleres
+//        til å passe, med proporsjonene i behold (motivMaal), og sentreres i boksen. Boksen er satt til proporsjonene på
+//        Buldrehallen-logoen (aspekt 1,573). Sonen finnes bare på overdeler (OVERDEL_KATEGORIER) som kan ha NTNUI-logo foran,
+//        og tegnes bare når gruppa har sponsor og kunden velger NTNUI-logo foran (sponsorFor). Et plagg kan avvike med
+//        `sonerCm.sponsor: { b, h, luft, dx, dy }`, der dx og dy er cm ekstra forskyvning fra standardplasseringen.
 // Et plagg kan avvike med `sonerCm: { sone: { b, dx, dy, rot } }`. For bryst og tekst på plagg med adidas-logo
 // kan man i stedet flytte den speilvendte plasseringen sideveis med `speilDx` (cm, positiv mot høyre i bildet),
 // f.eks. når teksten ellers ville truffet et hvitt felt.
 const TRYKKSONER = {
   bryst: { side: "front", b: 14, dx: 14.5, dy: 26 },
   tekst: { side: "front", b: 18, dx: 14.5, dy: 26 },
+  sponsor: { side: "front", b: 13, h: 8.3, luft: 2 },
   logo: { side: "bak", b: 42, dx: 0, dy: 38.5 },
   // baktekst, motiv og estd er én blokk. Tallene her er Entrada TEE: baktekst 17,5 cm under halsen, 4 cm luft, motivet,
   // 4 cm luft, estd, og navnet nederst. Andre plagg regnes ut av visuellMotiv() med samme andeler
@@ -502,9 +524,15 @@ function motivMaal(z, aspekt) {
   return { b: Math.round(b * 10) / 10, h: Math.round(h * 10) / 10 };
 }
 
+// Kategoriene som er overdeler. Shorts (SHORTS) og bukser (TRENING) har ikke sponsorlogo foran.
+const OVERDEL_KATEGORIER = ["SPORT", "CASUAL"];
+// Bredde / høyde på NTNUI-logoen (img/ntnui-logo.svg, viewBox 138,48 × 55,3). Brukes til å finne underkanten av brystlogoen
+const NTNUI_ASPEKT = 2.504;
+
 // Sonene et plagg faktisk bruker, etter hva det kan trykkes på det
 function sonePaaPlagg(p, sone) {
   if (sone === "bryst") return p.front.includes("ntnui");
+  if (sone === "sponsor") return OVERDEL_KATEGORIER.includes(p.kategori) && p.front.includes("ntnui");
   if (sone === "tekst") return p.front.includes("tekst");
   if (sone === "logo") return p.bak.includes("logo");
   if (sone === "navn") return p.navnFelt;
@@ -633,6 +661,15 @@ function beregnSoner(p) {
     };
     if (z.h) soner[navn].h = rund(px(z.h) * 0.9);
     if (z.rot) soner[navn].rot = z.rot;
+    if (navn === "sponsor") {
+      // Under NTNUI-brystlogoen (`bryst`, som står før `sponsor` i TRYKKSONER): samme x, og midten av boksen
+      // brystlogoens halve høyde + luft + sponsorboksens halve høyde under midten av brystlogoen
+      const bryst = { ...TRYKKSONER.bryst, ...(p.sonerCm && p.sonerCm.bryst) };
+      const dyCm = bryst.b / NTNUI_ASPEKT / 2 + z.luft + z.h / 2 + (ov.dy || 0);
+      soner[navn].x = rund(soner.bryst.x + px(ov.dx || 0));
+      soner[navn].y = rund(soner.bryst.y + px(dyCm) * 0.9);
+      if (soner.bryst.rot) soner[navn].rot = soner.bryst.rot;
+    }
   }
   return soner;
 }
@@ -643,6 +680,13 @@ function finnPlagg(id) {
 }
 function finnGruppe(navn) {
   return GRUPPER.find((g) => g.navn === navn);
+}
+// Sponsoren som følger med foran, ellers null: bare når gruppa har en, plagget har sonen (overdeler) og kunden har
+// valgt NTNUI-logo foran. `gruppe` er gruppenavnet (valg.gruppe, eller l.gruppe på en bestilling), `front` valget foran.
+function sponsorFor(p, gruppe, front) {
+  const g = finnGruppe(gruppe);
+  if (front !== "ntnui" || !g || !g.sponsor || !p.soner || !p.soner.sponsor) return null;
+  return SPONSORER[g.sponsor] || null;
 }
 
 // Prisen for én konfigurasjon, med hvert ledd for seg
