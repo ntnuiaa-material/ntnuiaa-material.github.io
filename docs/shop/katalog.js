@@ -198,7 +198,7 @@ const PLAGG = [
     navnFelt: true,
     mal: {
       front: { hals: { x: 50.2, y: 28.3 }, bredde: 40.6, cm: 60, adidas: { x: 38.3, y: 42.1 } },
-      bak: { hals: { x: 50.0, y: 27.5 }, bredde: 44.4, cm: 60, bunn: 99.8, rygg: 51, tekstMaks: 40, motivNed: 3, motivMindre: 1 },
+      bak: { hals: { x: 50.0, y: 27.5 }, bredde: 44.4, cm: 60, bunn: 99.8, rygg: 51, tekstMaks: 40, motivNed: 3, motivMindre: 1, logoSkala: 0.85 },
     },
     sonerCm: { navn: { dy: 82.0 } }, // samme høyde som før cm-målene (nær nedre kant)
   },
@@ -526,6 +526,7 @@ function sonePaaPlagg(p, sone) {
 //   rygg:   (valgfri, bak) synlig ryggbredde i prosent av lerretet når `bredde` er smalere enn det som ser ut som
 //           ryggen i bildet (hettejakker: hetta og armene gjør at bildet er skalert ned). Brukes bare av visuellLogo()
 //   motivNed: (valgfri, bak, hettejakker) cm hele motivblokka flyttes ned i tillegg, etter øyemål per plagg
+//   logoSkala: (valgfri, bak) faktor på ryggtrykket «logo» etter øyemål per plagg, f.eks. 0.85 = 15 % mindre
 //   motivMindre: (valgfri, bak) cm motivboksen gjøres smalere enn MOTIV_ANDEL × logo-b, etter øyemål per plagg
 //   tekstMaks: (valgfri, bak) største bredde i % av lerretet for «NTNUI ÅLESUND» bak, når de hvite eller grå
 //           skulderfeltene begrenser det mørke feltet (windbreaker og regnjakke). Brukes av visuellMotiv()
@@ -548,7 +549,7 @@ function visuellLogo(p) {
   const cmPerProsent = mal.cm / mal.bredde;
   const rund = (v) => Math.round(v * 2) / 2; // hele og halve cm
   p.sonerCm = { ...p.sonerCm, logo: {
-    b: rund(LOGO_ANDEL_BREDDE * (mal.rygg || mal.bredde) * cmPerProsent),
+    b: rund(LOGO_ANDEL_BREDDE * (mal.rygg || mal.bredde) * cmPerProsent * (mal.logoSkala || 1)),
     dy: rund(LOGO_ANDEL_HOYDE * (mal.bunn - mal.hals.y) * cmPerProsent / 0.9),
   } };
 }
