@@ -1068,9 +1068,16 @@ img.lag-trykk { height: auto; }
 }
 .bunn-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 32px;
 }
+.github-lenke {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.github-lenke svg { width: 16px; height: 16px; fill: currentColor; flex: none; }
+.github-stjerner { color: var(--dempet); font-variant-numeric: tabular-nums; }
 .bunn-grid p {
   margin: 10px 0 0;
   max-width: 34ch;
@@ -1233,6 +1240,12 @@ img.lag-trykk { height: auto; }
   text-underline-offset: 3px;
   cursor: pointer;
 }
+.linje-valg {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+a.fjern { display: inline-block; }
 .kurv-tom {
   margin: 40px 0;
   text-align: center;

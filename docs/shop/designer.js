@@ -25,9 +25,20 @@ const valg = {
   front: startPlagg.front.includes(urlFront) ? urlFront : standardFront(startPlagg),
   bak: startPlagg.bak.includes(urlBak) ? urlBak : startPlagg.bak[0] || "ingen",
   navn: startPlagg.navnFelt ? urlNavn(params.get("navn")) : "",
-  kjonn: "",
-  storrelse: "",
+  // Snitt og størrelse kommer bare med fra «Endre» i kurven. rettOpp() tømmer dem hvis plagget ikke har dem
+  kjonn: startPlagg.kjonn.includes(params.get("kjonn")) ? params.get("kjonn") : "",
+  storrelse: params.get("storrelse") || "",
 };
+
+// Nøkkelen til kurvlinja som endres (fra «Endre» i kurven), ellers null. Da lagrer knappen over linja
+// i stedet for å legge til en ny.
+let endrer = kurv.some((l) => l.nokkel === params.get("endre")) ? params.get("endre") : null;
+
+function tegnKnapp() {
+  const tekst = $("#legg-til [data-i18n]");
+  tekst.dataset.i18n = endrer ? "des.lagre" : "des.leggtil";
+  tekst.textContent = t(tekst.dataset.i18n);
+}
 
 const plagg = () => finnPlagg(valg.plagg);
 
@@ -291,6 +302,19 @@ $("#legg-til").addEventListener("click", () => {
     mangler.forEach((m) => { m.classList.remove("mangler"); void m.offsetWidth; m.classList.add("mangler"); });
     return visToast(t("mangler"));
   }
+  if (endrer && erstatt(endrer, { ...valg, artikkel: artikkel() })) {
+    // Ferdig med endringen: knappen legger til igjen, og kurven åpnes så man ser resultatet
+    endrer = null;
+    const url = new URL(location.href);
+    ["endre", "kjonn", "storrelse"].forEach((n) => url.searchParams.delete(n));
+    history.replaceState(null, "", url);
+    tegnKnapp();
+    visToast(t("endret"));
+    apneKurv();
+    return;
+  }
+  endrer = null;
+  tegnKnapp();
   leggTil({ ...valg, artikkel: artikkel() });
   visToast(`${plagg().navn[sprak]} ${t("lagtTil")}`);
 });
@@ -320,3 +344,4 @@ if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
 
 vedSprak.push(oppdater);
 start();
+tegnKnapp();

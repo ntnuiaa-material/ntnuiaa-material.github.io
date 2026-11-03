@@ -67,6 +67,8 @@ const TEKST = {
     "bunn.kontakt": "Kontakt",
     "bunn.personvern": "Personvern",
     "bunn.personverntekst": "Navn, telefon og e-post brukes bare til bestillingen og slettes etter levering.",
+    "bunn.kode": "Feil på siden?",
+    "bunn.kodetekst": "Koden ligger åpent på GitHub. Meld fra om feil eller kom med forslag under Issues.",
     "des.tittel": "Designeren",
     "des.front": "Front",
     "des.bak": "Rygg",
@@ -83,6 +85,7 @@ const TEKST = {
     "des.pristrykk": "Trykk",
     "des.prisnavn": "Navn",
     "des.leggtil": "Legg i kurven",
+    "des.lagre": "Lagre endringen",
     "des.info": "Om plagget",
     "des.kun": "bare",
     "des.velgsnitt": "Velg snitt først",
@@ -124,6 +127,8 @@ const TEKST = {
     bak: "bak",
     lagtTil: "lagt i kurven",
     fjern: "Fjern",
+    endre: "Endre",
+    endret: "Endringen er lagret",
     mindre: "Færre",
     flere: "Flere",
     mangler: "Velg snitt og størrelse først",
@@ -173,6 +178,8 @@ const TEKST = {
     "bunn.kontakt": "Contact",
     "bunn.personvern": "Privacy",
     "bunn.personverntekst": "Name, phone and email are only used for the order and deleted after delivery.",
+    "bunn.kode": "Found a bug?",
+    "bunn.kodetekst": "The code is open on GitHub. Report bugs or suggest changes under Issues.",
     "des.tittel": "The designer",
     "des.front": "Front",
     "des.bak": "Back",
@@ -189,6 +196,7 @@ const TEKST = {
     "des.pristrykk": "Print",
     "des.prisnavn": "Name",
     "des.leggtil": "Add to cart",
+    "des.lagre": "Save changes",
     "des.info": "About the item",
     "des.kun": "only",
     "des.velgsnitt": "Choose a fit first",
@@ -229,6 +237,8 @@ const TEKST = {
     bak: "back",
     lagtTil: "added to cart",
     fjern: "Remove",
+    endre: "Edit",
+    endret: "Changes saved",
     mindre: "Fewer",
     flere: "More",
     mangler: "Choose fit and size first",
@@ -312,6 +322,38 @@ function leggTil(k) {
   else kurv.push({ nokkel, k: { ...k }, antall: 1 });
   lagre("shop-kurv-v2", kurv);
   tegnKurv();
+  dunk();
+}
+
+// Bytter ut linja med nøkkelen `gammel` med et nytt valg, og beholder antallet. Blir det nye valget likt en annen
+// linje i kurven, slås de sammen. Gir false hvis linja ikke finnes lenger (f.eks. fjernet i en annen fane).
+function erstatt(gammel, k) {
+  const linje = kurv.find((l) => l.nokkel === gammel);
+  if (!linje) return false;
+  const nokkel = nokkelFor(k);
+  const lik = kurv.find((l) => l.nokkel === nokkel && l !== linje);
+  if (lik) {
+    lik.antall = Math.min(10, lik.antall + linje.antall);
+    kurv.splice(kurv.indexOf(linje), 1);
+  } else {
+    linje.nokkel = nokkel;
+    linje.k = { ...k };
+  }
+  lagre("shop-kurv-v2", kurv);
+  tegnKurv();
+  dunk();
+  return true;
+}
+
+// Adressen til designeren med alle valgene på en kurvlinje, og `endre` som sier hvilken linje som skal byttes ut
+function endreLenke(l) {
+  const u = new URLSearchParams({ plagg: l.k.plagg, gruppe: l.k.gruppe, farge: l.k.farge, front: l.k.front, bak: l.k.bak,
+    kjonn: l.k.kjonn, storrelse: l.k.storrelse, endre: l.nokkel });
+  if (l.k.navn) u.set("navn", l.k.navn);
+  return `designer.html?${u}`;
+}
+
+function dunk() {
   const teller = $("#kurv-antall");
   teller.classList.remove("dunk");
   void teller.offsetWidth;
@@ -365,7 +407,10 @@ function tegnKurv() {
         </div>
         <div class="linje-hoyre">
           <strong>${kroner(prisFor(l.k).sum * l.antall)}</strong>
-          <button type="button" class="fjern" data-fjern="${i}">${escape(t("fjern"))}</button>
+          <div class="linje-valg">
+            <a class="fjern" href="${escape(endreLenke(l))}">${escape(t("endre"))}</a>
+            <button type="button" class="fjern" data-fjern="${i}">${escape(t("fjern"))}</button>
+          </div>
         </div>
       </li>`;
   }).join("");
@@ -592,8 +637,24 @@ function observerInn(rot = document) {
   $$(".reveal:not(.is-in)", rot).forEach((el) => (observer ? observer.observe(el) : el.classList.add("is-in")));
 }
 
+// Antall stjerner på repoet i bunnen av forsiden. Vises bare når det er noen, og feiler stille
+// (GitHub tillater 60 kall i timen per IP uten innlogging).
+function hentStjerner() {
+  const el = $("#github-stjerner");
+  if (!el) return;
+  fetch("https://api.github.com/repos/ntnuiaa-material/ntnuiaa-material.github.io")
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => {
+      if (!d || !d.stargazers_count) return;
+      el.textContent = `★ ${d.stargazers_count}`;
+      el.hidden = false;
+    })
+    .catch(() => {});
+}
+
 // Sidens eget skript kaller start() til slutt
 function start() {
   settSprak(sprak);
   observerInn();
+  hentStjerner();
 }
