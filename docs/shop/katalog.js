@@ -8,7 +8,7 @@
 // vektor: gruppelogoen finnes som SVG med kurver i img/logo/trykk/<slug>.svg (brukes som trykkfil bak).
 //   Uten vektor blir WebP-en på siden (560×560) lagt i ZIP-en, og admin merker den «kun rasterfil».
 // sponsor: (valgfri) nøkkel i SPONSORER under. Gruppas sponsorlogo kommer automatisk med foran, rett under
-//   NTNUI-logoen, på alle overdeler når kunden velger NTNUI-logo foran (front «ntnui»). Ikke noe eget valg, ingen
+//   NTNUI-logoen, på jerseyene (SPONSOR_PLAGG) når kunden velger NTNUI-logo foran (front «ntnui»). Ikke noe eget valg, ingen
 //   prisendring, og ikke med for «tekst» eller «ingen» foran. Ny sponsor: legg den inn i SPONSORER, lag
 //   trykkfilene og sett `sponsor` på gruppa. Resten (designer, kolleksjon, ZIP og ark) følger av dette.
 const GRUPPER = [
@@ -492,7 +492,7 @@ const PLAGG = [
 //        sentrert under NTNUI-brystlogoen (samme x som `bryst`, altså speilet om adidas-logoen), med `luft` cm mellom
 //        underkanten av NTNUI-logoen og overkanten av sponsorboksen. b og h er den største boksen i cm: trykkfila skaleres
 //        til å passe, med proporsjonene i behold (motivMaal), og sentreres i boksen. Boksen er satt til proporsjonene på
-//        Buldrehallen-logoen (aspekt 1,573). Sonen finnes bare på overdeler (OVERDEL_KATEGORIER) som kan ha NTNUI-logo foran,
+//        Buldrehallen-logoen (aspekt 1,573). Sonen finnes bare på jerseyene (SPONSOR_PLAGG) som kan ha NTNUI-logo foran,
 //        og tegnes bare når gruppa har sponsor og kunden velger NTNUI-logo foran (sponsorFor). Et plagg kan avvike med
 //        `sonerCm.sponsor: { b, h, luft, dx, dy }`, der dx og dy er cm ekstra forskyvning fra standardplasseringen.
 // Et plagg kan avvike med `sonerCm: { sone: { b, dx, dy, rot } }`. For bryst og tekst på plagg med adidas-logo
@@ -524,15 +524,16 @@ function motivMaal(z, aspekt) {
   return { b: Math.round(b * 10) / 10, h: Math.round(h * 10) / 10 };
 }
 
-// Kategoriene som er overdeler. Shorts (SHORTS) og bukser (TRENING) har ikke sponsorlogo foran.
-const OVERDEL_KATEGORIER = ["SPORT", "CASUAL"];
+// Plaggene som får sponsorlogo foran. Tilbakemelding 03.11.2026: Buldrehallen skal bare stå på klatrejerseyene,
+// ikke på alle overdeler.
+const SPONSOR_PLAGG = ["tiro-drakt", "entrada-jersey"];
 // Bredde / høyde på NTNUI-logoen (img/ntnui-logo.svg, viewBox 138,48 × 55,3). Brukes til å finne underkanten av brystlogoen
 const NTNUI_ASPEKT = 2.504;
 
 // Sonene et plagg faktisk bruker, etter hva det kan trykkes på det
 function sonePaaPlagg(p, sone) {
   if (sone === "bryst") return p.front.includes("ntnui");
-  if (sone === "sponsor") return OVERDEL_KATEGORIER.includes(p.kategori) && p.front.includes("ntnui");
+  if (sone === "sponsor") return SPONSOR_PLAGG.includes(p.id) && p.front.includes("ntnui");
   if (sone === "tekst") return p.front.includes("tekst");
   if (sone === "logo") return p.bak.includes("logo");
   if (sone === "navn") return p.navnFelt;
@@ -681,7 +682,7 @@ function finnPlagg(id) {
 function finnGruppe(navn) {
   return GRUPPER.find((g) => g.navn === navn);
 }
-// Sponsoren som følger med foran, ellers null: bare når gruppa har en, plagget har sonen (overdeler) og kunden har
+// Sponsoren som følger med foran, ellers null: bare når gruppa har en, plagget har sonen (jerseyene) og kunden har
 // valgt NTNUI-logo foran. `gruppe` er gruppenavnet (valg.gruppe, eller l.gruppe på en bestilling), `front` valget foran.
 function sponsorFor(p, gruppe, front) {
   const g = finnGruppe(gruppe);

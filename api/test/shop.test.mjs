@@ -98,7 +98,7 @@ test("trykksoner: rotasjonen fra sonerCm følger med til sona", () => {
   assert.equal(PLAGG.find((p) => p.id === "tiro-drakt").soner.bryst.rot, undefined);
 });
 
-test("Entrada26 jersey: herre JZ2505 og dame JZ2492, 150 kr og samme soner som Entrada TEE", () => {
+test("Entrada26 jersey: herre JZ2505 og dame JZ2492, 150 kr og samme soner som Entrada TEE, pluss sponsor", () => {
   const j = PLAGG.find((p) => p.id === "entrada-jersey");
   assert.deepEqual(j.kjonn, ["herre", "dame"]);
   assert.equal(j.artikler["svart:herre"], "JZ2505");
@@ -107,7 +107,9 @@ test("Entrada26 jersey: herre JZ2505 og dame JZ2492, 150 kr og samme soner som E
   assert.deepEqual(j.info.passform, { herre: "Slim", dame: "Regular" });
   assert.equal(j.pris, Math.round(j.katalogpris * 0.75 / 5) * 5);
   assert.equal(j.pris, 150);
-  assert.deepEqual(j.soner, PLAGG.find((p) => p.id === "entrada-tee").soner);
+  const { sponsor, ...soner } = j.soner;
+  assert.ok(sponsor);
+  assert.deepEqual(soner, PLAGG.find((p) => p.id === "entrada-tee").soner);
 });
 
 test("trykksoner: alle soner ligger innenfor lerretet", () => {
@@ -218,13 +220,13 @@ test("sponsor: SVG-ene finnes i hvit og sort, aspektet stemmer, merket er grønt
   for (const g of GRUPPER.filter((x) => x.sponsor)) assert.ok(SPONSORER[g.sponsor], `${g.slug}: ukjent sponsor ${g.sponsor}`);
 });
 
-test("sponsor: bare Klatring har sponsor, og den kommer bare med på overdeler med NTNUI-logo foran", () => {
+test("sponsor: bare Klatring har sponsor, og den kommer bare med på jerseyene med NTNUI-logo foran", () => {
   assert.deepEqual(GRUPPER.filter((g) => g.sponsor).map((g) => `${g.slug}:${g.sponsor}`), ["klatring:buldrehallen"]);
-  const overdeler = PLAGG.filter((p) => ["SPORT", "CASUAL"].includes(p.kategori));
-  assert.equal(overdeler.length, 10);
+  const jerseyer = PLAGG.filter((p) => ["tiro-drakt", "entrada-jersey"].includes(p.id));
+  assert.equal(jerseyer.length, 2);
   for (const p of PLAGG) {
-    const over = overdeler.includes(p);
-    assert.equal(Boolean(p.soner.sponsor), over, `${p.id}: sponsorsonen skal bare finnes på overdeler`);
+    const over = jerseyer.includes(p);
+    assert.equal(Boolean(p.soner.sponsor), over, `${p.id}: sponsorsonen skal bare finnes på jerseyene`);
     assert.equal(Boolean(sponsorFor(p, "Klatring", "ntnui")), over, `${p.id}: Klatring + NTNUI foran`);
     assert.equal(sponsorFor(p, "Klatring", "tekst"), null, `${p.id}: ikke med for gruppenavn foran`);
     assert.equal(sponsorFor(p, "Klatring", "ingen"), null, `${p.id}: ikke med uten trykk foran`);
@@ -246,7 +248,7 @@ test("sponsor: sentrert under NTNUI-brystlogoen med 2 cm luft, og prisen er uend
     assert.ok(Math.abs(sponsor.b * cmPerProsent - 13) < 0.3, `${p.id}: sponsorbredde`);
     assert.ok(sponsor.x - sponsor.b / 2 > 0 && sponsor.x + sponsor.b / 2 < 100 && sponsor.y + sponsor.h / 2 < 100, `${p.id}: utenfor lerretet`);
   }
-  const k = { plagg: "entrada-tee", farge: "svart", front: "ntnui", bak: "ingen", navn: "" };
+  const k = { plagg: "entrada-jersey", farge: "svart", front: "ntnui", bak: "ingen", navn: "" };
   assert.equal(prisFor({ ...k, gruppe: "Klatring" }).sum, prisFor({ ...k, gruppe: "Fotball" }).sum);
   assert.equal(prisFor({ ...k, gruppe: "Klatring", bak: "logo" }).sum, prisFor({ ...k, gruppe: "Fotball", bak: "logo" }).sum);
 });
