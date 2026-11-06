@@ -16,14 +16,31 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="bestilling.css?v=202611061300">
+  <link rel="stylesheet" href="bestilling.css?v=202611061500">
 </head>
 <body>
   <div class="bakgrunn-fart" aria-hidden="true">
     <div class="fart">
       <span class="fart-glod"></span>
-      <span class="fart-spor"></span>
-      <span class="fart-band"></span>
+      <svg class="fart-band" viewBox="0 0 1000 100" preserveAspectRatio="none" focusable="false">
+        <defs>
+          <linearGradient id="fart-fade" x1="0" y1="0" x2="1000" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0.10" stop-color="#fff" stop-opacity="0"/>
+            <stop offset="0.20" stop-color="#fff" stop-opacity="0.04"/>
+            <stop offset="0.29" stop-color="#fff" stop-opacity="0.16"/>
+            <stop offset="0.37" stop-color="#fff" stop-opacity="0.4"/>
+            <stop offset="0.44" stop-color="#fff" stop-opacity="0.75"/>
+            <stop offset="0.50" stop-color="#fff" stop-opacity="1"/>
+          </linearGradient>
+          <mask id="fart-maske" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="100">
+            <rect width="1000" height="100" fill="url(#fart-fade)"/>
+          </mask>
+        </defs>
+        <g mask="url(#fart-maske)">
+          <rect class="fart-gronn" width="1000" height="100"/>
+          <rect class="fart-gul" y="30" width="1000" height="40"/>
+        </g>
+      </svg>
     </div>
   </div>
 

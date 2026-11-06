@@ -31,7 +31,7 @@
 
   /* 3:4:3 – grønn, gul, grønn */
   --s-gronn: #007d32;
-  --s-gul: rgba(250, 250, 0, 0.7);
+  --s-gul: rgba(250, 250, 0, 0.9);
   --stripe: linear-gradient(180deg, var(--s-gronn) 0 30%, var(--s-gul) 30% 70%, var(--s-gronn) 70% 100%);
   --stripe-liten: linear-gradient(90deg, #007d32 0 30%, #fafa00 30% 70%, #007d32 70% 100%);
 }
@@ -127,8 +127,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
    Ett bredt diagonalt bånd av tre striper, grønn / gul / grønn i forholdet 3:4:3.
    Bandet står på høyre halvdel og går fra nede til venstre mot oppe til høyre (-26deg).
    Venstre ende tones ut, så logoen og teksten ligger på rolig flate.
-   Lag: glød (uskarp, bredere), spor (middels uskarp, forskjøvet bakover, som fartsuskarphet),
-   bånd (nesten skarpt, så 3:4:3 leses). Bare glødlaget driver, sakte, med transform. */
+   Lag: glød (uskarp, bredere) og et skarpt SVG-bånd med lang uttoning nede til venstre.
+   Bare glødlaget driver, sakte, med transform. */
 
 .bakgrunn-fart {
   --b: clamp(160px, 21vw, 300px);
@@ -136,13 +136,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
   top: 0;
   left: 0;
   right: 0;
-  height: max(100svh, 640px);
+  height: calc(max(100svh, 640px) + 20vh);
   z-index: -2;
   display: block;
   overflow: hidden;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(#000 70%, transparent 100%);
-  mask-image: linear-gradient(#000 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(#000 78%, transparent 100%);
+  mask-image: linear-gradient(#000 78%, transparent 100%);
 }
 .fart {
   position: absolute;
@@ -152,30 +152,26 @@ button, input, select, textarea { font: inherit; color: inherit; }
   height: var(--b);
   transform: rotate(-26deg);
 }
-.fart > span {
+.fart > span,
+.fart > svg {
   position: absolute;
   inset: 0;
-  background: var(--stripe);
+  width: 100%;
+  height: 100%;
 }
-.fart-band {
-  filter: blur(2px);
-  opacity: 0.85;
-  -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - 34vw), #000 calc(50% - 8vw));
-  mask-image: linear-gradient(90deg, transparent calc(50% - 34vw), #000 calc(50% - 8vw));
-}
-.fart-spor {
-  filter: blur(18px);
-  opacity: var(--spor-styrke);
-  transform: translateX(-5vw);
-  -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - 46vw), #000 calc(50% - 14vw));
-  mask-image: linear-gradient(90deg, transparent calc(50% - 46vw), #000 calc(50% - 14vw));
-}
+.fart-glod { background: var(--stripe); }
+/* Skarpt bånd i SVG: ingen blur, så kantene tegnes i full oppløsning.
+   Uttoningen mot nede til venstre ligger i SVG-masken (#fart-fade), lang og myk. */
+.fart-band { overflow: visible; }
+.fart-gronn { fill: var(--s-gronn); }
+.fart-gul { fill: var(--s-gul); }
 .fart-glod {
   inset: calc(var(--b) * -0.25) 0;
+  height: auto;
   filter: blur(72px);
   opacity: var(--glod-styrke);
-  -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - 46vw), #000 calc(50% - 10vw));
-  mask-image: linear-gradient(90deg, transparent calc(50% - 46vw), #000 calc(50% - 10vw));
+  -webkit-mask-image: linear-gradient(90deg, transparent 18%, rgba(0,0,0,.25) 34%, #000 48%);
+  mask-image: linear-gradient(90deg, transparent 18%, rgba(0,0,0,.25) 34%, #000 48%);
   animation: fart-drift 40s ease-in-out infinite alternate;
   will-change: transform;
 }
@@ -1423,9 +1419,6 @@ form.kurv-steg .knapp { margin-top: 12px; }
     top: calc(80% - var(--b) / 2);
     transform: rotate(-22deg);
   }
-  .fart-band { -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - 60vw), #000 calc(50% - 16vw)); mask-image: linear-gradient(90deg, transparent calc(50% - 60vw), #000 calc(50% - 16vw)); }
-  .fart-spor { -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - 70vw), #000 calc(50% - 20vw)); mask-image: linear-gradient(90deg, transparent calc(50% - 70vw), #000 calc(50% - 20vw)); }
-  .fart-glod { -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - 70vw), #000 calc(50% - 16vw)); mask-image: linear-gradient(90deg, transparent calc(50% - 70vw), #000 calc(50% - 16vw)); }
 }
 
 @media (max-width: 560px) {
