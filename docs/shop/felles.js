@@ -41,7 +41,7 @@ const TEKST = {
     "helt.tittel2": "hele NTNUI",
     "helt.serif": "fra gymsalen til fjelltoppen.",
     "helt.ingress": "Sett sammen plagget ditt i designeren, legg det i kurven og send bestillingen. Du betaler først når du henter hos Intersport Rongve.",
-    "helt.slagord": "klær for hele NTNUI Ålesund.",
+    "helt.slagord": "klær for hele NTNUI Ålesund",
     "helt.samarbeid": "i samarbeid med",
     "helt.cta": "Ta meg til designeren",
     "helt.cta2": "Se kolleksjonen",
@@ -78,7 +78,7 @@ const TEKST = {
     "des.frontvalg": "Foran",
     "des.bakvalg": "Bak",
     "des.navn": "Navn på ryggen",
-    "des.navnhjelp": "Maks 12 tegn.",
+    "des.navnhjelp": "Maks 12 tegn",
     "des.kjonn": "Snitt",
     "des.storrelse": "Størrelse",
     "des.prisplagg": "Plagg",
@@ -132,11 +132,11 @@ const TEKST = {
     mindre: "Færre",
     flere: "Flere",
     mangler: "Velg snitt og størrelse først",
-    feilNavn: "Skriv fullt navn.",
-    feilTelefon: "Skriv et norsk mobilnummer med 8 siffer.",
-    feilTelefonUtland: "Skriv telefonnummeret uten landkode.",
-    feilEpost: "Bruk e-posten din som slutter på @stud.ntnu.no.",
-    feilSamtykke: "Kryss av for å gå videre.",
+    feilNavn: "Skriv fullt navn",
+    feilTelefon: "Skriv et norsk mobilnummer med 8 siffer",
+    feilTelefonUtland: "Skriv telefonnummeret uten landkode",
+    feilEpost: "Bruk e-posten din som slutter på @stud.ntnu.no",
+    feilSamtykke: "Kryss av for å gå videre",
     feilSend: "Noe gikk galt. Prøv igjen, eller send en mail til material@ntnui-alesund.no.",
     sender: "Sender …",
     sendtEpost: (epost) => `Kvitteringen er sendt til ${epost}. Vi sier fra når plaggene er klare til henting.`,
@@ -152,7 +152,7 @@ const TEKST = {
     "helt.tittel2": "all of NTNUI",
     "helt.serif": "from the gym to the summit.",
     "helt.ingress": "Build your item in the designer, add it to the cart and send the order. You only pay when you pick it up at Intersport Rongve.",
-    "helt.slagord": "clothes for all of NTNUI Ålesund.",
+    "helt.slagord": "clothes for all of NTNUI Ålesund",
     "helt.samarbeid": "in partnership with",
     "helt.cta": "Take me to the designer",
     "helt.cta2": "See the collection",
@@ -189,7 +189,7 @@ const TEKST = {
     "des.frontvalg": "Front",
     "des.bakvalg": "Back",
     "des.navn": "Name on the back",
-    "des.navnhjelp": "Max 12 characters.",
+    "des.navnhjelp": "Max 12 characters",
     "des.kjonn": "Fit",
     "des.storrelse": "Size",
     "des.prisplagg": "Item",
@@ -242,11 +242,11 @@ const TEKST = {
     mindre: "Fewer",
     flere: "More",
     mangler: "Choose fit and size first",
-    feilNavn: "Enter your full name.",
-    feilTelefon: "Enter a Norwegian mobile number with 8 digits.",
-    feilTelefonUtland: "Enter the phone number without the country code.",
-    feilEpost: "Use your email ending in @stud.ntnu.no.",
-    feilSamtykke: "Tick the box to continue.",
+    feilNavn: "Enter your full name",
+    feilTelefon: "Enter a Norwegian mobile number with 8 digits",
+    feilTelefonUtland: "Enter the phone number without the country code",
+    feilEpost: "Use your email ending in @stud.ntnu.no",
+    feilSamtykke: "Tick the box to continue",
     feilSend: "Something went wrong. Try again, or email material@ntnui-alesund.no.",
     sender: "Sending …",
     sendtEpost: (epost) => `The receipt has been sent to ${epost}. We will let you know when your items are ready for pickup.`,
@@ -322,7 +322,6 @@ function leggTil(k) {
   else kurv.push({ nokkel, k: { ...k }, antall: 1 });
   lagre("shop-kurv-v2", kurv);
   tegnKurv();
-  dunk();
 }
 
 // Bytter ut linja med nøkkelen `gammel` med et nytt valg, og beholder antallet. Blir det nye valget likt en annen
@@ -341,7 +340,6 @@ function erstatt(gammel, k) {
   }
   lagre("shop-kurv-v2", kurv);
   tegnKurv();
-  dunk();
   return true;
 }
 
@@ -351,13 +349,6 @@ function endreLenke(l) {
     kjonn: l.k.kjonn, storrelse: l.k.storrelse, endre: l.nokkel });
   if (l.k.navn) u.set("navn", l.k.navn);
   return `designer.html?${u}`;
-}
-
-function dunk() {
-  const teller = $("#kurv-antall");
-  teller.classList.remove("dunk");
-  void teller.offsetWidth;
-  teller.classList.add("dunk");
 }
 
 function total() {

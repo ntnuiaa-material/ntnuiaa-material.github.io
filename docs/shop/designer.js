@@ -326,22 +326,6 @@ function visSide(side) {
 }
 $$(".visning button").forEach((b) => b.addEventListener("click", () => visSide(b.dataset.vis)));
 
-// Litt helning etter pekeren
-const figurer = $("#figurer");
-if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  figurer.addEventListener("pointermove", (e) => {
-    const r = figurer.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    figurer.style.setProperty("--ry", `${x * 10}deg`);
-    figurer.style.setProperty("--rx", `${-y * 8}deg`);
-  });
-  figurer.addEventListener("pointerleave", () => {
-    figurer.style.setProperty("--ry", "0deg");
-    figurer.style.setProperty("--rx", "0deg");
-  });
-}
-
 vedSprak.push(oppdater);
 start();
 tegnKnapp();
